@@ -29,16 +29,11 @@ sys.path.insert(1, rootPath)
 
 import django
 
-if django.VERSION[1] <= 6 and django.VERSION[0] <= 1:
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'default_settings'
-    import django.core.handlers.wsgi
-    application = django.core.handlers.wsgi.WSGIHandler()
-else:
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "default_settings")
-    from django.core.wsgi import get_wsgi_application
-    try:
-        application = get_wsgi_application()
-    except RuntimeError:
-        traceback.print_exc()
-        os.kill(os.getpid(), signal.SIGINT)
-        time.sleep(2.5)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "default_settings")
+from django.core.wsgi import get_wsgi_application
+try:
+    application = get_wsgi_application()
+except RuntimeError:
+    traceback.print_exc()
+    os.kill(os.getpid(), signal.SIGINT)
+    time.sleep(2.5)
