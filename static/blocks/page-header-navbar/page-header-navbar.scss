@@ -1,0 +1,23 @@
+/**
+ * @module page-header-navbar
+ * @changed 2024.02.27, 22:10
+ */
+
+@import "../shared";
+
+.page-header-navbar {
+  // Dark primary navbar with background decor...
+  &.navbar-inverse.navbar-primary, // OLD
+  &.navbar-dark.navbar-primary {
+    @include themeBackgroundBefore;
+  }
+  .navbar-header {
+    position: relative;
+  }
+  @media (max-width: $screenXsMax) {
+    .navbar-header {
+      // background-color: @primaryDarkColor;
+      // background-blend-mode: multiply;
+    }
+  }
+}

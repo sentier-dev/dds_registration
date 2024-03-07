@@ -1,0 +1,75 @@
+@use "sass:map";
+@use 'sass:math';
+@use 'sass:color';
+
+@import '../../bootstrap-5.3.2-src/scss/functions';
+@import '../../bootstrap-5.3.2-src/scss/variables';
+
+// Breakpoints:...
+
+// @see static/bootstrap-5.3.2-src/scss/_variables.scss
+// xs: 0
+// sm: 576px
+// md: 768px
+// lg: 992px
+// xl: 1200px
+// xxl: 1400px
+
+$screenXsMin: map-get($grid-breakpoints, 'xs'); // 0
+$screenSmMin: map-get($grid-breakpoints, 'sm'); // 576px
+$screenMdMin: map-get($grid-breakpoints, 'md'); // 768px
+$screenLgMin: map-get($grid-breakpoints, 'lg'); // 992px
+$screenXlMin: map-get($grid-breakpoints, 'xl'); // 1200px
+$screenXxlMin: map-get($grid-breakpoints, 'xxl'); // 1400px
+
+$screenXsMax: map-get($grid-breakpoints, 'sm'); // 576px
+$screenSmMax: map-get($grid-breakpoints, 'md'); // 768px
+$screenMdMax: map-get($grid-breakpoints, 'lg'); // 992px
+$screenLgMax: map-get($grid-breakpoints, 'xl'); // 1200px
+$screenXlMax: map-get($grid-breakpoints, 'xxl'); // 1400px
+
+// Primary color...
+
+$primaryLightColor: #8a9;
+$primaryColor: #486;
+$primaryDarkColor: #375;
+$primaryDarkestColor: #3C5343;
+
+// Misc colors...
+
+// UNUSED?
+$xdarkBlueColor: #036;
+$darkBlueColor: #047;
+$mediumBlueColor: #157;
+$moodBlueColor: #6ac;
+$extralightBlueColor: #def;
+
+$darkGreenColor: #461;
+$mediumGreenColor: #9a0;
+
+$defaultTextColor: #333;
+
+$backgroundColor: #fff;
+
+// Collapsable widths...
+
+$collapseWidth: screenMdMin; // $grid-float-breakpoint; // =@screen-sm-min=768px ? =@screen-md-min=992px
+$navbarCollapse: $screenSmMin; // $grid-float-breakpoint; // =@screen-sm-min=768px ? =@screen-md-min=992px
+$midbarCollapse: $collapseWidth;
+
+// Navbar...
+
+$navbarMainHeight: 60px;
+$navbarPlusHeight: 50px;
+
+// Fonts...
+
+$defaultFontFamily: "Roboto", "Helvetica", "Arial", sans-serif;
+
+// Timeouts...
+
+$momentTime: 150ms;
+$transitionTime: 250ms;
+$animationTime: 500ms;
+$effectTime: 1000ms;
+
