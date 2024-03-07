@@ -59,7 +59,6 @@
 
   <!-- {{{ Page header container -->
   {% block page_header %}
-  <div>Page header stub</div>
   {% endblock page_header %}
   <!-- }}} Page header container -->
 
@@ -79,6 +78,7 @@
 
   <!-- {{{ JS -->
 
+  <script src="{% if settings.LOCAL %}{% static 'vendor/popperjs-2.11.8/popper.js' %}{% else %}https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js{% endif %}" type="text/javascript"></script>
   <script src="{% if settings.LOCAL %}{% static 'vendor/bootstrap-5.3.2/js/bootstrap.js' %}{% else %}https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js{% endif %}" type="text/javascript"></script>
 
   {# TODO: Place custom scripts here, with compress tag #}

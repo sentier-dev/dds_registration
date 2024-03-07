@@ -42,7 +42,7 @@ dependencies = [
     "django-compressor>=4.4",
     "django-livereload-server>=0.5.1",
     "django-preferences>=1.0.0",
-    "django-libsass>=0.9",
+    # "django-libsass>=0.9",  # DEPRECATED!
 ]
 
 [project.urls]

@@ -4,7 +4,7 @@
 {% block page_header %}
 {{ block.super }}
 
-{% comment %} {% include 'blocks/page-header-navbar/page-header-navbar.django' %} {% endcomment %}
+{% include 'blocks/page-header-navbar/page-header-navbar.django' %}
 {% endblock page_header %}
 
 {% block page_body %}

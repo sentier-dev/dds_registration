@@ -73,7 +73,20 @@ STATICFILES_FINDERS = (
 )
 
 COMPRESS_PRECOMPILERS = (
-    ('text/x-scss', 'django_libsass.SassCompiler'),
+    ('text/x-scss', 'sass {infile} {outfile}'),
+    # Sass installation:
+    # - https://sass-lang.com/install/
+    # - https://github.com/sass/dart-sass/releases/latest
+
+    # @see https://django-compressor.readthedocs.io/en/stable/settings.html#django.conf.settings.COMPRESS_PRECOMPILERS
+    #  ('text/x-scss', 'django_libsass.SassCompiler'),  # NOTE: DEPRECATED!
+
+    #  ('text/coffeescript', 'coffee --compile --stdio'),
+    #  ('text/less', 'lessc {infile} {outfile}'),
+    #  ('text/x-sass', 'sass {infile} {outfile}'),
+
+    #  ('text/stylus', 'stylus < {infile} > {outfile}'),
+    #  ('text/foobar', 'path.to.MyPrecompilerFilter'),
 )
 
 # Quick-start development settings - unsuitable for production
