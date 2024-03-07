@@ -6,8 +6,9 @@
 @import "../shared";
 
 .page-header-navbar {
+  padding: 0;
   // Dark primary navbar with background decor...
-  &.navbar-inverse.navbar-primary, // OLD
+  // &.navbar-inverse.navbar-primary, // OLD
   &.navbar-dark.navbar-primary {
     @include themeBackgroundBefore;
   }
