@@ -1,7 +1,8 @@
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized / DLL files / cache
 __pycache__/
 *.py[cod]
 *$py.class
+/static/CACHE
 
 db.sqlite
 
@@ -129,3 +130,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Temporariy, swap & ignored files
+/config-local.*
+/*.session
+*UNUSED
+*_
+*~
+.*.sw?
+*.tmp
+*.zip
+*.tgz
