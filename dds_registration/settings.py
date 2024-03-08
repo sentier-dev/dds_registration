@@ -35,6 +35,9 @@ LOCAL = LOCAL_RUN and RUNNING_DEVSERVER
 DEV = LOCAL
 DEBUG = True  # LOCAL  # and DEV
 
+# Use filters to preprocess assets' sources (like sass, see `COMPRESS_PRECOMPILERS` section below)
+USE_DJANGO_PREPROCESSORS = LOCAL and True
+
 # Core folders...
 
 # Static files (CSS, JavaScript, Images)
@@ -315,24 +318,17 @@ if DEV:
 
 # Pass settings to context...
 PASS_VARIABLES = {
-    #  # DEBUG: Debug only (to check the correctness of dev-mode determining)!
-    #  'RUNNING_DEVSERVER': RUNNING_DEVSERVER,
-    #  'RUNNING_MOD_WSGI': RUNNING_MOD_WSGI,
-    #  'RUNNING_MANAGE_PY': RUNNING_MANAGE_PY,
-
     'DEBUG': DEBUG,
     'DEV': DEV,
     'LOCAL_RUN': LOCAL_RUN,
     'LOCAL': LOCAL,
-    #  'DEV_MAKET_MODE': DEV_MAKET_MODE,
-    #  'COMPRESS_ENABLED': COMPRESS_ENABLED,
+    'USE_DJANGO_PREPROCESSORS': USE_DJANGO_PREPROCESSORS,
     'SITE_NAME': SITE_NAME,
     'SITE_TITLE': SITE_TITLE,
     'BLOCKS_FOLDER': BLOCKS_FOLDER,
     'STATIC_ROOT': STATIC_ROOT,
     'BLOCKS_ROOT': BLOCKS_ROOT,
     'STATIC_URL': STATIC_URL,
-    #  'ASSETS_URL': ASSETS_URL,
     'SITE_DESCRIPTION': SITE_DESCRIPTION,
     'SITE_KEYWORDS': SITE_KEYWORDS,
 }

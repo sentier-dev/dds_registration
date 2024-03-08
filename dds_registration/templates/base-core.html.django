@@ -50,7 +50,11 @@
   {% endif %}
 
   {% compress css %}
-  <link type="text/x-scss" href="{% static 'blocks/styles.scss' %}" rel="stylesheet" media="screen">
+  {% if settings.USE_DJANGO_PREPROCESSORS %}
+  <link href="{% static 'blocks/styles.scss' %}" rel="stylesheet" type="text/x-scss" />
+  {% else %}
+  <link href="{% static 'blocks/styles.css' %}" rel="stylesheet" type="text/css" />
+  {% endif %}
   {% endcompress css %}
 
   <!-- CSS }}} -->
