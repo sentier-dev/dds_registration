@@ -68,9 +68,9 @@
 
   <!-- {{{ Page content container -->
   <div class="content container" role="main">
-  {% block page_body %}
+  {% block content %}
 
-  {% endblock page_body %}
+  {% endblock content %}
   </div>
   <!-- }}} Page content container -->
 

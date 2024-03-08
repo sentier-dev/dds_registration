@@ -7,10 +7,10 @@
 {% include 'assets/page-header-navbar/page-header-navbar.django' %}
 {% endblock page_header %}
 
-{% block page_body %}
+{% block content %}
 {{ block.super }}
 {% comment %} {% include 'assets/test/test.django' %} {% endcomment %}
-{% endblock page_body %}
+{% endblock content %}
 
 {% block page_footer %}
 {% include 'assets/page-footer-navbar/page-footer-navbar.django' %}
