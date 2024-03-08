@@ -1,0 +1,48 @@
+/**
+ * @module page-footer-navbar
+ * @changed 2024.03.08, 13:30
+ */
+
+.page-footer-navbar {
+  $borderColor: #eee;
+  border-top: 1px solid $borderColor;
+  border-bottom: 1px solid $borderColor;
+  margin-bottom: 0;
+  margin-top: 20px;
+  .container-fluid {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    justify-content: space-between;
+    .navbar-right {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    @media (min-width: $screenSmMin) {
+      flex-direction: row;
+      .navbar-copyright,
+      .navbar-middle,
+      .navbar-right {
+        flex: 1
+      }
+      .navbar-copyright {
+      }
+      .navbar-middle {
+      }
+      .navbar-right {
+        justify-content: flex-end;
+      }
+    }
+  }
+  .navbar-copyright {
+    display: flex;
+    align-items: center;
+    // gap: 10px;
+  }
+  .navbar-nav {
+    flex-direction: row;
+    gap: 16px;
+  }
+}

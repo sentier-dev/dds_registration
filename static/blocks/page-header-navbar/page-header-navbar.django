@@ -8,7 +8,7 @@
 
 {# NOTE: Don't forget to update global body top padding for fixed navbar #}
 
-<nav class="page-header-navbar fixed-top -bg-dark navbar navbar-dark navbar-primary navbar-expand-lg">
+<nav class="page-header-navbar navbar fixed-top -bg-dark navbar-dark navbar-primary navbar-expand-lg">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">
       <img src="{% static 'images/dds-logo/svg/Beige Logo.svg' %}" height="50" />

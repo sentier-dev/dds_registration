@@ -72,7 +72,6 @@
 
   <!-- {{{ Page footer container -->
   {% block page_footer %}
-  <div>Page footer stub</div>
   {% endblock page_footer %}
   <!-- }}} Page footer container -->
 

@@ -1,11 +1,16 @@
 {# ex: set ft=htmldjango : #}
-{% extends "base-main.html.django" %}
+{% extends "base-regular.html.django" %}
 
 {% block title %}Bootstrap components demo &mdash; {{ block.super }}{% endblock %}
 
 {% block page_body %}
-{{ block.super }}
+AAA
 
+XXX
 {% include "blocks/components-demo/components-demo.django" %}
+YYY
+
+{% comment %} {{ block.super }} {% endcomment %}
+ZZZ
 
 {% endblock page_body %}

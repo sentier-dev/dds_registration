@@ -13,6 +13,6 @@
 {% endblock page_body %}
 
 {% block page_footer %}
-{% comment %} {% include 'blocks/page-footer-navbar/page-footer-navbar.django' %} {% endcomment %}
+{% include 'blocks/page-footer-navbar/page-footer-navbar.django' %}
 {{ block.super }}
 {% endblock page_footer %}

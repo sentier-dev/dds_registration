@@ -7,8 +7,8 @@
     <li class="active">Login</li>
 {% endblock %}
 
-{% block content %}
+{% block page_body %}
 
 <p>Landing</p>
 
-{% endblock %}
+{% endblock page_body %}
