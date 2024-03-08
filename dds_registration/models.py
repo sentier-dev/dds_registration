@@ -20,13 +20,32 @@ class Event(models.Model):
     code = models.TextField(unique=True, default=random_choice)
     title = models.TextField(unique=True)
     description = models.TextField(blank=True)
-    registration_open = models.DateField(auto_now=True, help_text="Date registration opens")
-    registration_close = models.DateField(blank=True, null=True, help_text="Date registration closes")
+    registration_open = models.DateField(
+        auto_now=True, help_text="Date registration opens")
+    registration_close = models.DateField(
+        blank=True, null=True, help_text="Date registration closes")
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text="Maximum number of participants to this event (0 = no limit)",
     )
     currency = models.TextField(null=True, blank=True)
+
+    #  # UNUSED
+    #  owner = models.ForeignKey(
+    #      settings.AUTH_USER_MODEL,
+    #      related_name="events_owned",
+    #      on_delete=models.CASCADE,
+    #      help_text="Main organiser",
+    #  )
+    #  organisers = models.ManyToManyField(
+    #      settings.AUTH_USER_MODEL, blank=True, related_name="events_organised"
+    #  )
+
+    def get_active_registrations(self):
+        """
+        Return the active registrations
+        """
+        return self.registrations.all()  # filter(cancelledOn__isnull=True)
 
     def __unicode__(self):
         return self.name
@@ -51,16 +70,20 @@ class RegistrationOption(models.Model):
     add_on = models.BooleanField(default=False)
 
 
+# Ex `Booking`
 class Registration(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    event = models.ForeignKey(
+        Event, related_name="registrations", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, related_name="registrations", on_delete=models.CASCADE)
     options = models.ManyToManyField(RegistrationOption)
     paid = models.BooleanField(default=False)
     paid_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['event', 'user'], name='Single registration')
+            models.UniqueConstraint(
+                fields=['event', 'user'], name='Single registration')
         ]
 
 
@@ -74,13 +97,17 @@ class DiscountCode(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     code = models.TextField(default=partial(random_choice, length=4))
     only_registration = models.BooleanField(default=True)
-    percentage = models.IntegerField(help_text="Value as a percentage, like 10", blank=True, null=True)
-    absolute = models.FloatField(help_text="Absolute amount of discount", blank=True, null=True)
+    percentage = models.IntegerField(
+        help_text="Value as a percentage, like 10", blank=True, null=True)
+    absolute = models.FloatField(
+        help_text="Absolute amount of discount", blank=True, null=True)
 
 
 class GroupDiscount(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     only_registration = models.BooleanField(default=True)
-    percentage = models.IntegerField(help_text="Value as a percentage, like 10", blank=True, null=True)
-    absolute = models.FloatField(help_text="Absolute amount of discount", blank=True, null=True)
+    percentage = models.IntegerField(
+        help_text="Value as a percentage, like 10", blank=True, null=True)
+    absolute = models.FloatField(
+        help_text="Absolute amount of discount", blank=True, null=True)
