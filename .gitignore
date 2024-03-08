@@ -120,6 +120,9 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
+# Code
+/.vscode
+
 # mkdocs documentation
 /site
 
@@ -135,7 +138,6 @@ dmypy.json
 /config-local.*
 /*.session
 *UNUSED
-*_
 *~
 .*.sw?
 *.tmp
