@@ -5,7 +5,7 @@
 
 {% block page_body %}
 
-{% include "blocks/components-demo/components-demo.django" %}
+{% include "assets/components-demo/components-demo.django" %}
 
 {{ block.super }}
 

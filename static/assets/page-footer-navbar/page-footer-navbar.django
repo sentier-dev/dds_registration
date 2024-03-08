@@ -15,7 +15,7 @@
       </span>
     </div>
     <ul class="navbar-nav me-auto">
-      {% include "blocks/page-menus/menu-main.django" %}
+      {% include "assets/page-menus/menu-main.django" %}
     </ul>
   </div><!-- /.container-fluid -->
 </nav>

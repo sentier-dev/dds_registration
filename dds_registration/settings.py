@@ -46,16 +46,12 @@ STATIC_FOLDER = 'static/'
 STATIC_ROOT = posixpath.join(BASE_DIR, STATIC_FOLDER)
 STATIC_URL = posixpath.join('/', STATIC_FOLDER)
 
-#  ASSETS_FOLDER = 'src/'
-#  ASSETS_ROOT = posixpath.join(BASE_DIR, ASSETS_FOLDER)
-#  ASSETS_URL = posixpath.join('/', ASSETS_FOLDER)
-
 MEDIA_FOLDER = 'media/'
 MEDIA_ROOT = posixpath.join(BASE_DIR, MEDIA_FOLDER)
 MEDIA_URL = posixpath.join('/', MEDIA_FOLDER)
 
-BLOCKS_FOLDER = 'blocks/'
-BLOCKS_ROOT = posixpath.join(STATIC_ROOT, BLOCKS_FOLDER)
+ASSETS_FOLDER = 'assets/'
+ASSETS_ROOT = posixpath.join(STATIC_ROOT, ASSETS_FOLDER)
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -176,7 +172,8 @@ TEMPLATES = [
                 #  # @see: https://github.com/praekelt/django-preferences
                 #  'preferences.context_processors.preferences_cp',
 
-                APP_NAME + '.context_processors.common_values',  # Pass local context to the templates. @see `main/context_processors.py`
+                # Pass local context to the templates. @see `main/context_processors.py`
+                APP_NAME + '.context_processors.common_values',
             ],
         },
         'DIRS': TEMPLATE_DIRS,
@@ -325,9 +322,9 @@ PASS_VARIABLES = {
     'USE_DJANGO_PREPROCESSORS': USE_DJANGO_PREPROCESSORS,
     'SITE_NAME': SITE_NAME,
     'SITE_TITLE': SITE_TITLE,
-    'BLOCKS_FOLDER': BLOCKS_FOLDER,
+    'ASSETS_FOLDER': ASSETS_FOLDER,
     'STATIC_ROOT': STATIC_ROOT,
-    'BLOCKS_ROOT': BLOCKS_ROOT,
+    'ASSETS_ROOT': ASSETS_ROOT,
     'STATIC_URL': STATIC_URL,
     'SITE_DESCRIPTION': SITE_DESCRIPTION,
     'SITE_KEYWORDS': SITE_KEYWORDS,

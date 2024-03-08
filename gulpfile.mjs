@@ -17,7 +17,7 @@ import gulpAutoprefixer from 'gulp-autoprefixer';
 const sassRunner = gulpSass(sass);
 
 const staticPath = 'static/';
-const blocksPath = staticPath + 'blocks/';
+const assetsPath = staticPath + 'assets/';
 
 const watchOptions = {
   // @see: https://gulpjs.com/docs/en/getting-started/watching-files/
@@ -31,9 +31,9 @@ const watchOptions = {
 };
 
 // Styles...
-const stylesSrcAll = [blocksPath + '**/*.scss'];
-const stylesSrcEntry = blocksPath + 'styles.scss';
-const stylesDest = blocksPath;
+const stylesSrcAll = [assetsPath + '**/*.scss'];
+const stylesSrcEntry = assetsPath + 'styles.scss';
+const stylesDest = assetsPath;
 function compileStyles() {
   return (
     gulp

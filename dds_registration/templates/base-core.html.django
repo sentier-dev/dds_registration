@@ -51,9 +51,9 @@
 
   {% compress css %}
   {% if settings.USE_DJANGO_PREPROCESSORS %}
-  <link href="{% static 'blocks/styles.scss' %}" rel="stylesheet" type="text/x-scss" />
+  <link href="{% static 'assets/styles.scss' %}" rel="stylesheet" type="text/x-scss" />
   {% else %}
-  <link href="{% static 'blocks/styles.css' %}" rel="stylesheet" type="text/css" />
+  <link href="{% static 'assets/styles.css' %}" rel="stylesheet" type="text/css" />
   {% endif %}
   {% endcompress css %}
 

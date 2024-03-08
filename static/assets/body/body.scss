@@ -10,6 +10,6 @@ $headerNavbarHeight: 60px;
 body {
   font-family: $defaultFontFamily;
   background-color: $backgroundColor;
-  // Add space for fixed navar (see `static/blocks/page-header-navbar/page-header-navbar.django`)
+  // Add space for fixed navar (see `static/assets/page-header-navbar/page-header-navbar.django`)
   margin-top: $headerNavbarHeight + 20px;
 }
