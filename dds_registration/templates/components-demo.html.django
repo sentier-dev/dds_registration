@@ -4,13 +4,9 @@
 {% block title %}Bootstrap components demo &mdash; {{ block.super }}{% endblock %}
 
 {% block page_body %}
-AAA
 
-XXX
 {% include "blocks/components-demo/components-demo.django" %}
-YYY
 
-{% comment %} {{ block.super }} {% endcomment %}
-ZZZ
+{{ block.super }}
 
 {% endblock page_body %}

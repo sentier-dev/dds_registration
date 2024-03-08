@@ -16,6 +16,9 @@
       "last 1 safari version"
     ]
   },
+  "dependencies": {
+    "sass": "^1.71.1"
+  },
   "scripts": {
     "livereload-server": "echo --Start livereload server-- && python manage.py livereload static",
     "start-django": "echo --Start django dev server-- && python manage.py runserver",
@@ -23,8 +26,5 @@
     "pylint": "echo --Run python linter /pyright, venv/-- && pyright .",
     "check-all": "echo --Run all python checkers /autopep8, venv/-- && npm-run-all pyformat pylint",
     "help": "echo --List all available script commands-- && npm-package-user-scripts-list"
-  },
-  "dependencies": {
-    "sass": "^1.71.1"
   }
 }

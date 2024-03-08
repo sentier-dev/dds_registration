@@ -1,5 +1,5 @@
 {# ex: set ft=htmldjango : #}
-<li class="nav-item"><a class="nav-link" href="/features">Features</a></li>
+<li class="nav-item"><a class="nav-link" href="/components-demo">Features</a></li>
 <li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a></li>
 <li class="nav-item"><a class="nav-link" href="/faq">FAQ</a></li>
 <li class="nav-item"><a class="nav-link" href="/about">About</a></li>

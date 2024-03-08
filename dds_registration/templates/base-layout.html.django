@@ -9,7 +9,7 @@
 
 {% block page_body %}
 {{ block.super }}
-{% include 'blocks/test/test.django' %}
+{% comment %} {% include 'blocks/test/test.django' %} {% endcomment %}
 {% endblock page_body %}
 
 {% block page_footer %}

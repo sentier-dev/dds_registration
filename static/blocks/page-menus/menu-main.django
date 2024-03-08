@@ -1,5 +1,10 @@
 {# ex: set ft=htmldjango : #}
-<li class="nav-item"><a class="nav-link active" href="/features">Features</a></li>
+<!--
+  @module menu-main.django
+  @changed 2024.02.27, 20:08
+-->
+
+<li class="nav-item"><a class="nav-link active" href="/components-demo">Features</a></li>
 <li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a></li>
 <li class="nav-item"><a class="nav-link" href="/faq">FAQ</a></li>
 <li class="nav-item"><a class="nav-link" href="/about">About</a></li>

@@ -14,7 +14,7 @@
         &copy; Copyright 2024
       </span>
     </div>
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <ul class="navbar-nav me-auto">
       {% include "blocks/page-menus/menu-plain.django" %}
     </ul>
   </div><!-- /.container-fluid -->

@@ -12,13 +12,12 @@
   &.navbar-dark.navbar-primary {
     @include themeBackgroundBefore;
   }
-  .navbar-header {
-    position: relative;
-  }
-  @media (max-width: $screenXsMax) {
-    .navbar-header {
-      // background-color: @primaryDarkColor;
-      // background-blend-mode: multiply;
+  @media (min-width: $navbarCollapse) {
+    .navbar-brand {
+      flex: 1;
+    }
+    .collapse.navbar-collapse {
+      flex: 0;
     }
   }
 }

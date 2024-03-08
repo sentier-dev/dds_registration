@@ -1,6 +1,6 @@
 {# ex: set ft=htmldjango : #}
 <!--
-  @module main-page-splash
+  @module main-page-splash.django
   @changed 2024.02.27, 20:08
 -->
 

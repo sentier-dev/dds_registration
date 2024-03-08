@@ -73,7 +73,7 @@ STATICFILES_FINDERS = (
 )
 
 COMPRESS_PRECOMPILERS = (
-    ('text/x-scss', 'sass {infile} {outfile}'),
+    ('text/x-scss', 'sass --embed-source-map {infile} {outfile}'),
     # Sass installation:
     # - https://sass-lang.com/install/
     # - https://github.com/sass/dart-sass/releases/latest

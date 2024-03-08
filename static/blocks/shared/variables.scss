@@ -28,12 +28,22 @@ $screenMdMax: map-get($grid-breakpoints, 'lg'); // 992px
 $screenLgMax: map-get($grid-breakpoints, 'xl'); // 1200px
 $screenXlMax: map-get($grid-breakpoints, 'xxl'); // 1400px
 
+// Collapsable widths...
+
+$collapseWidth: screenMdMin; // $grid-float-breakpoint; // =@screen-sm-min=768px ? =@screen-md-min=992px
+$navbarCollapse: $screenLgMin;
+$navbarCollapseMax: $screenMdMax;
+$midbarCollapse: $collapseWidth;
+
 // Primary color...
 
 $primaryLightColor: #8a9;
 $primaryColor: #486;
 $primaryDarkColor: #375;
+$primaryDarkenColor: color.adjust($primaryDarkColor, $lightness: -10%);
 $primaryDarkestColor: #3C5343;
+
+$primaryColorRgb: 68,136,102;
 
 // Misc colors...
 
@@ -50,12 +60,6 @@ $mediumGreenColor: #9a0;
 $defaultTextColor: #333;
 
 $backgroundColor: #fff;
-
-// Collapsable widths...
-
-$collapseWidth: screenMdMin; // $grid-float-breakpoint; // =@screen-sm-min=768px ? =@screen-md-min=992px
-$navbarCollapse: $screenSmMin; // $grid-float-breakpoint; // =@screen-sm-min=768px ? =@screen-md-min=992px
-$midbarCollapse: $collapseWidth;
 
 // Navbar...
 
