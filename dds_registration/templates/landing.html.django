@@ -11,6 +11,6 @@
 {% block page_body %}
 {{ block.super }}
 
-<p>Landing</p>
+<p>TODO: Landing</p>
 
 {% endblock page_body %}

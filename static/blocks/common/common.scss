@@ -1,4 +1,14 @@
+/**
+ * @module common.scss
+ * @changed 2024.03.08, 12:00
+ */
+
+@import "../shared";
+
 .item-label,
 .text-info {
   opacity: 0.5;
+}
+.primary-color {
+  color: $primaryColor;
 }

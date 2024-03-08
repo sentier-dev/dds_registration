@@ -116,11 +116,16 @@ INSTALLED_APPS = [
 
     'compressor',
     'crispy_forms',
+    'crispy_bootstrap5',
     #  'django_extensions',
     #  'debug_toolbar',
 
     APP_NAME,
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -281,10 +286,6 @@ LOGGING = {
             'handlers': ['django'],
             'propagate': True,
             'level': 'INFO',
-        },
-        'django_project': {
-            'handlers': ['apps'],
-            'level': 'DEBUG',
         },
         APP_NAME: {
             'handlers': ['apps'],

@@ -1,0 +1,13 @@
+/**
+ * @module forms.scss
+ * @changed 2024.03.08, 12:00
+ */
+
+@import "../shared";
+
+.asteriskField {
+  // crispy_forms element
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0.5;
+}

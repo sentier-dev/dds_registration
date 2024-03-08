@@ -1,6 +1,6 @@
 /**
- * @module page-header-navbar
- * @changed 2024.02.27, 22:10
+ * @module page-header-navbar.scss
+ * @changed 2024.03.08, 12:00
  */
 
 @import "../shared";
@@ -8,11 +8,18 @@
 .page-header-navbar {
   padding: 0;
   // Dark primary navbar with background decor...
-  // &.navbar-inverse.navbar-primary, // OLD
   &.navbar-dark.navbar-primary {
     @include themeBackgroundBefore;
   }
+  @media (max-width: 400px) {
+    .site-name {
+      display: none;
+    }
+  }
   @media (min-width: $navbarCollapse) {
+    // .container-fluid {
+    //   flex-wrap: nowrap;
+    // }
     .navbar-brand {
       flex: 1;
     }

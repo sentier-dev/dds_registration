@@ -45,6 +45,9 @@
   .navbar-nav {
     margin: 0;
     flex-direction: row;
-    gap: 16px;
+    .nav-link {
+      padding-right: var(--bs-navbar-nav-link-padding-x);
+      padding-left: var(--bs-navbar-nav-link-padding-x);
+    }
   }
 }
