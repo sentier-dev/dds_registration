@@ -1,12 +1,22 @@
-// @see https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+// ex: set ft=jsonc :
+// @see @see https://microsoft.github.io/pyright/#/configuration
 {
+  "venvPath": ".",
+  "venv": ".venv",
+  // Disabled type checks due to getting a lot of false errors (for django models) like these:
+  // `... Type "Literal[True]" cannot be assigned to type "type[NOT_PROVIDED]" (reportArgumentType)`
+  "typeCheckingMode": "off",
+  // "reportAttributeAccessIssue": false,
   "exclude": [
     "**/migrations",
     ".venv",
     ".vscode",
-    "utils",
+    "build",
+    "*.egg-info",
+    "*cache",
+    "static/CACHE",
+    "static/vendor",
+    "__pycache__",
     "node_modules",
-    "static"
   ],
-  "reportAttributeAccessIssue": false
 }

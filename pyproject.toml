@@ -69,7 +69,7 @@ dev = [
     "pytest-cov",
     "pytest-randomly",
     "setuptools",
-    "pyright",
+    "pyright>=1.1.353",
 ]
 
 [tool.setuptools]
