@@ -70,7 +70,40 @@ dev = [
     "pytest-randomly",
     "setuptools",
     "pyright>=1.1.353",
+    "autopep8>=2.0.4",
+    "blue==0.9.1",
 ]
+
+[tool.blue]
+line-length = 120
+target-version = ['py37']
+# include = '\.pyi?$'
+exclude = [
+  # "**/migrations",
+  # ".venv",
+  # ".git",
+  # ".vscode",
+  # "build",
+  # "*.egg-info",
+  # "*cache",
+  # "static/CACHE",
+  # "static/vendor",
+  # "__pycache__",
+  "node_modules",
+]
+include = [
+  "core",
+  "dds_registration",
+]
+
+[tool.autopep8]
+# @see https://linuxcommandlibrary.com/man/autopep8
+# @see https://github.com/hhatto/autopep8
+max_line_length = 120
+# ignore = "E501,W6"  # or ["E501", "W6"]
+in-place = true
+recursive = true
+aggressive = 3
 
 [tool.setuptools]
 license-files = ["LICENSE"]

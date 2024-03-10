@@ -26,9 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Determine dev mode...
 
-RUNNING_DEVSERVER = (len(sys.argv) > 1 and sys.argv[1] == 'runserver')
-RUNNING_MANAGE_PY = (len(sys.argv) > 0 and sys.argv[0] == 'manage.py')
-RUNNING_MOD_WSGI = (len(sys.argv) > 0 and sys.argv[0] == 'mod_wsgi')
+RUNNING_DEVSERVER = len(sys.argv) > 1 and sys.argv[1] == 'runserver'
+RUNNING_MANAGE_PY = len(sys.argv) > 0 and sys.argv[0] == 'manage.py'
+RUNNING_MOD_WSGI = len(sys.argv) > 0 and sys.argv[0] == 'mod_wsgi'
 # TODO: Correctly determine is it runnning on production server or locally?
 LOCAL_RUN = RUNNING_MANAGE_PY and not RUNNING_MOD_WSGI
 LOCAL = LOCAL_RUN and RUNNING_DEVSERVER
@@ -55,7 +55,6 @@ ASSETS_ROOT = posixpath.join(STATIC_ROOT, ASSETS_FOLDER)
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-
     # Put strings here, like '/home/html/static' or 'C:/www/django/static'.
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -76,14 +75,11 @@ COMPRESS_PRECOMPILERS = (
     # Sass installation:
     # - https://sass-lang.com/install/
     # - https://github.com/sass/dart-sass/releases/latest
-
     # @see https://django-compressor.readthedocs.io/en/stable/settings.html#django.conf.settings.COMPRESS_PRECOMPILERS
     #  ('text/x-scss', 'django_libsass.SassCompiler'),  # NOTE: DEPRECATED!
-
     #  ('text/coffeescript', 'coffee --compile --stdio'),
     #  ('text/less', 'lessc {infile} {outfile}'),
     #  ('text/x-sass', 'sass {infile} {outfile}'),
-
     #  ('text/stylus', 'stylus < {infile} > {outfile}'),
     #  ('text/foobar', 'path.to.MyPrecompilerFilter'),
 )
@@ -109,16 +105,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-
     #  # @see: https://github.com/praekelt/django-preferences
     #  'preferences',
-
     'compressor',
     'crispy_forms',
     'crispy_bootstrap5',
     #  'django_extensions',
     #  'debug_toolbar',
-
     APP_NAME,
 ]
 
@@ -168,10 +161,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-
                 #  # @see: https://github.com/praekelt/django-preferences
                 #  'preferences.context_processors.preferences_cp',
-
                 # Pass local context to the templates. @see `main/context_processors.py`
                 APP_NAME + '.context_processors.common_values',
             ],
@@ -250,35 +241,31 @@ LOGGING = {
     # 'incremental': True,
     'formatters': {
         'verbose': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt': "%Y.%m.%d %H:%M:%S"
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
+            'datefmt': '%Y.%m.%d %H:%M:%S',
         },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
-        },
+        'simple': {'format': '%(levelname)s %(message)s'},
     },
     'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        },
+        'require_debug_false': {'()': 'django.utils.log.RequireDebugFalse'},
     },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+            'class': 'django.utils.log.AdminEmailHandler',
         },
         'django': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': posixpath.join(BASE_DIR, 'log-django.log'),
-            'formatter': 'verbose'
+            'formatter': 'verbose',
         },
         'apps': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': posixpath.join(BASE_DIR, 'log-apps.log'),
-            'formatter': 'verbose'
+            'formatter': 'verbose',
         },
     },
     'loggers': {
@@ -300,14 +287,14 @@ TIMEOUT = 30 if DEBUG else 300  # Short value for debug time
 # Site config
 
 # TODO: Use `Site.objects.get_current().name` (via `from django.contrib.sites.models import Site`) as site title.
-SITE_NAME = u'DDS Registration'
+SITE_NAME = 'DDS Registration'
 SITE_TITLE = SITE_NAME
 SITE_DESCRIPTION = SITE_NAME
-SITE_KEYWORDS = u'''
+SITE_KEYWORDS = """
 DDS
 Registration
 application
-'''
+"""
 SITE_KEYWORDS = re.sub(r'\s*[\n\r]+\s*', ', ', SITE_KEYWORDS.strip())
 
 if DEV:

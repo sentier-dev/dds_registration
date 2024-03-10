@@ -1,9 +1,9 @@
 {
   "name": "dds_registration",
   "version": "0.0.3",
-  "timetag": "240308-2112",
-  "timestamp": "2024.03.08 21:12 +0700",
-  "changed": "2024.03.08, 20:59",
+  "timetag": "240310-1627",
+  "timestamp": "2024.03.10 16:27 +0700",
+  "changed": "2024.03.10, 16:33",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -29,7 +29,8 @@
     "watch-assets": "echo --Watch all assets-- && gulp watchAll",
     "livereload-server": "echo --Start livereload server-- && python manage.py livereload static",
     "start-django": "echo --Start django dev server-- && python manage.py runserver",
-    "pyformat": "echo --Run python formatter /autopep8, venv/-- && autopep8 .",
+    "pyformat-OLD": "echo --Run python formatter /autopep8, venv/-- && autopep8 .",
+    "pyformat": "echo --Run python formatter /blue, venv/-- && blue *.py core/**/*.py dds_registration/**/*.py",
     "pylint": "echo --Run python linter /pyright, venv/-- && pyright .",
     "check-all": "echo --Run all python checkers /autopep8, venv/-- && npm-run-all pyformat pylint",
     "help": "echo --List all available script commands-- && npm-package-user-scripts-list"
