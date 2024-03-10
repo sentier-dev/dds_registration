@@ -4,15 +4,15 @@
 {% block page_header %}
 {{ block.super }}
 
-{% comment %} {% include 'blocks/page-header-navbar/page-header-navbar.django' %} {% endcomment %}
+{% include 'assets/page-header-navbar/page-header-navbar.django' %}
 {% endblock page_header %}
 
 {% block page_body %}
 {{ block.super }}
-{% include 'blocks/test/test.django' %}
+{% comment %} {% include 'assets/test/test.django' %} {% endcomment %}
 {% endblock page_body %}
 
 {% block page_footer %}
-{% comment %} {% include 'blocks/page-footer-navbar/page-footer-navbar.django' %} {% endcomment %}
+{% include 'assets/page-footer-navbar/page-footer-navbar.django' %}
 {{ block.super }}
 {% endblock page_footer %}

@@ -1,0 +1,30 @@
+/**
+ * @module page-header-navbar.scss
+ * @changed 2024.03.08, 12:00
+ */
+
+@import "../shared";
+
+.page-header-navbar {
+  padding: 0;
+  // Dark primary navbar with background decor...
+  &.navbar-dark.navbar-primary {
+    @include themeBackgroundBefore;
+  }
+  @media (max-width: 400px) {
+    .site-name {
+      display: none;
+    }
+  }
+  @media (min-width: $navbarCollapse) {
+    // .container-fluid {
+    //   flex-wrap: nowrap;
+    // }
+    .navbar-brand {
+      flex: 1;
+    }
+    .collapse.navbar-collapse {
+      flex: 0;
+    }
+  }
+}

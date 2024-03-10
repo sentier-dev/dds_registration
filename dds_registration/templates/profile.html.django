@@ -1,0 +1,29 @@
+{# ex: set ft=htmldjango : #}
+{% extends "base-regular.html.django" %}
+
+{% load crispy_forms_tags %}
+
+{% block navbar_breadcrumbs %}
+    <li>Account</li>
+    <li class="active">Profile</li>
+{% endblock %}
+
+{% block page_body %}
+{{ block.super }}
+
+<h2 class="primary-color">Profile</h2>
+
+{% if user.is_authenticated %}
+  <!-- DEMO -->
+  <p
+    data-user-name="{{ user.get_username }}"
+    data-user-email="{{ user.email }}"
+    data-user-last-login="{{ user.last_login }}"
+  >
+    Welcome, {{ user.get_full_name }}. Thanks for logging in.
+  </p>
+{% endif %}
+
+<p>TODO: Show user's own applications</p>
+
+{% endblock page_body %}

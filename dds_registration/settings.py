@@ -35,6 +35,9 @@ LOCAL = LOCAL_RUN and RUNNING_DEVSERVER
 DEV = LOCAL
 DEBUG = True  # LOCAL  # and DEV
 
+# Use filters to preprocess assets' sources (like sass, see `COMPRESS_PRECOMPILERS` section below)
+USE_DJANGO_PREPROCESSORS = LOCAL and True
+
 # Core folders...
 
 # Static files (CSS, JavaScript, Images)
@@ -43,16 +46,12 @@ STATIC_FOLDER = 'static/'
 STATIC_ROOT = posixpath.join(BASE_DIR, STATIC_FOLDER)
 STATIC_URL = posixpath.join('/', STATIC_FOLDER)
 
-#  ASSETS_FOLDER = 'src/'
-#  ASSETS_ROOT = posixpath.join(BASE_DIR, ASSETS_FOLDER)
-#  ASSETS_URL = posixpath.join('/', ASSETS_FOLDER)
-
 MEDIA_FOLDER = 'media/'
 MEDIA_ROOT = posixpath.join(BASE_DIR, MEDIA_FOLDER)
 MEDIA_URL = posixpath.join('/', MEDIA_FOLDER)
 
-BLOCKS_FOLDER = 'blocks/'
-BLOCKS_ROOT = posixpath.join(STATIC_ROOT, BLOCKS_FOLDER)
+ASSETS_FOLDER = 'assets/'
+ASSETS_ROOT = posixpath.join(STATIC_ROOT, ASSETS_FOLDER)
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -73,7 +72,20 @@ STATICFILES_FINDERS = (
 )
 
 COMPRESS_PRECOMPILERS = (
-    ('text/x-scss', 'django_libsass.SassCompiler'),
+    ('text/x-scss', 'sass --embed-source-map {infile} {outfile}'),
+    # Sass installation:
+    # - https://sass-lang.com/install/
+    # - https://github.com/sass/dart-sass/releases/latest
+
+    # @see https://django-compressor.readthedocs.io/en/stable/settings.html#django.conf.settings.COMPRESS_PRECOMPILERS
+    #  ('text/x-scss', 'django_libsass.SassCompiler'),  # NOTE: DEPRECATED!
+
+    #  ('text/coffeescript', 'coffee --compile --stdio'),
+    #  ('text/less', 'lessc {infile} {outfile}'),
+    #  ('text/x-sass', 'sass {infile} {outfile}'),
+
+    #  ('text/stylus', 'stylus < {infile} > {outfile}'),
+    #  ('text/foobar', 'path.to.MyPrecompilerFilter'),
 )
 
 # Quick-start development settings - unsuitable for production
@@ -103,11 +115,16 @@ INSTALLED_APPS = [
 
     'compressor',
     'crispy_forms',
+    'crispy_bootstrap5',
     #  'django_extensions',
     #  'debug_toolbar',
 
     APP_NAME,
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -155,7 +172,8 @@ TEMPLATES = [
                 #  # @see: https://github.com/praekelt/django-preferences
                 #  'preferences.context_processors.preferences_cp',
 
-                APP_NAME + '.context_processors.common_values',  # Pass local context to the templates. @see `main/context_processors.py`
+                # Pass local context to the templates. @see `main/context_processors.py`
+                APP_NAME + '.context_processors.common_values',
             ],
         },
         'DIRS': TEMPLATE_DIRS,
@@ -269,10 +287,6 @@ LOGGING = {
             'propagate': True,
             'level': 'INFO',
         },
-        'django_project': {
-            'handlers': ['apps'],
-            'level': 'DEBUG',
-        },
         APP_NAME: {
             'handlers': ['apps'],
             'level': 'DEBUG',
@@ -301,24 +315,17 @@ if DEV:
 
 # Pass settings to context...
 PASS_VARIABLES = {
-    #  # DEBUG: Debug only (to check the correctness of dev-mode determining)!
-    #  'RUNNING_DEVSERVER': RUNNING_DEVSERVER,
-    #  'RUNNING_MOD_WSGI': RUNNING_MOD_WSGI,
-    #  'RUNNING_MANAGE_PY': RUNNING_MANAGE_PY,
-
     'DEBUG': DEBUG,
     'DEV': DEV,
     'LOCAL_RUN': LOCAL_RUN,
     'LOCAL': LOCAL,
-    #  'DEV_MAKET_MODE': DEV_MAKET_MODE,
-    #  'COMPRESS_ENABLED': COMPRESS_ENABLED,
+    'USE_DJANGO_PREPROCESSORS': USE_DJANGO_PREPROCESSORS,
     'SITE_NAME': SITE_NAME,
     'SITE_TITLE': SITE_TITLE,
-    'BLOCKS_FOLDER': BLOCKS_FOLDER,
+    'ASSETS_FOLDER': ASSETS_FOLDER,
     'STATIC_ROOT': STATIC_ROOT,
-    'BLOCKS_ROOT': BLOCKS_ROOT,
+    'ASSETS_ROOT': ASSETS_ROOT,
     'STATIC_URL': STATIC_URL,
-    #  'ASSETS_URL': ASSETS_URL,
     'SITE_DESCRIPTION': SITE_DESCRIPTION,
     'SITE_KEYWORDS': SITE_KEYWORDS,
 }
