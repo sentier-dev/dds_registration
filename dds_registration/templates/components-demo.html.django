@@ -3,10 +3,10 @@
 
 {% block title %}Bootstrap components demo &mdash; {{ block.super }}{% endblock %}
 
-{% block page_body %}
+{% block content %}
 
 {% include "assets/components-demo/components-demo.django" %}
 
 {{ block.super }}
 
-{% endblock page_body %}
+{% endblock content %}

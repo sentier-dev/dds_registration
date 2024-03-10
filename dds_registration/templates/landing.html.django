@@ -8,9 +8,9 @@
     <li class="active">Login</li>
 {% endblock %}
 
-{% block page_body %}
+{% block content %}
 {{ block.super }}
 
 <p>TODO: Landing</p>
 
-{% endblock page_body %}
+{% endblock content %}

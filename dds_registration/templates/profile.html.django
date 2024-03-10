@@ -8,7 +8,7 @@
     <li class="active">Profile</li>
 {% endblock %}
 
-{% block page_body %}
+{% block content %}
 {{ block.super }}
 
 <h2 class="primary-color">Profile</h2>
@@ -24,6 +24,6 @@
   </p>
 {% endif %}
 
-<p>TODO: Show user's own applications</p>
+<p>TODO: Show user's own applications (see events_list)</p>
 
-{% endblock page_body %}
+{% endblock content %}

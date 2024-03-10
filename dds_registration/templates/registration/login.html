@@ -1,7 +1,5 @@
 {# ex: set ft=htmldjango : #}
 {% extends "base-regular.html.django" %}
-
-{# @see https://django-crispy-forms.readthedocs.io/ #}
 {% load crispy_forms_tags %}
 
 {% block navbar_breadcrumbs %}
@@ -9,17 +7,17 @@
     <li class="active">Login</li>
 {% endblock %}
 
-{% block page_body %}
+{% block content %}
 
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
 
 <form role="form" method="post" action="{% url 'login' %}">
-  {% csrf_token %}
-  <input type="hidden" name="next" value="{{ next }}" />
-  {{ form|crispy }}
-  <button type="submit" class="btn btn-primary">Login</button>
+{% csrf_token %}
+    {{ form|crispy }}
+    <input class="btn btn-primary" type="submit" value="Login" />
+    <input type="hidden" name="next" value="{{ next }}" />
 </form>
 
-{% endblock page_body %}
+{% endblock content %}
