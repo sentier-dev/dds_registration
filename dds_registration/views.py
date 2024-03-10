@@ -2,15 +2,11 @@
 from multiprocessing.managers import BaseManager
 from django.contrib import messages
 
-# from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
 from django.db.models.query_utils import Q
 from django.http import HttpRequest, HttpResponse, Http404
 
-# from django.http.response import Http404
-# from django.http.response import HttpResponse, Http404
-# from django.shortcuts import render, redirect
 from django.shortcuts import render, redirect, get_object_or_404
 
 # from django.template.defaultfilters import slugify

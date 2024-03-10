@@ -6,9 +6,14 @@ from datetime import date
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.urls import reverse
-from django.contrib.auth.models import Group, User
-from typing import cast
-from django.db.models.fields import NOT_PROVIDED
+from django.contrib.auth.models import (
+    Group,
+    User,
+    # BaseUserManager,
+    # AbstractBaseUser,
+)
+
+from django.db.models.signals import post_save
 
 from core.constants.date_time_formats import dateTimeFormat
 
@@ -20,7 +25,25 @@ random_code_length = 8
 
 
 def random_code(length=random_code_length):
+    # TODO: To use uuid?
     return ''.join(random.choices(alphabet, k=length))
+
+
+class AppUser(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='app_user')
+    email_verified = models.BooleanField(default=False)
+
+    #  created_at = models.DateTimeField(auto_now_add=True)
+    #  updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        # fmt: off
+        info = ' '.join(filter(None, map(str, [
+            self.user.get_full_name(),
+            '<{}>'.format(self.user.email) if self.user.email else None,
+        ])))
+        # fmt: on
+        return info
 
 
 class Event(models.Model):

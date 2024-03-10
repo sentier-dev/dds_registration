@@ -203,6 +203,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+#  AUTH_PROFILE_MODULE = APP_NAME + '.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
