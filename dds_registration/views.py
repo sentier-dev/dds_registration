@@ -29,9 +29,10 @@ def index(request: HttpRequest):
         return render(request, 'landing.html.django')
 
 
-# From OneEvent
-def events_list(request: HttpRequest, events: list[Event], context: dict, show_archived=False):
-    context['events'] = []
+def get_events_list(request: HttpRequest, events: list[Event], show_archived=False):
+    if not events or not events.count():
+        return None
+    result = []
     for evt in events:
         event_info = {'event': evt, 'registration': None}
         #  # Hide events that the user can not list
@@ -59,11 +60,10 @@ def events_list(request: HttpRequest, events: list[Event], context: dict, show_a
             #  event_info["user_can_book"] = evt.user_can_book(request.user)
             #  event_info["user_can_update"] = evt.user_can_update(request.user)
             #  event_info["price_for_user"] = evt.user_price(request.user)
-        context['events'].append(event_info)
-    return render(request, 'events_list.html.django', context)
+        result.append(event_info)
+    return result
 
 
-# From OneEvent
 @login_required
 def events_list_mine(request: HttpRequest):
     # We don't have personalities in event objects
@@ -74,19 +74,27 @@ def events_list_mine(request: HttpRequest):
     # query = query | Q(organisers=request.user)
     # query = query | Q(owner=request.user)
     events = Event.objects.all()  # filter(query).distinct()
-    if events.count() > 0:
-        return events_list(request, events, context)
+    events_list = get_events_list(request, events)
+    if not events_list or not len(events_list):
+        messages.info(request, 'You have no events yet')
     else:
-        messages.debug(request, 'You have no event yet')
-        return redirect('events_list_all')
+        context['events'] = events_list
+    return render(request, 'events_list.html.django', context)
 
 
 @login_required
 def profile(request: HttpRequest):
     if not request.user.is_authenticated:
         return redirect('index')
-
-    return render(request, 'profile.html.django')
+    context = {'events_shown': 'mine'}
+    events = Event.objects.all()  # filter(query).distinct()
+    events_list = get_events_list(request, events)
+    if not events_list or not len(events_list):
+        messages.info(request, 'You have no events yet')
+    else:
+        #  messages.success(request, 'Already has events: {}'.format(len(events_list)))
+        context['events'] = events_list
+    return render(request, 'profile.html.django', context)
 
 
 def events_view(request: HttpRequest, code):
