@@ -46,6 +46,7 @@ def get_events_list(request: HttpRequest, events: list[Event], show_archived=Fal
                 #  event_info["user_can_cancel"] = user_registration.user_can_cancel(
                 #      request.user
                 #  )
+                result.append(event_info)
             except Registration.DoesNotExist:
                 pass
             except Exception as err:
@@ -60,7 +61,6 @@ def get_events_list(request: HttpRequest, events: list[Event], show_archived=Fal
             #  event_info["user_can_book"] = evt.user_can_book(request.user)
             #  event_info["user_can_update"] = evt.user_can_update(request.user)
             #  event_info["price_for_user"] = evt.user_price(request.user)
-        result.append(event_info)
     return result
 
 
@@ -76,7 +76,7 @@ def events_list_mine(request: HttpRequest):
     events = Event.objects.all()  # filter(query).distinct()
     events_list = get_events_list(request, events)
     if not events_list or not len(events_list):
-        messages.info(request, 'You have no events yet')
+        messages.info(request, "You don't have any events yet")
     else:
         context['events'] = events_list
     return render(request, 'events_list.html.django', context)
@@ -90,7 +90,7 @@ def profile(request: HttpRequest):
     events = Event.objects.all()  # filter(query).distinct()
     events_list = get_events_list(request, events)
     if not events_list or not len(events_list):
-        messages.info(request, 'You have no events yet')
+        messages.info(request, "You don't have any events yet")
     else:
         #  messages.success(request, 'Already has events: {}'.format(len(events_list)))
         context['events'] = events_list

@@ -31,8 +31,9 @@
   </p>
 {% endif %}
 
-<p>Your registrations:</p>
-
-{% include 'assets/events-list/events-list.django' %}
+{% if events %}
+  <p>Your registrations:</p>
+  {% include 'assets/events-list/events-list.django' %}
+{% endif %}
 
 {% endblock content %}
