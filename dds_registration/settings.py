@@ -112,6 +112,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     #  'django_extensions',
     #  'debug_toolbar',
+    'accounts',
     APP_NAME,
 ]
 

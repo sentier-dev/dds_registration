@@ -1,5 +1,5 @@
 {# ex: set ft=htmldjango : #}
-{% extends "base-regular.html.django" %}
+{% extends 'base-regular.html.django' %}
 
 {% block title %}All your events & registrations &mdash; {{ block.super }}{% endblock %}
 
