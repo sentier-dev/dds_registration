@@ -20,7 +20,7 @@
     data-user-email="{{ user.email }}"
     data-user-last-login="{{ user.last_login }}"
   >
-    Welcome, {{ user.get_full_name }}. Thanks for logging in.
+    Welcome, {{ user.username }}. Thanks for logging in.
   </p>
 {% endif %}
 
