@@ -1,11 +1,13 @@
 # -*- coding:utf-8 -*-
 from django.conf import settings
+
 #  from django.contrib.sites.shortcuts import get_current_site
 
 #  # Logging demo
 #  import logging
 #  LOG = logging.getLogger(__name__)
 #  LOG.info('test')
+
 
 def common_values(request):
 

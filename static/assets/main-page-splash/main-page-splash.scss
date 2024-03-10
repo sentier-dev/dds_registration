@@ -1,0 +1,17 @@
+/**
+ * @module main-page-splash
+ * @changed 2024.03.08, 17:06
+ */
+
+@import "../shared";
+
+.main-page-splash {
+  @include themeBackgroundBefore;
+  position: relative;
+  > .content {
+    h1 {
+      font-weight: 400;
+    }
+    position: relative;
+  }
+}

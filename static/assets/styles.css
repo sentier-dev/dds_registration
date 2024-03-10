@@ -1,0 +1,218 @@
+/**
+ * @module styles.scss
+ * @changed 2024.03.08, 12:00
+ */
+/**
+ * @module common.scss
+ * @changed 2024.03.08, 12:00
+ */
+/**
+ * @module variables.scss
+ * @changed 2024.03.08, 12:00
+ */
+.item-label,
+.text-info {
+  opacity: 0.5;
+}
+
+.primary-color {
+  color: #486;
+}
+
+/**
+ * @module forms.scss
+ * @changed 2024.03.08, 12:00
+ */
+/**
+ * @module variables.scss
+ * @changed 2024.03.08, 12:00
+ */
+.asteriskField {
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0.5;
+}
+
+/**
+ * @module body
+ * @changed 2024.03.08, 13:30
+ */
+/**
+ * @module variables.scss
+ * @changed 2024.03.08, 12:00
+ */
+body {
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  background-color: #fff;
+  margin-top: 80px;
+}
+
+/**
+ * @module bootstrap-theme-fixes
+ * @changed 2024.03.08, 17:13
+ */
+/**
+ * @module variables.scss
+ * @changed 2024.03.08, 12:00
+ */
+:root {
+  --bs-primary-rgb: 68, 136, 102;
+}
+
+:root {
+  --bs-link-color: #486;
+  --bs-link-hover-color: #24533c;
+}
+
+.btn-primary {
+  --bs-btn-bg: #486;
+  --bs-btn-border-color: #486;
+  --bs-btn-hover-bg: #375;
+  --bs-btn-hover-border-color: #24533c;
+  --bs-btn-active-bg: #24533c;
+  --bs-btn-active-border-color: #24533c;
+  --bs-btn-disabled-bg: #486;
+  --bs-btn-disabled-border-color: #486;
+}
+
+.progress, .progress-stacked {
+  --bs-progress-bar-bg: #486;
+}
+
+.list-group {
+  --bs-list-group-active-bg: #486;
+  --bs-list-group-active-border-color: #486;
+}
+
+/**
+ * @module page-header-navbar.scss
+ * @changed 2024.03.08, 12:00
+ */
+/**
+ * @module variables.scss
+ * @changed 2024.03.08, 12:00
+ */
+.page-header-navbar {
+  padding: 0;
+}
+.page-header-navbar.navbar-dark.navbar-primary {
+  background-color: #486;
+  color: #fff;
+}
+.page-header-navbar.navbar-dark.navbar-primary:before {
+  display: block;
+  content: " ";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  opacity: 0.15;
+  background-image: url("/static/images/splash/curves-bg/curves-x.svg");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.page-header-navbar.navbar-dark.navbar-primary .container-fluid {
+  z-index: 1;
+}
+@media (max-width: 400px) {
+  .page-header-navbar .site-name {
+    display: none;
+  }
+}
+@media (min-width: 992px) {
+  .page-header-navbar .navbar-brand {
+    flex: 1;
+  }
+  .page-header-navbar .collapse.navbar-collapse {
+    flex: 0;
+  }
+}
+
+/**
+ * @module page-footer-navbar
+ * @changed 2024.03.08, 13:30
+ */
+.page-footer-navbar {
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 0;
+  margin-top: 20px;
+  padding: 0;
+}
+.page-footer-navbar .container-fluid {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  justify-content: space-between;
+}
+.page-footer-navbar .container-fluid .navbar-right {
+  display: flex;
+  flex-wrap: wrap;
+}
+@media (min-width: 576px) {
+  .page-footer-navbar .container-fluid {
+    flex-direction: row;
+  }
+  .page-footer-navbar .container-fluid .navbar-copyright,
+  .page-footer-navbar .container-fluid .navbar-middle,
+  .page-footer-navbar .container-fluid .navbar-right {
+    flex: 1;
+  }
+  .page-footer-navbar .container-fluid .navbar-right {
+    justify-content: flex-end;
+  }
+}
+.page-footer-navbar .navbar-copyright {
+  display: flex;
+  align-items: center;
+}
+.page-footer-navbar .navbar-nav {
+  margin: 0;
+  flex-direction: row;
+}
+.page-footer-navbar .navbar-nav .nav-link {
+  padding-right: var(--bs-navbar-nav-link-padding-x);
+  padding-left: var(--bs-navbar-nav-link-padding-x);
+}
+
+/**
+ * @module main-page-splash
+ * @changed 2024.03.08, 17:06
+ */
+/**
+ * @module variables.scss
+ * @changed 2024.03.08, 12:00
+ */
+.main-page-splash {
+  background-color: #486;
+  color: #fff;
+  position: relative;
+}
+.main-page-splash:before {
+  display: block;
+  content: " ";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  opacity: 0.15;
+  background-image: url("/static/images/splash/curves-bg/curves-x.svg");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.main-page-splash .container-fluid {
+  z-index: 1;
+}
+.main-page-splash > .content {
+  position: relative;
+}
+.main-page-splash > .content h1 {
+  font-weight: 400;
+}
+/*# sourceMappingURL=styles.css.map */

@@ -1,0 +1,28 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module menu-main.django
+  @changed 2024.03.08, 20:09
+-->
+
+<li class="nav-item"><a class="nav-link active" href="/components-demo">Features</a></li>
+<li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a></li>
+<li class="nav-item"><a class="nav-link" href="/faq">FAQ</a></li>
+{% if user.is_authenticated %}
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-person-fill"></i> {{ user.username }}
+  </a>
+  <form id="logout-form" action="{% url 'logout' %}" method="post">
+  {% csrf_token %}
+  <ul class="dropdown-menu" id="user-menu">
+    <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="{% url 'logout' %}" onClick="document.getElementById('logout-form').submit(); return false">Logout</a></li>
+  </ul>
+  </form>
+</li>
+{% else %}
+<li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Signup</a></li>
+{% endif %}
+

@@ -3,10 +3,9 @@
 
 {% block body_class %}main{% endblock %}
 
-{% block page_body %}
+{% block content %}
 {{ block.super }}
 
-{# {% include "blocks/main-page-splash/main-page-splash.django" %} #}
-<div>Splash coming here</div>
+{% include "assets/main-page-splash/main-page-splash.django" %}
 
-{% endblock page_body %}
+{% endblock content %}

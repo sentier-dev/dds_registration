@@ -1,0 +1,19 @@
+{# ex: set ft=htmldjango : #}
+{% extends 'base-regular.html.django' %}
+
+{% block title %}All your events & registrations &mdash; {{ block.super }}{% endblock %}
+
+{% block content %}
+
+<fieldset>
+  <legend>
+    <h1 class="primary-color">All your events & registrations</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+{% include 'assets/render-messages/render-messages.django' %}
+
+{% include 'assets/events-list/events-list.django' %}
+
+{% endblock content %}

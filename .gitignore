@@ -120,6 +120,9 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
+# Code
+/.vscode
+
 # mkdocs documentation
 /site
 
@@ -130,3 +133,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Temporariy, swap & ignored files
+/config-local.*
+/*.session
+*UNUSED
+*~
+.*.sw?
+*.tmp
+*.zip
+*.tgz

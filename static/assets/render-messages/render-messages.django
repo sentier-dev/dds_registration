@@ -1,0 +1,28 @@
+{# ex: set ft=htmldjango : #}
+
+<div class="render-messages">
+  {% if messages %}
+    {% for message in messages %}
+      {% if message.tags == 'error' %}
+        <div class="alert alert-danger alert-dismissible" role="alert">
+          <strong>{{ message }}</strong>
+        </div>
+      {% endif %}
+      {% if message.tags == 'warning' %}
+        <div class="alert alert-warning alert-dismissible" role="alert">
+          <strong>{{ message }}</strong>
+        </div>
+      {% endif %}
+      {% if message.tags == 'info' %}
+        <div class="alert alert-info alert-dismissible" role="alert">
+          <strong>{{ message }}</strong>
+        </div>
+      {% endif %}
+      {% if message.tags == 'success' %}
+        <div class="alert alert-success alert-dismissible" role="alert">
+          <strong>{{ message }}</strong>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+</div>

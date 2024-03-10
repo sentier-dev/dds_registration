@@ -1,5 +1,6 @@
 {# ex: set ft=htmldjango : #}
 {% extends "base-main.html.django" %}
+
 {% load crispy_forms_tags %}
 
 {% block navbar_breadcrumbs %}
@@ -8,7 +9,8 @@
 {% endblock %}
 
 {% block content %}
+{{ block.super }}
 
-<p>Landing</p>
+<p>TODO: Landing</p>
 
-{% endblock %}
+{% endblock content %}

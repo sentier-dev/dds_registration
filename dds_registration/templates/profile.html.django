@@ -1,0 +1,39 @@
+{# ex: set ft=htmldjango : #}
+{% extends 'base-regular.html.django' %}
+
+{% load crispy_forms_tags %}
+
+{% block navbar_breadcrumbs %}
+    <li>Account</li>
+    <li class="active">Profile</li>
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+
+<fieldset>
+  <legend>
+    <h1 class="primary-color">Profile</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+{% include 'assets/render-messages/render-messages.django' %}
+
+{% if user.is_authenticated %}
+  <!-- DEMO -->
+  <p
+    data-user-name="{{ user.get_username }}"
+    data-user-email="{{ user.email }}"
+    data-user-last-login="{{ user.last_login }}"
+  >
+    Welcome, {{ user.username }}. Thanks for logging in.
+  </p>
+{% endif %}
+
+{% if events %}
+  <p>Your registrations:</p>
+  {% include 'assets/events-list/events-list.django' %}
+{% endif %}
+
+{% endblock content %}
