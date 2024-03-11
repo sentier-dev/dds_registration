@@ -1,8 +1,8 @@
 {
   "name": "dds_registration",
-  "version": "0.0.5",
-  "timetag": "240311-0155",
-  "timestamp": "2024.03.11 01:55 +0700",
+  "version": "0.0.6",
+  "timetag": "240311-2114",
+  "timestamp": "2024.03.11 21:14 +0700",
   "changed": "2024.03.11, 16:50",
   "browserslist": {
     "production": [
