@@ -242,6 +242,10 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 # NOTE: Set your `SENDGRID_API_KEY` in `.env` (see `.env.SAMPLE` for example)
 EMAIL_HOST_PASSWORD = env('SENDGRID_API_KEY')
+# NOTE: Check if `SENDGRID_API_KEY` hasn't set (write to log and stop server)...
+if not EMAIL_HOST_PASSWORD:
+    error_text = 'Error: A required sendgrid api key SENDGRID_API_KEY is not provided! It expected to be set in .env file (see .env.SAMPLE).'
+    raise Exception(error_text)
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
