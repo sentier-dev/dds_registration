@@ -55,10 +55,6 @@ DEBUG = env('DEBUG')
 
 SENDGRID_API_KEY = env('SENDGRID_API_KEY')
 
-print("SECRET_KEY:", SECRET_KEY)
-print("DEBUG:", DEBUG)
-print("SENDGRID_API_KEY:", SENDGRID_API_KEY)
-
 # Use filters to preprocess assets' sources (like sass, see `COMPRESS_PRECOMPILERS` section below)
 USE_DJANGO_PREPROCESSORS = LOCAL and True
 
@@ -229,6 +225,12 @@ AUTH_PASSWORD_VALIDATORS = [
 #  AUTH_PROFILE_MODULE = APP_NAME + '.User'
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
+
+# Registration
+# @see https://django-registration.readthedocs.io
+
+ACCOUNT_ACTIVATION_DAYS = 7   # One-week activation window
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

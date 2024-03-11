@@ -83,34 +83,24 @@ dev = [
 # ignore="H023"
 # H023: Do not use entity references
 exclude = [
+  "**/migrations",
   "static/CACHE",
   "static/vendor",
   "node_modules",
-]
-
-[tool.black]
-line-length = 120
-target-version = ['py37']
-# include = '\.pyi?$'
-exclude = "static/vendor"
-include = [
-  "core",
-  "dds_registration",
 ]
 
 [tool.blue]
 line-length = 120
 target-version = ['py37']
-# include = '\.pyi?$'
-exclude = [
-  "static/CACHE",
-  "static/vendor",
-  "node_modules",
-]
-include = [
-  "core",
-  "dds_registration",
-]
+include = "\\.py$"
+force-exclude = '''
+^/.*/migrations/
+| ^/dds_registration/__init__
+| ^/.git/
+| ^/node_modules/
+| ^/.vscode/
+| ^/.venv/
+'''
 
 [tool.setuptools]
 license-files = ["LICENSE"]

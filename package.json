@@ -3,7 +3,7 @@
   "version": "0.0.5",
   "timetag": "240311-0155",
   "timestamp": "2024.03.11 01:55 +0700",
-  "changed": "2024.03.10, 16:33",
+  "changed": "2024.03.11, 16:50",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -30,7 +30,7 @@
     "livereload-server": "echo --Start livereload server-- && python manage.py livereload static",
     "start-django": "echo --Start django dev server-- && python manage.py runserver",
     "pyformat-OLD": "echo --Run python formatter /autopep8, venv/-- && autopep8 .",
-    "pyformat": "echo --Run python formatter /blue, venv/-- && blue *.py core/**/*.py dds_registration/**/*.py",
+    "pyformat": "echo --Run python formatter /blue, venv/-- && blue ./**/*.py",
     "pylint": "echo --Run python linter /pyright, venv/-- && pyright .",
     "check-all": "echo --Run all python checkers /autopep8, venv/-- && npm-run-all pyformat pylint",
     "help": "echo --List all available script commands-- && npm-package-user-scripts-list"
