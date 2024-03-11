@@ -3,6 +3,7 @@ import random
 from functools import partial
 from datetime import date
 
+from django import forms
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -28,24 +29,8 @@ def random_code(length=random_code_length):
     return ''.join(random.choices(alphabet, k=length))
 
 
-#  # UNUSED: In favor to django_registration
-#  class AppUser(models.Model):
-#      user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='app_user')
-#      NOTE: With django_registration we can use user.active
-#      email_verified = models.BooleanField(default=False)
-#      def __str__(self):
-#          full_name = self.user.get_full_name()
-#          # fmt: off
-#          info = ' '.join(filter(None, map(str, [
-#              full_name if full_name else self.user.username,
-#              '<{}>'.format(self.user.email) if self.user.email else None,
-#          ])))
-#          # fmt: on
-#          return info
-
-
 class Event(models.Model):
-    code = models.TextField(unique=True, default=random_code)  # TODO: Show as an input
+    code = models.TextField(unique=True, default=random_code)   # TODO: Show as an input
     title = models.TextField(unique=True, null=False, blank=False)  # TODO: Show as an input
     description = models.TextField(blank=True)
     registration_open = models.DateField(auto_now=True, help_text='Date registration opens')
@@ -58,17 +43,6 @@ class Event(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    #  # UNUSED
-    #  owner = models.ForeignKey(
-    #      settings.AUTH_USER_MODEL,
-    #      related_name="events_owned",
-    #      on_delete=models.CASCADE,
-    #      help_text="Main organiser",
-    #  )
-    #  organisers = models.ManyToManyField(
-    #      settings.AUTH_USER_MODEL, blank=True, related_name="events_organised"
-    #  )
 
     def get_active_registrations(self):
         """

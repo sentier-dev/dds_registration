@@ -10,7 +10,7 @@
   <div class="container-fluid">
     <div class="navbar-copyright">
       <a class="navbar-brand" href="{% url 'index' %}">
-        <img src="{% static 'images/dds-logo/svg/Green Logo.svg' %}" width="auto" height="32" alt="DDS Logo" />
+        <img src="{% static 'images/dds-logo/svg/Green Logo.svg' %}" width="auto" height="32" alt="DdS Logo" />
       </a>
       <span class="copy-text">
         © Copyright 2024

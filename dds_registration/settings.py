@@ -43,7 +43,8 @@ DEV = LOCAL
 env = environ.Env(
     # @see https://django-environ.readthedocs.io
     DEBUG=(bool, True),  # LOCAL  # and DEV
-    SECRET_KEY=(str, 'django-insecure-1d*alw^8-nya9h#xhfjqe*5%w8!o7vy8!211ez++h!p_*nm%21'),
+    SECRET_KEY=(
+        str, 'django-insecure-1d*alw^8-nya9h#xhfjqe*5%w8!o7vy8!211ez++h!p_*nm%21'),
     SENDGRID_API_KEY=(str, ''),
 )
 environ.Env.read_env(posixpath.join(BASE_DIR, '.env'))
@@ -325,11 +326,11 @@ TIMEOUT = 30 if DEBUG else 300  # Short value for debug time
 # Site config
 
 # TODO: Use `Site.objects.get_current().name` (via `from django.contrib.sites.models import Site`) as site title.
-SITE_NAME = 'DDS Registration'
+SITE_NAME = 'DdS Registration'
 SITE_TITLE = SITE_NAME
 SITE_DESCRIPTION = SITE_NAME
 SITE_KEYWORDS = """
-DDS
+DdS
 Registration
 application
 """
