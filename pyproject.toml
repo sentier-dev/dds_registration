@@ -44,10 +44,10 @@ dependencies = [
     "django-compressor>=4.4",
     "django-livereload-server>=0.5.1",
     "django-preferences>=1.0.0",
-    # "django-libsass>=0.9",  # DEPRECATED!
-    # "django-crispy-forms~=1.8",
     "django-crispy-forms>=2.1",
     "crispy-bootstrap5>=2024.2",
+    "django-environ>=0.11.2",
+    "django-registration>=3.4",
 ]
 
 [project.urls]
@@ -72,9 +72,9 @@ dev = [
     "pytest-cov",
     "pytest-randomly",
     "setuptools",
-    "pyright>=1.1.353",
-    "blue==0.9.1",
-    "djlint==1.34.1",
+    "blue>=0.9.1",  # Python formatter, based on black, but wit a support (at least) for single quotes coding style
+    "pyright>=1.1.353",  # TODO: Remove from shared deps
+    "djlint>=1.34.1",  # TODO: Remove from shared deps (?)
 ]
 
 [tool.djlint]
@@ -86,6 +86,16 @@ exclude = [
   "static/CACHE",
   "static/vendor",
   "node_modules",
+]
+
+[tool.black]
+line-length = 120
+target-version = ['py37']
+# include = '\.pyi?$'
+exclude = "static/vendor"
+include = [
+  "core",
+  "dds_registration",
 ]
 
 [tool.blue]
@@ -132,9 +142,6 @@ exclude = [
     ".eggs",
     "docs/conf.py",
 ]
-
-[tool.black]
-line-length = 88
 
 [tool.isort]
 profile = "black"

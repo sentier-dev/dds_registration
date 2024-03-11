@@ -25,7 +25,6 @@ random_code_length = 8
 
 
 def random_code(length=random_code_length):
-    # TODO: To use uuid?
     return ''.join(random.choices(alphabet, k=length))
 
 
@@ -37,9 +36,10 @@ class AppUser(models.Model):
     #  updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        full_name = self.user.get_full_name()
         # fmt: off
         info = ' '.join(filter(None, map(str, [
-            self.user.get_full_name(),
+            full_name if full_name else self.user.username,
             '<{}>'.format(self.user.email) if self.user.email else None,
         ])))
         # fmt: on
@@ -122,8 +122,11 @@ class RegistrationOption(models.Model):
         return info
 
 
-# Ex `Booking`
 class Registration(models.Model):
+    """
+    Ex `Booking` class in OneEvent
+    """
+
     event = models.ForeignKey(Event, related_name='registrations', on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
     options = models.ManyToManyField(RegistrationOption)
@@ -144,11 +147,6 @@ class Registration(models.Model):
             self.created_at.strftime(dateTimeFormat) if self.created_at else None,
         ])))
         # fmt: on
-        #  info = " (" + info + ")" if info else None
-        #  info = " ".join(list(filter(None, [
-        #      str(self.id),
-        #      info,
-        #  ])))
         return info
 
 

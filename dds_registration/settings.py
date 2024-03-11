@@ -14,6 +14,10 @@ from pathlib import Path
 import posixpath
 import re
 import sys
+import environ
+
+
+# App name
 
 APP_NAME = 'dds_registration'  # Root app name
 
@@ -33,7 +37,27 @@ RUNNING_MOD_WSGI = len(sys.argv) > 0 and sys.argv[0] == 'mod_wsgi'
 LOCAL_RUN = RUNNING_MANAGE_PY and not RUNNING_MOD_WSGI
 LOCAL = LOCAL_RUN and RUNNING_DEVSERVER
 DEV = LOCAL
-DEBUG = True  # LOCAL  # and DEV
+
+# Env variables...
+
+env = environ.Env(
+    # @see https://django-environ.readthedocs.io
+    DEBUG=(bool, True),  # LOCAL  # and DEV
+    SECRET_KEY=(str, 'django-insecure-1d*alw^8-nya9h#xhfjqe*5%w8!o7vy8!211ez++h!p_*nm%21'),
+    SENDGRID_API_KEY=(str, ''),
+)
+environ.Env.read_env(posixpath.join(BASE_DIR, '.env'))
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = env('SECRET_KEY')
+
+DEBUG = env('DEBUG')
+
+SENDGRID_API_KEY = env('SENDGRID_API_KEY')
+
+print("SECRET_KEY:", SECRET_KEY)
+print("DEBUG:", DEBUG)
+print("SENDGRID_API_KEY:", SENDGRID_API_KEY)
 
 # Use filters to preprocess assets' sources (like sass, see `COMPRESS_PRECOMPILERS` section below)
 USE_DJANGO_PREPROCESSORS = LOCAL and True
@@ -87,9 +111,6 @@ COMPRESS_PRECOMPILERS = (
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1d*alw^8-nya9h#xhfjqe*5%w8!o7vy8!211ez++h!p_*nm%21'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 
 ALLOWED_HOSTS = []
@@ -110,6 +131,7 @@ INSTALLED_APPS = [
     'compressor',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_registration',
     #  'django_extensions',
     #  'debug_toolbar',
     'accounts',
