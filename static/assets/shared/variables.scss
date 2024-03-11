@@ -10,6 +10,13 @@
 @import '../../vendor/bootstrap-5.3.2/scss/functions';
 @import '../../vendor/bootstrap-5.3.2/scss/variables';
 
+// Font...
+
+$defaultFontSize: 14px;
+
+$defaultFontFamily: "Roboto", "Helvetica", "Arial", sans-serif;
+// $defaultFontFamily: Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
 // Breakpoints:...
 
 // @see static/bootstrap-5.3.2-src/scss/_variables.scss
@@ -70,10 +77,6 @@ $backgroundColor: #fff;
 
 $navbarMainHeight: 60px;
 $navbarPlusHeight: 50px;
-
-// Fonts...
-
-$defaultFontFamily: "Roboto", "Helvetica", "Arial", sans-serif;
 
 // Timeouts...
 

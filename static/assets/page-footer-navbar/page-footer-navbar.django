@@ -1,7 +1,7 @@
 {# ex: set ft=htmldjango : #}
 <!--
   @module footer
-  @changed 2024.02.27, 20:53
+  @changed 2024.03.11, 14:10
 -->
 
 {% load static %}
@@ -9,15 +9,15 @@
 <nav class="page-footer-navbar navbar -navbar-expand-lg">
   <div class="container-fluid">
     <div class="navbar-copyright">
-      <a class="navbar-brand" href="/">
-        <img src="{% static 'images/dds-logo/svg/Green Logo.svg' %}" height="32" />
+      <a class="navbar-brand" href="{% url 'index' %}">
+        <img src="{% static 'images/dds-logo/svg/Green Logo.svg' %}" width="auto" height="32" alt="DDS Logo" />
       </a>
       <span class="copy-text">
-        &copy; Copyright 2024
+        © Copyright 2024
       </span>
     </div>
     <ul class="navbar-nav me-auto">
-      {% include 'assets/page-menus/menu-plain.django' %}
+      {% include "assets/page-menus/menu-plain.django" %}
     </ul>
   </div><!-- /.container-fluid -->
 </nav>

@@ -24,5 +24,7 @@
   <p>Registration: +</p>
   {% endif %}
 
+  {# TODO: Render events/registration well #}
+
 {% endfor %}
 

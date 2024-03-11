@@ -1,24 +1,24 @@
 {# ex: set ft=htmldjango : #}
-{% extends 'base-regular.html.django' %}
+<!--
+  @module profile.html.django
+  @changed 2024.03.11, 14:10
+-->
+
+{% extends "base-regular.html.django" %}
 
 {% load crispy_forms_tags %}
-
-{% block navbar_breadcrumbs %}
-    <li>Account</li>
-    <li class="active">Profile</li>
-{% endblock %}
 
 {% block content %}
 {{ block.super }}
 
 <fieldset>
   <legend>
-    <h1 class="primary-color">Profile</h1>
+    <h1 class="page-title primary-color">Profile</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
 
-{% include 'assets/render-messages/render-messages.django' %}
+{% include "assets/render-messages/render-messages.django" %}
 
 {% if user.is_authenticated %}
   <!-- DEMO -->
@@ -33,7 +33,7 @@
 
 {% if events %}
   <p>Your registrations:</p>
-  {% include 'assets/events-list/events-list.django' %}
+  {% include "assets/events-list/events-list.django" %}
 {% endif %}
 
 {% endblock content %}
