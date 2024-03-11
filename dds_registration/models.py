@@ -3,6 +3,7 @@ import random
 from functools import partial
 from datetime import date
 
+from django import forms
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -25,30 +26,12 @@ random_code_length = 8
 
 
 def random_code(length=random_code_length):
-    # TODO: To use uuid?
     return ''.join(random.choices(alphabet, k=length))
 
 
-class AppUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='app_user')
-    email_verified = models.BooleanField(default=False)
-
-    #  created_at = models.DateTimeField(auto_now_add=True)
-    #  updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        # fmt: off
-        info = ' '.join(filter(None, map(str, [
-            self.user.get_full_name(),
-            '<{}>'.format(self.user.email) if self.user.email else None,
-        ])))
-        # fmt: on
-        return info
-
-
 class Event(models.Model):
-    code = models.CharField(max_length=random_code_length, unique=True, default=random_code)
-    title = models.CharField(max_length=80, unique=True, null=False, blank=False)
+    code = models.TextField(unique=True, default=random_code)   # TODO: Show as an input
+    title = models.TextField(unique=True, null=False, blank=False)  # TODO: Show as an input
     description = models.TextField(blank=True)
     registration_open = models.DateField(auto_now=True, help_text='Date registration opens')
     registration_close = models.DateField(blank=True, null=True, help_text='Date registration closes')
@@ -56,21 +39,10 @@ class Event(models.Model):
         default=0,  # pyright: ignore [reportArgumentType]
         help_text='Maximum number of participants to this event (0 = no limit)',
     )
-    currency = models.CharField(max_length=8, null=True, blank=True)
+    currency = models.TextField(null=True, blank=True)  # TODO: Show as an input
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    #  # UNUSED
-    #  owner = models.ForeignKey(
-    #      settings.AUTH_USER_MODEL,
-    #      related_name="events_owned",
-    #      on_delete=models.CASCADE,
-    #      help_text="Main organiser",
-    #  )
-    #  organisers = models.ManyToManyField(
-    #      settings.AUTH_USER_MODEL, blank=True, related_name="events_organised"
-    #  )
 
     def get_active_registrations(self):
         """
@@ -108,7 +80,7 @@ class Event(models.Model):
 
 class RegistrationOption(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    item = models.CharField(max_length=40, null=False, blank=False)
+    item = models.TextField(null=False, blank=False)  # TODO: Show as an input
     price = models.FloatField(default=0, null=False)
     add_on = models.BooleanField(default=False)
 
@@ -122,8 +94,11 @@ class RegistrationOption(models.Model):
         return info
 
 
-# Ex `Booking`
 class Registration(models.Model):
+    """
+    Ex `Booking` class in OneEvent
+    """
+
     event = models.ForeignKey(Event, related_name='registrations', on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
     options = models.ManyToManyField(RegistrationOption)
@@ -144,11 +119,6 @@ class Registration(models.Model):
             self.created_at.strftime(dateTimeFormat) if self.created_at else None,
         ])))
         # fmt: on
-        #  info = " (" + info + ")" if info else None
-        #  info = " ".join(list(filter(None, [
-        #      str(self.id),
-        #      info,
-        #  ])))
         return info
 
 
@@ -172,7 +142,7 @@ class Message(models.Model):
 
 class DiscountCode(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    code = models.CharField(max_length=4, default=partial(random_code, length=4))
+    code = models.TextField(default=partial(random_code, length=4))  # TODO: Show as an input
     # pyright: ignore [reportArgumentType]
     only_registration = models.BooleanField(default=True)
     percentage = models.IntegerField(help_text='Value as a percentage, like 10', blank=True, null=True)

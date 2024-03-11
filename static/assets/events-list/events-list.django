@@ -1,0 +1,30 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module events-list.django
+  @changed 2024.03.11, 01:03
+-->
+
+{% for event_info in events %}
+
+  <p>Event: {{ event_info.event.title }}</p>
+
+  {% if event_info.event.max_participants > 0 %}
+  <p>Participants: {{event_info.event.get_active_registrations.count}}/{{event_info.event.max_participants}}</p>
+  {% endif %}
+
+  {% if event_info.event.registration_open %}
+  <p>Registration opens: {{event_info.event.registration_open}}</p>
+  {% endif %}
+
+  {% if event_info.event.registration_close %}
+  <p>Registration closes: {{event_info.event.registration_close}}</p>
+  {% endif %}
+
+  {% if event_info.registration %}
+  <p>Registration: +</p>
+  {% endif %}
+
+  {# TODO: Render events/registration well #}
+
+{% endfor %}
+

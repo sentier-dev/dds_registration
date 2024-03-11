@@ -11,20 +11,25 @@
   &.navbar-dark.navbar-primary {
     @include themeBackgroundBefore;
   }
+  .dropdown-menu#user-menu {
+    // Position dropdown popup relative to the right screen side (as the menu is positioned to the right)
+    right: 0;
+    left: auto;
+  }
   @media (max-width: 400px) {
     .site-name {
       display: none;
     }
   }
   @media (min-width: $navbarCollapse) {
-    // .container-fluid {
-    //   flex-wrap: nowrap;
-    // }
     .navbar-brand {
       flex: 1;
     }
     .collapse.navbar-collapse {
       flex: 0;
     }
+  }
+  .nav-link {
+    white-space: nowrap;
   }
 }

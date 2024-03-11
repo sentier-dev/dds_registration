@@ -1,12 +1,13 @@
+# @module views
+# @changed 2024.03.11, 13:24
+
 # from django.conf import settings
-from multiprocessing.managers import BaseManager
 from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.sites.models import Site
-from django.db.models.query_utils import Q
+from django.contrib.sites.models import Site  # To access site properties
+from django.db.models.query_utils import Q  # To use for objects querying
 from django.http import HttpRequest, HttpResponse, Http404
-
 from django.shortcuts import render, redirect, get_object_or_404
 
 # from django.template.defaultfilters import slugify
@@ -16,7 +17,14 @@ from django.views.generic import TemplateView
 import traceback
 import logging
 
-from .models import Event, Registration, RegistrationOption, Message, DiscountCode, GroupDiscount
+from .models import (
+    Event,
+    Registration,
+    # RegistrationOption,
+    # Message,
+    # DiscountCode,
+    # GroupDiscount,
+)
 
 
 LOG = logging.getLogger(__name__)
@@ -29,9 +37,10 @@ def index(request: HttpRequest):
         return render(request, 'landing.html.django')
 
 
-# From OneEvent
-def events_list(request: HttpRequest, events: list[Event], context: dict, show_archived=False):
-    context['events'] = []
+def get_events_list(request: HttpRequest, events: list[Event], show_archived=False):
+    if not events or not events.count():
+        return None
+    result = []
     for evt in events:
         event_info = {'event': evt, 'registration': None}
         #  # Hide events that the user can not list
@@ -45,6 +54,7 @@ def events_list(request: HttpRequest, events: list[Event], context: dict, show_a
                 #  event_info["user_can_cancel"] = user_registration.user_can_cancel(
                 #      request.user
                 #  )
+                result.append(event_info)
             except Registration.DoesNotExist:
                 pass
             except Exception as err:
@@ -59,34 +69,21 @@ def events_list(request: HttpRequest, events: list[Event], context: dict, show_a
             #  event_info["user_can_book"] = evt.user_can_book(request.user)
             #  event_info["user_can_update"] = evt.user_can_update(request.user)
             #  event_info["price_for_user"] = evt.user_price(request.user)
-        context['events'].append(event_info)
-    return render(request, 'events_list.html.django', context)
-
-
-# From OneEvent
-@login_required
-def events_list_mine(request: HttpRequest):
-    # We don't have personalities in event objects
-    context = {'events_shown': 'mine'}
-    #  query = Q(registrations__person=request.user,
-    #            #  registrations__cancelledOn=None,
-    #            )
-    # query = query | Q(organisers=request.user)
-    # query = query | Q(owner=request.user)
-    events = Event.objects.all()  # filter(query).distinct()
-    if events.count() > 0:
-        return events_list(request, events, context)
-    else:
-        messages.debug(request, 'You have no event yet')
-        return redirect('events_list_all')
+    return result
 
 
 @login_required
 def profile(request: HttpRequest):
     if not request.user.is_authenticated:
         return redirect('index')
-
-    return render(request, 'profile.html.django')
+    context = {'events_shown': 'mine'}
+    events = Event.objects.all()  # filter(query).distinct()
+    events_list = get_events_list(request, events)
+    if events_list and len(events_list):
+        context['events'] = events_list
+    # else:
+    #     messages.info(request, "You don't have any events yet")
+    return render(request, 'profile.html.django', context)
 
 
 def events_view(request: HttpRequest, code):

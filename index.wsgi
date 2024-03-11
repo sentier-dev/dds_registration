@@ -29,8 +29,9 @@ sys.path.insert(1, rootPath)
 
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "default_settings")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'default_settings')
 from django.core.wsgi import get_wsgi_application
+
 try:
     application = get_wsgi_application()
 except RuntimeError:

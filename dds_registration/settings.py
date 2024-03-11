@@ -14,6 +14,10 @@ from pathlib import Path
 import posixpath
 import re
 import sys
+import environ
+
+
+# App name
 
 APP_NAME = 'dds_registration'  # Root app name
 
@@ -33,7 +37,24 @@ RUNNING_MOD_WSGI = len(sys.argv) > 0 and sys.argv[0] == 'mod_wsgi'
 LOCAL_RUN = RUNNING_MANAGE_PY and not RUNNING_MOD_WSGI
 LOCAL = LOCAL_RUN and RUNNING_DEVSERVER
 DEV = LOCAL
-DEBUG = True  # LOCAL  # and DEV
+
+# Env variables...
+
+env = environ.Env(
+    # @see https://django-environ.readthedocs.io
+    DEBUG=(bool, True),  # LOCAL  # and DEV
+    SECRET_KEY=(
+        str, 'django-insecure-1d*alw^8-nya9h#xhfjqe*5%w8!o7vy8!211ez++h!p_*nm%21'),
+    SENDGRID_API_KEY=(str, ''),
+)
+environ.Env.read_env(posixpath.join(BASE_DIR, '.env'))
+
+# SECURITY WARNING: keep the secret key used in production secret!
+# NOTE: Set your `SECRET_KEY` in `.env` (see `.env.SAMPLE` for example)
+SECRET_KEY = env('SECRET_KEY')
+
+# NOTE: Set your `DEBUG` in `.env` (see `.env.SAMPLE` for example)
+DEBUG = env('DEBUG')
 
 # Use filters to preprocess assets' sources (like sass, see `COMPRESS_PRECOMPILERS` section below)
 USE_DJANGO_PREPROCESSORS = LOCAL and True
@@ -87,9 +108,6 @@ COMPRESS_PRECOMPILERS = (
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1d*alw^8-nya9h#xhfjqe*5%w8!o7vy8!211ez++h!p_*nm%21'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 
 ALLOWED_HOSTS = []
@@ -110,8 +128,10 @@ INSTALLED_APPS = [
     'compressor',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_registration',
     #  'django_extensions',
     #  'debug_toolbar',
+    #  'accounts', # Custom accounts extensions (unused in favour of django_registration)
     APP_NAME,
 ]
 
@@ -204,6 +224,24 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 #  AUTH_PROFILE_MODULE = APP_NAME + '.User'
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'index'
+
+# Registration
+# @see https://django-registration.readthedocs.io
+
+ACCOUNT_ACTIVATION_DAYS = 7   # One-week activation window
+
+# Sending emails with sendgrid
+
+# @see https://docs.sendgrid.com/for-developers/sending-email/django
+DEFAULT_FROM_EMAIL = 'noreply@d-d-s.ch'
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey'   # this is exactly the value 'apikey'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+# NOTE: Set your `SENDGRID_API_KEY` in `.env` (see `.env.SAMPLE` for example)
+EMAIL_HOST_PASSWORD = env('SENDGRID_API_KEY')
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -288,11 +326,11 @@ TIMEOUT = 30 if DEBUG else 300  # Short value for debug time
 # Site config
 
 # TODO: Use `Site.objects.get_current().name` (via `from django.contrib.sites.models import Site`) as site title.
-SITE_NAME = 'DDS Registration'
+SITE_NAME = 'DdS Registration'
 SITE_TITLE = SITE_NAME
 SITE_DESCRIPTION = SITE_NAME
 SITE_KEYWORDS = """
-DDS
+DdS
 Registration
 application
 """

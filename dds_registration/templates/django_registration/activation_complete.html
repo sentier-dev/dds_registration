@@ -1,0 +1,27 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module activation_complete.html
+  @changed 2024.03.11, 18:47
+-->
+
+{% extends "base-regular.html.django" %}
+
+{% block title %}Account Activated — {{ block.super }}{% endblock %}
+
+{% block content %}
+<p>
+    Your account is now activated.
+    {% if not user.is_authenticated %}
+      You can <a href="{% url 'login' %}">log in</a>.
+    {% endif %}
+</p>
+{% endblock %}
+
+
+{% comment %}
+**registration/activation_complete.html**
+
+Used after successful account activation. This template has no context
+variables of its own, and should simply inform the user that their
+account is now active.
+{% endcomment %}

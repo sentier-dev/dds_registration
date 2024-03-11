@@ -1,25 +1,30 @@
 {# ex: set ft=htmldjango : #}
 <!--
   @module menu-main.django
-  @changed 2024.03.08, 20:09
+  @changed 2024.03.11, 14:12
 -->
 
-<li class="nav-item"><a class="nav-link active" href="/components-demo">Features</a></li>
+<li class="nav-item"><a class="nav-link active" href="{% url 'components_demo' %}">Features</a></li>
+{# djlint:off #}
 <li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a></li>
 <li class="nav-item"><a class="nav-link" href="/faq">FAQ</a></li>
-<li class="nav-item"><a class="nav-link" href="/about">About</a></li>
-{% comment %}
-  UNUSED: Could be used as a template
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-      Options
-    </a>
-    <ul class="dropdown-menu">
-      <li><a class="dropdown-item" href="#">Action</a></li>
-      <li><a class="dropdown-item" href="#">Another action</a></li>
-      <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item" href="#">Something else here</a></li>
-    </ul>
-  </li>
-  <li class="nav-item"><a class="nav-link disabled">Disabled</a></li>
-{% endcomment %}
+{# djlint:on #}
+{% if user.is_authenticated %}
+<li class="nav-item dropdown">
+  <span class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-person-fill"></i> {{ user.get_full_name|default:user.username }}
+  </span>
+  <form id="menu-logout-form" action="{% url 'logout' %}" method="post">
+  {% csrf_token %}
+  <ul class="dropdown-menu" id="user-menu">
+    <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="{% url 'logout' %}" onClick="document.getElementById('menu-logout-form').submit(); return false">Logout</a></li>
+  </ul>
+  </form>
+</li>
+{% else %}
+<li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'django_registration_register' %}">Signup</a></li>
+{% endif %}
+
