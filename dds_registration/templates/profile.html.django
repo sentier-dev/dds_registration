@@ -34,6 +34,10 @@
 {% if events %}
   <p>Your registrations:</p>
   {% include "assets/events-list/events-list.django" %}
+{% else %}
+  <p class="dimmed-info">
+    You don't have any events yet.
+  </p>
 {% endif %}
 
 {% endblock content %}

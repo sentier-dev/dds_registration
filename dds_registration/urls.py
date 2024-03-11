@@ -17,11 +17,18 @@ urlpatterns = [
     # Account urls.
     #  path('accounts/', include('accounts.urls')),  # Our own signup extension
     path(
-        'accounts/', include('django_registration.backends.activation.urls')
+        # @see https://django-registration.readthedocs.io/en/latest/quickstart.html#setting-up-urls
+        # The following URL names are defined by django_registration.backends.activation.urls:
+        # - django_registrater is the account-registration view.
+        # - django_registration_complete is the post-registration success message.
+        # - django_registration_activate is the account-activation view.
+        # - django_registration_activation_complete is the post-activation success message.
+        # - django_registration_disallowed is a message indicating registration is not currently permitted.
+        'accounts/',
+        include('django_registration.backends.activation.urls'),
     ),  # django_registration: https://django-registration.readthedocs.io
     path('accounts/', include('django.contrib.auth.urls')),
     path('profile', views.profile, name='profile'),
-    path('events/mine', views.events_list_mine, name='events_list_mine'),
     path('event/<str:code>', views.events_view, name='event_view'),
     # Demo pages...
     path('components-demo', views.components_demo, name='components_demo'),

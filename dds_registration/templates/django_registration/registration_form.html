@@ -1,7 +1,7 @@
 {# ex: set ft=htmldjango : #}
 <!--
-  @module signup.html
-  @changed 2024.03.11, 01:26
+  @module registration_form.html
+  @changed 2024.03.11, 17:03
 -->
 
 {% extends "base-regular.html.django" %}
@@ -17,4 +17,4 @@
   <input class="btn btn-primary" type="submit" value="Sign Up" />
   <input type="hidden" name="next" value="{{ next }}" />
 </form>
-{% endblock %}
+{% endblock content %}

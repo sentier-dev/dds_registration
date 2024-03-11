@@ -1,17 +1,13 @@
 # @module views
 # @changed 2024.03.11, 13:24
 
-# TODO 2024.03.11, 13:26 -- Use helper to detect account 'email verified' status and to redirect to verification code enter page if not verified yet.
-
 # from django.conf import settings
-#  from multiprocessing.managers import BaseManager
 from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site  # To access site properties
 from django.db.models.query_utils import Q  # To use for objects querying
 from django.http import HttpRequest, HttpResponse, Http404
-
 from django.shortcuts import render, redirect, get_object_or_404
 
 # from django.template.defaultfilters import slugify
@@ -77,35 +73,16 @@ def get_events_list(request: HttpRequest, events: list[Event], show_archived=Fal
 
 
 @login_required
-def events_list_mine(request: HttpRequest):
-    # We don't have personalities in event objects
-    context = {'events_shown': 'mine'}
-    #  query = Q(registrations__person=request.user,
-    #            #  registrations__cancelledOn=None,
-    #            )
-    # query = query | Q(organisers=request.user)
-    # query = query | Q(owner=request.user)
-    events = Event.objects.all()  # filter(query).distinct()
-    events_list = get_events_list(request, events)
-    if not events_list or not len(events_list):
-        messages.info(request, "You don't have any events yet")
-    else:
-        context['events'] = events_list
-    return render(request, 'events_list.html.django', context)
-
-
-@login_required
 def profile(request: HttpRequest):
     if not request.user.is_authenticated:
         return redirect('index')
     context = {'events_shown': 'mine'}
     events = Event.objects.all()  # filter(query).distinct()
     events_list = get_events_list(request, events)
-    if not events_list or not len(events_list):
-        messages.info(request, "You don't have any events yet")
-    else:
-        #  messages.success(request, 'Already has events: {}'.format(len(events_list)))
+    if events_list and len(events_list):
         context['events'] = events_list
+    # else:
+    #     messages.info(request, "You don't have any events yet")
     return render(request, 'profile.html.django', context)
 
 

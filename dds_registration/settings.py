@@ -49,11 +49,11 @@ env = environ.Env(
 environ.Env.read_env(posixpath.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# NOTE: Set your `SECRET_KEY` in `.env` (see `.env.SAMPLE` for example)
 SECRET_KEY = env('SECRET_KEY')
 
+# NOTE: Set your `DEBUG` in `.env` (see `.env.SAMPLE` for example)
 DEBUG = env('DEBUG')
-
-SENDGRID_API_KEY = env('SENDGRID_API_KEY')
 
 # Use filters to preprocess assets' sources (like sass, see `COMPRESS_PRECOMPILERS` section below)
 USE_DJANGO_PREPROCESSORS = LOCAL and True
@@ -130,7 +130,7 @@ INSTALLED_APPS = [
     'django_registration',
     #  'django_extensions',
     #  'debug_toolbar',
-    'accounts',
+    #  'accounts', # Custom accounts extensions (unused in favour of django_registration)
     APP_NAME,
 ]
 
@@ -231,6 +231,16 @@ LOGOUT_REDIRECT_URL = 'index'
 
 ACCOUNT_ACTIVATION_DAYS = 7   # One-week activation window
 
+# Sending emails with sendgrid
+
+# @see https://docs.sendgrid.com/for-developers/sending-email/django
+DEFAULT_FROM_EMAIL = 'noreply@d-d-s.ch'
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey'   # this is exactly the value 'apikey'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+# NOTE: Set your `SENDGRID_API_KEY` in `.env` (see `.env.SAMPLE` for example)
+EMAIL_HOST_PASSWORD = env('SENDGRID_API_KEY')
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

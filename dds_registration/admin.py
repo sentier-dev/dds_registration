@@ -9,7 +9,7 @@ from .models import (
     Message,
     Registration,
     RegistrationOption,
-    AppUser,
+    #  AppUser,
 )
 
 
@@ -19,33 +19,31 @@ admin.site.register(GroupDiscount)
 admin.site.register(Message)
 
 
-# Define an inline admin descriptor for AppUser model which acts a bit like a singleton
-class AppUserInline(admin.StackedInline):
-    model = AppUser
-    can_delete = False
-    #  verbose_name_plural = "Users"
+#  # Define an inline admin descriptor for AppUser model which acts a bit like a singleton
+#  class AppUserInline(admin.StackedInline):
+#      model = AppUser
+#      can_delete = False
+#      #  verbose_name_plural = "Users"
 
 
 # Define a new User admin
 class UserAdmin(BaseUserAdmin):
-    inlines = [AppUserInline]
+    #  inlines = [AppUserInline]
     list_display = (
         'username',
         'email',
         'first_name',
         'last_name',
-        'get_email_verified',
+        #  'get_email_verified',
         'is_staff',
     )
 
-    def get_email_verified(self, user):
-        return user.app_user.email_verified
-
-    get_email_verified.short_description = 'Verified'
-    get_email_verified.boolean = True
-
-    def get_app_user(self, user):
-        return user.app_user
+    #  def get_email_verified(self, user):
+    #      return user.app_user.email_verified
+    #  get_email_verified.short_description = 'Verified'
+    #  get_email_verified.boolean = True
+    #  def get_app_user(self, user):
+    #      return user.app_user
 
 
 admin.site.unregister(User)

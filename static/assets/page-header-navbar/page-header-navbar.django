@@ -11,7 +11,7 @@
 <nav class="page-header-navbar navbar fixed-top -bg-dark navbar-dark navbar-primary navbar-expand-lg">
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'index' %}">
-      <img src="{% static 'images/dds-logo/svg/Green Logo.svg' %}" width="auto" height="50" alt="DDS Logo" />
+      <img src="{% static 'images/dds-logo/svg/Beige Logo.svg' %}" width="auto" height="50" alt="DDS Logo" />
       <span class="site-name">
         {{ settings.SITE_NAME }}
       </span>
