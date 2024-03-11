@@ -1,10 +1,15 @@
+# @module views
+# @changed 2024.03.11, 13:24
+
+# TODO 2024.03.11, 13:26 -- Use helper to detect account 'email verified' status and to redirect to verification code enter page if not verified yet.
+
 # from django.conf import settings
-from multiprocessing.managers import BaseManager
+#  from multiprocessing.managers import BaseManager
 from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.sites.models import Site
-from django.db.models.query_utils import Q
+from django.contrib.sites.models import Site  # To access site properties
+from django.db.models.query_utils import Q  # To use for objects querying
 from django.http import HttpRequest, HttpResponse, Http404
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -16,7 +21,14 @@ from django.views.generic import TemplateView
 import traceback
 import logging
 
-from .models import Event, Registration, RegistrationOption, Message, DiscountCode, GroupDiscount
+from .models import (
+    Event,
+    Registration,
+    # RegistrationOption,
+    # Message,
+    # DiscountCode,
+    # GroupDiscount,
+)
 
 
 LOG = logging.getLogger(__name__)
