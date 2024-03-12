@@ -11,6 +11,8 @@
 {% block content %}
 {{ block.super }}
 
-<p>TODO: Landing</p>
+{% include "assets/render-messages/render-messages.django" %}
+
+<p>TODO: Landing page content</p>
 
 {% endblock content %}
