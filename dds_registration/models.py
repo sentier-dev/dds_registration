@@ -30,8 +30,8 @@ def random_code(length=random_code_length):
 
 
 class Event(models.Model):
-    code = models.TextField(unique=True, default=random_code)   # TODO: Show as an input
-    title = models.TextField(unique=True, null=False, blank=False)  # TODO: Show as an input
+    code = models.TextField(unique=True, default=random_code)   # Show as an input
+    title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
     description = models.TextField(blank=True)
     registration_open = models.DateField(auto_now=True, help_text='Date registration opens')
     registration_close = models.DateField(blank=True, null=True, help_text='Date registration closes')
@@ -39,7 +39,7 @@ class Event(models.Model):
         default=0,  # pyright: ignore [reportArgumentType]
         help_text='Maximum number of participants to this event (0 = no limit)',
     )
-    currency = models.TextField(null=True, blank=True)  # TODO: Show as an input
+    currency = models.TextField(null=True, blank=True)  # Show as an input
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -63,6 +63,7 @@ class Event(models.Model):
         return (today >= self.registration_open) and (not self.registration_close or today <= self.registration_close)
 
     def url(self):
+        # ???
         reverse('event_view', args=(self.unique_code,))
 
     def __str__(self):
@@ -80,7 +81,7 @@ class Event(models.Model):
 
 class RegistrationOption(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    item = models.TextField(null=False, blank=False)  # TODO: Show as an input
+    item = models.TextField(null=False, blank=False)  # Show as an input
     price = models.FloatField(default=0, null=False)
     add_on = models.BooleanField(default=False)
 
@@ -104,6 +105,14 @@ class Registration(models.Model):
     options = models.ManyToManyField(RegistrationOption)
     paid = models.BooleanField(default=False)
     paid_date = models.DateTimeField(blank=True, null=True)
+
+    # Payment method:
+    PAYMENT_METHODS = [
+        ('STRIPE', 'Stripe'),
+        ('INVOICE', 'Invoice'),
+    ]
+    #  payment_method = models.CharField(max_length=15, choices=PAYMENT_METHODS, default="STRIPE")
+    payment_method = models.TextField(choices=PAYMENT_METHODS, default='STRIPE')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -142,7 +151,7 @@ class Message(models.Model):
 
 class DiscountCode(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    code = models.TextField(default=partial(random_code, length=4))  # TODO: Show as an input
+    code = models.TextField(default=partial(random_code, length=4))  # Show as an input
     # pyright: ignore [reportArgumentType]
     only_registration = models.BooleanField(default=True)
     percentage = models.IntegerField(help_text='Value as a percentage, like 10', blank=True, null=True)

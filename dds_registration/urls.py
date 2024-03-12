@@ -29,7 +29,8 @@ urlpatterns = [
     ),  # django_registration: https://django-registration.readthedocs.io
     path('accounts/', include('django.contrib.auth.urls')),
     path('profile', views.profile, name='profile'),
-    path('event/<str:code>', views.events_view, name='event_view'),
+    #  path('event/<str:code>', views.events_view, name='event_view'), # ???
+    path('event/<str:event_code>/registration', views.event_registration, name='event_registration'),
     # Demo pages...
     path('components-demo', views.components_demo, name='components_demo'),
     # Service pages...
