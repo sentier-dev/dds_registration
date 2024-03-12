@@ -10,6 +10,13 @@
 
 {% block content %}
 
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Login</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %}

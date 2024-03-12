@@ -9,9 +9,21 @@
 {% block title %}Activation email sent — {{ block.super }}{% endblock %}
 
 {% block content %}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Activation email sent</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
 <p>
-  Please check your email to complete the registration process.
+  We’ve emailed you the activation email.
+  Please check your mail to complete the registration process.
 </p>
+<p>If you don’t receive an email, please make sure you’ve entered the address
+you registered with, and check your spam folder.</p>
+
 {% endblock content %}
 
 

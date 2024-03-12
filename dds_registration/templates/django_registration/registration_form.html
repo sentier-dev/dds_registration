@@ -7,14 +7,23 @@
 {% extends "base-regular.html.django" %}
 {% load crispy_forms_tags %}
 
-{% block title %}Sign Up — {{ block.super }}{% endblock %}
+{% block title %}Sign up — {{ block.super }}{% endblock %}
 
 {% block content %}
-<h2>Sign up</h2>
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Sign up</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
 <form method="post">
   {% csrf_token %}
   {{ form|crispy }}
-  <input class="btn btn-primary" type="submit" value="Sign Up" />
+  <input class="btn btn-primary" type="submit" value="Sign up" />
+  <a class="btn btn-default" href="{% url 'login' %}">Log in</a>
   <input type="hidden" name="next" value="{{ next }}" />
 </form>
+
 {% endblock content %}
