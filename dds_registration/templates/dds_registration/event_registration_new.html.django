@@ -8,14 +8,14 @@
 
 {% load crispy_forms_tags %}
 
-{% block title %}Event registration — {{ block.super }}{% endblock title %}
+{% block title %}Create new event registration — {{ block.super }}{% endblock title %}
 
 {% block content %}
 {{ block.super }}
 
 <fieldset>
   <legend>
-    <h1 class="page-title primary-color">Event registration</h1>
+    <h1 class="page-title primary-color">Create new event registration</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
@@ -23,80 +23,11 @@
 {% include "assets/render-messages/render-messages.django" %}
 
 <form class="data-form" method="post">
-{% csrf_token %}
+  {% csrf_token %}
 
   <input type="hidden" name="event_code" value="{{ event_code }}" />
 
-  <fieldset id="payment_method" class="mb3 form-group">
-    <legend class="mb-3 primary-color">Payment method</legend>
-    {% for method in PAYMENT_METHODS %}
-    {% with id=method.0 name=method.1 %}
-        <div class="mb-2 form-check">
-          <input
-            class="form-check-input"
-            type="radio"
-            name="payment_method"
-            id="payment_method_{{ id }}"
-            value="{{ id }}"
-            {% if id == payment_method %}checked{% endif %}
-          >
-          <label class="form-check-label" for="payment_method_{{ id }}">
-            {{ name }}
-          </label>
-        </div>
-    {% endwith %}
-    {% endfor %}
-  </fieldset>
-
-  <!-- Manual options list (as checkboxes) -->
-  {% if reg_options %}
-    <fieldset id="options_basic" class="mb3 form-group">
-      <legend class="mb-3 primary-color">Options</legend>
-      {% for option in reg_options %}
-        {% if not option.add_on %}
-          <div class="mb-2 form-check">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              id="option_{{ option.id }}"
-              name="checked_option_ids"
-              value="{{ option.id }}"
-              {% if option.id|is_in_list:checked_option_ids %}checked{% endif %}
-            >
-            <label class="form-check-label" for="option_{{ option.id }}">
-              {{ option.item }} {% if option.price %}
-                ({{ option.price }})
-              {% endif %} {% if option.add_on %}
-                 <i class="bi bi-plus-square-fill primary-color"></i>
-              {% endif %}
-            </label>
-          </div>
-        {% endif %}
-      {% endfor %}
-    </fieldset>
-    <fieldset id="options_addons" class="mb3 form-group">
-      <legend class="mb-3 primary-color">Add-ons</legend>
-      {% for option in reg_options %}
-        {% if option.add_on %}
-          <div class="mb-2 form-check">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              id="option_{{ option.id }}"
-              name="checked_option_ids"
-              value="{{ option.id }}"
-              {% if option.id|is_in_list:checked_option_ids %}checked{% endif %}
-            >
-            <label class="form-check-label" for="option_{{ option.id }}">
-              {{ option.item }} {% if option.price %}
-                ({{ option.price }})
-              {% endif %}
-            </label>
-          </div>
-        {% endif %}
-      {% endfor %}
-    </fieldset>
-  {% endif %}
+  {% include "assets/event_registration_form/event_registration_form.django" %}
 
   <fieldset class="mb3 form-group">
     <input class="btn btn-primary" type="submit" value="Save" />

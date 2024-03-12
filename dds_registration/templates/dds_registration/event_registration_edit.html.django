@@ -23,13 +23,11 @@
 {% include "assets/render-messages/render-messages.django" %}
 
 <form class="data-form" method="post">
-{% csrf_token %}
+  {% csrf_token %}
 
   <input type="hidden" name="event_code" value="{{ event_code }}" />
 
-  <fieldset class="mb3 form-group">
-    TODO: Display form
-  </fieldset>
+  {% include "assets/event_registration_form/event_registration_form.django" %}
 
   <fieldset class="mb3 form-group">
     <input class="btn btn-primary" type="submit" value="Save" />

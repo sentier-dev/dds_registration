@@ -53,7 +53,9 @@ class RegistrationAdmin(admin.ModelAdmin):
     list_display = (
         'user_column',
         'event',
+        'payment_method',
         'options_column',
+        'active',
         'paid',
         'created_at',
     )
