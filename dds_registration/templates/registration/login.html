@@ -1,11 +1,12 @@
 {# ex: set ft=htmldjango : #}
+<!--
+  @module XXX
+  @changed 2024.03.12, 21:35
+-->
+
 {% extends "base-regular.html.django" %}
 {% load crispy_forms_tags %}
-
-{% block navbar_breadcrumbs %}
-  <li>Account</li>
-  <li class="active">Login</li>
-{% endblock %}
+{% block title %}Login — {{ block.super }}{% endblock title %}
 
 {% block content %}
 
@@ -14,9 +15,11 @@
 {% endif %}
 
 <form role="form" method="post" action="{% url 'login' %}">
-{% csrf_token %}
+  {% csrf_token %}
   {{ form|crispy }}
   <input class="btn btn-primary" type="submit" value="Login" />
+  <a class="btn btn-default" href="{% url 'django_registration_register' %}">Signup</a>
+  <a class="btn btn-default" href="{% url 'password_reset' %}">Reset password</a>
   <input type="hidden" name="next" value="{{ next }}" />
 </form>
 
