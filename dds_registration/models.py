@@ -14,6 +14,8 @@ from django.contrib.auth.models import (
     # AbstractBaseUser,
 )
 
+#  from django.db.models import Q, UniqueConstraint
+
 from django.db.models.signals import post_save
 
 from core.constants.date_time_formats import dateTimeFormat
@@ -36,7 +38,7 @@ class Event(models.Model):
     registration_open = models.DateField(auto_now=True, help_text='Date registration opens')
     registration_close = models.DateField(blank=True, null=True, help_text='Date registration closes')
     max_participants = models.PositiveIntegerField(
-        default=0,  # pyright: ignore [reportArgumentType]
+        default=0,
         help_text='Maximum number of participants to this event (0 = no limit)',
     )
     currency = models.TextField(null=True, blank=True)  # Show as an input
@@ -48,7 +50,7 @@ class Event(models.Model):
         """
         Return the active registrations
         """
-        return self.registrations.all()  # filter(cancelledOn__isnull=True)
+        return self.registrations.all().filter(active=True)
 
     def __unicode__(self):
         return self.name
@@ -67,15 +69,15 @@ class Event(models.Model):
         reverse('event_view', args=(self.unique_code,))
 
     def __str__(self):
-        # fmt: off
-        info = ', '.join(filter(None, map(str, [
-            ' '.join(filter(None, map(str, [
-                self.title,
-                '({})'.format(self.code) if self.code else None,
-            ]))),
+        name_items = [
+            self.title,
+            '({})'.format(self.code) if self.code else None,
+        ]
+        items = [
+            ' '.join(filter(None, map(str, name_items))),
             self.created_at.strftime(dateTimeFormat) if self.created_at else None,
-        ])))
-        # fmt: on
+        ]
+        info = ', '.join(filter(None, map(str, items)))
         return info
 
 
@@ -86,12 +88,11 @@ class RegistrationOption(models.Model):
     add_on = models.BooleanField(default=False)
 
     def __str__(self):
-        # fmt: off
-        info = ' '.join(filter(None, map(str, [
+        items = [
             self.item,
             '({})'.format(self.price) if self.price else None,
-        ])))
-        # fmt: on
+        ]
+        info = ' '.join(filter(None, map(str, items)))
         return info
 
 
@@ -103,31 +104,38 @@ class Registration(models.Model):
     event = models.ForeignKey(Event, related_name='registrations', on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
     options = models.ManyToManyField(RegistrationOption)
-    paid = models.BooleanField(default=False)
-    paid_date = models.DateTimeField(blank=True, null=True)
 
     # Payment method:
     PAYMENT_METHODS = [
         ('STRIPE', 'Stripe'),
         ('INVOICE', 'Invoice'),
     ]
-    #  payment_method = models.CharField(max_length=15, choices=PAYMENT_METHODS, default="STRIPE")
-    payment_method = models.TextField(choices=PAYMENT_METHODS, default='STRIPE')
+    DEFAULT_PAYMENT_METHOD = 'STRIPE'
+    payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
+
+    paid = models.BooleanField(default=False)
+    paid_date = models.DateTimeField(blank=True, null=True)
+
+    # If the registration has cancelled, the `active` status should be set to false
+    active = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=['event', 'user'], name='Single registration')]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['event', 'user'], condition=models.Q(active=True), name='Single active registration'
+            )
+        ]
 
     def __str__(self):
-        # fmt: off
-        info = ', '.join(filter(None, map(str, [
+        items = [
             self.user.get_full_name(),
             self.user.email,
             self.created_at.strftime(dateTimeFormat) if self.created_at else None,
-        ])))
-        # fmt: on
+        ]
+        info = ', '.join(filter(None, map(str, items)))
         return info
 
 
@@ -139,13 +147,12 @@ class Message(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        # fmt: off
-        info = ', '.join(filter(None, map(str, [
+        items = [
             self.event,
             self.created_at.strftime(dateTimeFormat) if self.created_at else None,
             'emailed' if self.emailed else None,
-        ])))
-        # fmt: on
+        ]
+        info = ', '.join(filter(None, map(str, items)))
         return info
 
 
@@ -158,12 +165,11 @@ class DiscountCode(models.Model):
     absolute = models.FloatField(help_text='Absolute amount of discount', blank=True, null=True)
 
     def __str__(self):
-        # fmt: off
-        info = ', '.join(filter(None, map(str, [
+        items = [
             self.event,
             self.created_at.strftime(dateTimeFormat) if self.created_at else None,
-        ])))
-        # fmt: on
+        ]
+        info = ', '.join(filter(None, map(str, items)))
         return info
 
 
@@ -175,12 +181,11 @@ class GroupDiscount(models.Model):
     absolute = models.FloatField(help_text='Absolute amount of discount', blank=True, null=True)
 
     def __str__(self):
-        # fmt: off
-        info = ', '.join(filter(None, map(str, [
+        items = [
             self.event,
             'registration only' if self.only_registration else None,
             self.percentage,
             self.absolution,
-        ])))
-        # fmt: on
+        ]
+        info = ', '.join(filter(None, map(str, items)))
         return info

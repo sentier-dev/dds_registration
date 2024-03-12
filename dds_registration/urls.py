@@ -30,7 +30,9 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('profile', views.profile, name='profile'),
     #  path('event/<str:code>', views.events_view, name='event_view'), # ???
-    path('event/<str:event_code>/registration', views.event_registration, name='event_registration'),
+    path('event/<str:event_code>/registration/new', views.event_registration_new, name='event_registration_new'),
+    path('event/<str:event_code>/registration/new/success', views.event_registration_new_success, name='event_registration_new_success'),
+    path('event/<str:event_code>/registration/edit', views.event_registration_edit, name='event_registration_edit'),
     # Demo pages...
     path('components-demo', views.components_demo, name='components_demo'),
     # Service pages...

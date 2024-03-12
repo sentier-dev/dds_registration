@@ -1,5 +1,5 @@
 # @module views
-# @changed 2024.03.11, 13:24
+# @changed 2024.03.12, 23:14
 
 # from django.conf import settings
 from django.contrib import messages
@@ -60,14 +60,16 @@ def get_events_list(request: HttpRequest, events: list[Event], show_archived=Fal
             except Registration.DoesNotExist:
                 pass
             except Exception as err:
+                sError = errorToString(err, show_stacktrace=False)
                 sTraceback = str(traceback.format_exc())
-                LOG.error(
-                    'Caught error',
-                    {
-                        'err': err,
-                        'traceback': sTraceback,
-                    },
-                )
+                debug_data = {
+                    'events': events,
+                    'event_info': event_info,
+                    'err': err,
+                    'traceback': sTraceback,
+                }
+                LOG.error('Caught error %s (re-raising): %s', sError, debug_data)
+
             #  event_info["user_can_book"] = evt.user_can_book(request.user)
             #  event_info["user_can_update"] = evt.user_can_update(request.user)
             #  event_info["price_for_user"] = evt.user_price(request.user)
@@ -84,20 +86,21 @@ def profile(request: HttpRequest):
     if events_list and len(events_list):
         context['events'] = events_list
     # else:
-    #     messages.info(request, "You don't have any events yet")
+    #     messages.info(request, "You don't have any registrations yet")
     return render(request, 'dds_registration/profile.html.django', context)
 
 
 @login_required
-def event_registration(request: HttpRequest, event_code: str):
+def event_registration_new(request: HttpRequest, event_code: str):
     user = request.user
     if not user.is_authenticated:
         return redirect('index')
     event = None
     reg_options = None
     checked_option_ids = []  # Will be got from post request, see below
+    payment_method = Registration.DEFAULT_PAYMENT_METHOD
     # Is data ready to save
-    data_ok = False
+    data_ready = False
 
     # Try to get event object by code...
     try:
@@ -116,18 +119,18 @@ def event_registration(request: HttpRequest, event_code: str):
         # Redirect to profile page with error messages (see above)
         return redirect('profile')
 
-    # TODO: Check if any registrations are existed for this event and user and go to the next stage with a message text?
-    # Try to find rgistrations for this event...
+    # Try to find active registrations for this event (prevent constrain exception)...
     try:
-        regs = Registration.objects.filter(event=event)
+        # TODO: Go to the next stage with a message text?
+        regs = Registration.objects.filter(event=event, active=True)
         if len(regs):
-            msg_text = 'You already have a registration for this event'
+            msg_text = 'The registration for this event already exists'
             debug_data = {
                 'event_code': event_code,
             }
-            LOG.info('Message: %s (redirecting to profile): %s', msg_text, debug_data)
+            LOG.info('%s (redirecting): %s', msg_text, debug_data)
             messages.info(request, msg_text)
-            return redirect('profile')
+            return redirect('event_registration_new_success', event_code=event_code)
     except Exception as err:
         error_text = 'Got error while tried to check existed registrations for event "{}"'.format(event_code)
         messages.error(request, error_text)
@@ -162,6 +165,9 @@ def event_registration(request: HttpRequest, event_code: str):
     # If request has posted form data...
     has_post_data = request.method == 'POST'
     if has_post_data:
+        # Get payment method...
+        if 'payment_method' in request.POST:
+            payment_method = request.POST.get('payment_method')
         # Retrieve new options list from the post data...
         if 'checked_option_ids' in request.POST:
             new_checked_option_ids = request.POST.getlist('checked_option_ids')
@@ -174,14 +180,16 @@ def event_registration(request: HttpRequest, event_code: str):
         }
         LOG.debug('Post data: %s', debug_data)
         # Allow form save
-        data_ok = True
+        data_ready = True
+        return redirect('event_registration_new_success', event_code=event_code)
 
+    # Final step: prepare data, save created registration, render form...
     try:
         reg_options_basic = reg_options.filter(add_on=False)
         reg_options_basic_ids = list(map(lambda item: item.id, reg_options_basic))
         reg_options_basic_checked_ids = list(set(checked_option_ids) & set(reg_options_basic_ids))
         has_reg_options_basic_checked = bool(len(reg_options_basic_checked_ids))
-        # NOTE: It's required to have at least one checked basic option
+        # NOTE: It's required to have at least one checked basic option!
         if not has_reg_options_basic_checked:
             # Continue form edit and show message
             error_text = 'At least one basic option should be selected'
@@ -200,7 +208,7 @@ def event_registration(request: HttpRequest, event_code: str):
             if has_post_data:
                 # If had user data posted then show an error mnessgae...
                 messages.warning(request, error_text)
-            data_ok = False
+            data_ready = False
         reg_options_addons = reg_options.filter(add_on=True)
         context = {
             'event_code': event_code,
@@ -212,26 +220,32 @@ def event_registration(request: HttpRequest, event_code: str):
             'has_reg_options_basic_checked': has_reg_options_basic_checked,
             'reg_options_addons': reg_options_addons,
             'checked_option_ids': checked_option_ids,
-            'data_ok': data_ok,
+            'PAYMENT_METHODS': Registration.PAYMENT_METHODS,
+            'payment_method': payment_method,
+            'data_ready': data_ready,
         }
-        # If data_ok: save data and go to the next stage
-        if data_ok:
-            # TODO: If data_ok: save data and go to the next stage
+        # If data_ready: save data and go to the next stage
+        if data_ready:
+            # TODO: If data_ready: save data and go to the next stage
             options = RegistrationOption.objects.filter(id__in=checked_option_ids)
             reg = Registration()
             reg.event = event
             reg.user = user
-            reg.save()
+            reg.payment_method = payment_method
+            reg.save()  # Save object before set many-to-many relations
             reg.options.set(options)
             debug_data = {
                 'options': options,
                 'checked_option_ids': checked_option_ids,
+                'payment_method': payment_method,
             }
             LOG.debug('Creating a registration: %s', debug_data)
-            # reg.save()
-            # TODO: Redirect to the next stage?
+            # TODO: Send a message
+            # Redirect to the success message page
+            return redirect('event_registration_new_success', event_code=event_code)
+            # reg.save() # Do save again?
         LOG.debug('Rendering with context: %s', context)
-        return render(request, 'dds_registration/event_registration.html.django', context)
+        return render(request, 'dds_registration/event_registration_new.html.django', context)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())
@@ -242,6 +256,65 @@ def event_registration(request: HttpRequest, event_code: str):
         }
         LOG.error('Caught error %s (re-raising): %s', sError, debug_data)
         raise err
+
+
+@login_required
+def event_registration_edit(request: HttpRequest, event_code: str):
+    user = request.user
+    if not user.is_authenticated:
+        return redirect('index')
+
+    # Try to get event object by code...
+    try:
+        event = Event.objects.get(code=event_code)
+    except Exception as err:
+        error_text = 'Not found event "{}"'.format(event_code)
+        messages.error(request, error_text)
+        #  sError = errors.toString(err, show_stacktrace=False)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            'event_code': event_code,
+            'err': err,
+            'traceback': sTraceback,
+        }
+        LOG.error('%s (redirecting to profile): %s', error_text, debug_data)
+        # Redirect to profile page with error messages (see above)
+        return redirect('profile')
+
+    context = {
+        'event': event,
+    }
+    return render(request, 'dds_registration/event_registration_edit.html.django', context)
+
+
+@login_required
+def event_registration_new_success(request: HttpRequest, event_code: str):
+    user = request.user
+    if not user.is_authenticated:
+        return redirect('index')
+
+    # Try to get event object by code...
+    try:
+        event = Event.objects.get(code=event_code)
+    except Exception as err:
+        error_text = 'Not found event "{}"'.format(event_code)
+        messages.error(request, error_text)
+        #  sError = errors.toString(err, show_stacktrace=False)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            'event_code': event_code,
+            'err': err,
+            'traceback': sTraceback,
+        }
+        LOG.error('%s (redirecting to profile): %s', error_text, debug_data)
+        # Redirect to profile page with error messages (see above)
+        return redirect('profile')
+
+    context = {
+        'event_code': event_code,
+        'event': event,
+    }
+    return render(request, 'dds_registration/event_registration_new_success.html.django', context)
 
 
 def components_demo(request: HttpRequest):
