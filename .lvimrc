@@ -1,0 +1,13 @@
+" vim local configuration file
+" @changed 2024.03.12, 18:49
+
+" Execute once...
+if !exists('g:lvmrc_called')
+  " Add exclusions for Ctrl-P lookup...
+
+  " Ignore vendor/static files (add pattern to the end of exclusions list)...
+  let g:ctrlp_custom_ignore['dir'] = substitute(g:ctrlp_custom_ignore['dir'], ')$', '|static[\\/]vendor$)', '')
+  " NOTE: It seems that this code runs for each file
+
+  let g:lvmrc_called = 1
+endif
