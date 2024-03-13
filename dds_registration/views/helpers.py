@@ -271,8 +271,40 @@ def event_registration_form(
     return render(request, form_template, context)
 
 
+def show_registration_form_success(request: HttpRequest, event_code: str, template: str):
+    user = request.user
+    if not user.is_authenticated:
+        return redirect('index')
+
+    # TODO: To check if active registration is present?
+
+    # Try to get event object by code...
+    try:
+        event = Event.objects.get(code=event_code)
+    except Exception as err:
+        error_text = 'Not found event "{}"'.format(event_code)
+        messages.error(request, error_text)
+        #  sError = errors.toString(err, show_stacktrace=False)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            'event_code': event_code,
+            'err': err,
+            'traceback': sTraceback,
+        }
+        LOG.error('%s (redirecting to profile): %s', error_text, debug_data)
+        # Redirect to profile page with error messages (see above)
+        return redirect('profile')
+
+    context = {
+        'event_code': event_code,
+        'event': event,
+    }
+    return render(request, template, context)
+
+
 __all__ = [
     get_events_list,
     get_event_registration_form_context,
     event_registration_form,
+    show_registration_form_success,
 ]
