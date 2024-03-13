@@ -1,0 +1,27 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module event_registration_invoice.html.django
+  @changed 2024.03.13, 18:05
+-->
+
+{% extends "base-regular.html.django" %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}TODO: Invoice — {{ block.super }}{% endblock title %}
+
+{% block content %}
+{{ block.super }}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">TODO: Invoice</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+{% include "assets/render-messages/render-messages.django" %}
+
+<p>Here comes invoice pdf for the event {{ event.title }}...</p>
+
+{% endblock content %}

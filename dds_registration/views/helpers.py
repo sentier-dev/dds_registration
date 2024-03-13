@@ -5,8 +5,11 @@ from django.contrib import messages
 
 from django.http import HttpRequest
 from django.shortcuts import render, redirect
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.conf import settings
 
-
+from functools import reduce
 import traceback
 import logging
 
@@ -74,7 +77,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     except Exception as err:
         error_text = 'Not found event code "{}"'.format(event_code)
         messages.error(request, error_text)
-        #  sError = errors.toString(err, show_stacktrace=False)
+        #  sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())
         debug_data = {
             'event_code': event_code,
@@ -119,7 +122,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     except Exception as err:
         error_text = 'Got error while tried to check existed registrations for event "{}"'.format(event_code)
         messages.error(request, error_text)
-        #  sError = errors.toString(err, show_stacktrace=False)
+        #  sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())
         debug_data = {
             'event_code': event_code,
@@ -138,7 +141,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     except Exception as err:
         error_text = 'Got error while finding registration options for event "{}"'.format(event_code)
         messages.error(request, error_text)
-        #  sError = errors.toString(err, show_stacktrace=False)
+        #  sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())
         debug_data = {
             'event_code': event_code,
@@ -230,7 +233,9 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
                 'payment_method': payment_method,
             }
             LOG.debug('Creating a registration: %s', debug_data)
-            # TODO: Send an e-mail message
+            # TODO: Send an e-mail message (if registration has been created)...
+            if create_new:
+                send_event_registration_success_message(request, event_code)
             # Redirect to the success message page
             context['redirect'] = 'SUCCESS'
             context['registration_created'] = True
@@ -284,7 +289,7 @@ def show_registration_form_success(request: HttpRequest, event_code: str, templa
     except Exception as err:
         error_text = 'Not found event "{}"'.format(event_code)
         messages.error(request, error_text)
-        #  sError = errors.toString(err, show_stacktrace=False)
+        #  sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())
         debug_data = {
             'event_code': event_code,
@@ -302,9 +307,93 @@ def show_registration_form_success(request: HttpRequest, event_code: str, templa
     return render(request, template, context)
 
 
+def calculate_total_registration_price(registration: Registration) -> int:
+    options = registration.options.all()
+    options_price = reduce(lambda sum, opt: sum + opt.price if opt.price else sum, options, 0)
+    total_price = options_price
+    return total_price
+
+
+def get_event_registration_context(request: HttpRequest, event_code: str):
+    user = request.user
+    context = {
+        'event_code': event_code,
+        'user': user,
+        'site': get_current_site(request),
+    }
+    event = None
+    registration = None
+    # Try to get event object by code...
+    try:
+        event = Event.objects.get(code=event_code)
+        registration = event.registrations.get(user=user, active=True)
+        if not registration:
+            raise Exception('Not found active registrations')
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = 'Not found event code "{}": {}'.format(event_code, sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            'event_code': event_code,
+            'err': err,
+            'traceback': sTraceback,
+        }
+        LOG.error('%s (redirecting to profile): %s', error_text, debug_data)
+        raise Exception(error_text)
+
+    context['event'] = event
+    context['registration'] = registration
+    context['total_price'] = calculate_total_registration_price(registration)
+    return context
+
+
+def send_event_registration_success_message(request: HttpRequest, event_code: str):
+    """
+    Send successful event registration created message to the user
+    """
+
+    email_body_template = 'dds_registration/event_registration_new_success_message_body.txt'
+    email_subject_template = 'dds_registration/event_registration_new_success_message_subject.txt'
+
+    user = request.user
+
+    context = get_event_registration_context(request, event_code)
+
+    try:
+        LOG.debug('start: %s', context)
+        subject = render_to_string(
+            template_name=email_subject_template,
+            context=context,
+            request=request,
+        )
+        subject = ' '.join(subject.splitlines()).strip()
+        body = render_to_string(
+            template_name=email_body_template,
+            context=context,
+            request=request,
+        )
+        debug_data = {
+            'subject': subject,
+            'body': body,
+        }
+        LOG.debug('mail_user: %s', context)
+        user.email_user(subject, body, settings.DEFAULT_FROM_EMAIL)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            'err': err,
+            'traceback': sTraceback,
+        }
+        LOG.error('Caught error %s (re-raising): %s', sError, debug_data)
+        raise err
+
+
 __all__ = [
     get_events_list,
     get_event_registration_form_context,
     event_registration_form,
     show_registration_form_success,
+    get_event_registration_context,
 ]

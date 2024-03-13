@@ -13,6 +13,8 @@ from .event_registration import (
     event_registration_edit,
     event_registration_new_success,
     event_registration_edit_success,
+    event_registration_invoice,
+    event_registration_payment,
 )
 
 from .system import (

@@ -10,11 +10,7 @@ from django.urls import reverse
 from django.contrib.auth.models import (
     Group,
     User,
-    # BaseUserManager,
-    # AbstractBaseUser,
 )
-
-#  from django.db.models import Q, UniqueConstraint
 
 from django.db.models.signals import post_save
 
@@ -45,6 +41,8 @@ class Event(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # TODO: Add closed/finished status
 
     def get_active_registrations(self):
         """

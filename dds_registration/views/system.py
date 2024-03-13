@@ -4,8 +4,6 @@
 from django.contrib.sites.models import Site  # To access site properties
 from django.shortcuts import render
 
-# from django.template.defaultfilters import slugify
-# from django.utils import timezone
 from django.views.generic import TemplateView
 
 import logging
