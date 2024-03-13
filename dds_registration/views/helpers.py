@@ -1,42 +1,25 @@
-# @module views
-# @changed 2024.03.12, 23:14
+# @module dds_registration/views/helpers.py
+# @changed 2024.03.13, 16:09
 
-# from django.conf import settings
 from django.contrib import messages
 
-from django.contrib.auth.decorators import login_required
-from django.contrib.sites.models import Site  # To access site properties
-from django.db.models.query_utils import Q  # To use for objects querying
-from django.http import HttpRequest, HttpResponse, Http404
-from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpRequest
+from django.shortcuts import render, redirect
 
-# from django.template.defaultfilters import slugify
-# from django.utils import timezone
-from django.views.generic import TemplateView
 
 import traceback
 import logging
 
 from core.helpers.errors import errorToString
 
-from .models import (
+from ..models import (
     Event,
     Registration,
     RegistrationOption,
-    # Message,
-    # DiscountCode,
-    # GroupDiscount,
 )
 
 
 LOG = logging.getLogger(__name__)
-
-
-def index(request: HttpRequest):
-    if request.user.is_authenticated:
-        return redirect('profile')
-    else:
-        return render(request, 'dds_registration/index.html.django')
 
 
 def get_events_list(request: HttpRequest, events: list[Event], show_archived=False):
@@ -45,18 +28,11 @@ def get_events_list(request: HttpRequest, events: list[Event], show_archived=Fal
     result = []
     for event in events:
         event_info = {'event': event, 'registration': None}
-        #  # Hide events that the user can not list
-        #  if not event.user_can_list(request.user, show_archived):
-        #      continue
         if request.user.is_authenticated:
             # Look for a possible registration by the user
             try:
-                #  registration = event.get_active_registrations().get(user=request.user)
                 registration = event.registrations.get(user=request.user, active=True)
                 event_info['registration'] = registration
-                #  event_info["user_can_cancel"] = registration.user_can_cancel(
-                #      request.user
-                #  )
                 result.append(event_info)
             except Registration.DoesNotExist:
                 pass
@@ -70,25 +46,7 @@ def get_events_list(request: HttpRequest, events: list[Event], show_archived=Fal
                     'traceback': sTraceback,
                 }
                 LOG.error('Caught error %s (re-raising): %s', sError, debug_data)
-
-            #  event_info["user_can_book"] = event.user_can_book(request.user)
-            #  event_info["user_can_update"] = event.user_can_update(request.user)
-            #  event_info["price_for_user"] = event.user_price(request.user)
     return result
-
-
-@login_required
-def profile(request: HttpRequest):
-    if not request.user.is_authenticated:
-        return redirect('index')
-    context = {'events_shown': 'mine'}
-    events = Event.objects.all()  # filter(query).distinct()
-    events_list = get_events_list(request, events)
-    if events_list and len(events_list):
-        context['events'] = events_list
-    # else:
-    #     messages.info(request, "You don't have any registrations yet")
-    return render(request, 'dds_registration/profile.html.django', context)
 
 
 def get_event_registration_form_context(request: HttpRequest, event_code: str, create_new: bool = False):
@@ -292,7 +250,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
         raise err
 
 
-def render_event_registration_form(
+def event_registration_form(
     request: HttpRequest,
     event_code: str,
     form_template: str,
@@ -313,102 +271,8 @@ def render_event_registration_form(
     return render(request, form_template, context)
 
 
-@login_required
-def event_registration_new(request: HttpRequest, event_code: str):
-    return render_event_registration_form(
-        request,
-        event_code=event_code,
-        form_template='dds_registration/event_registration_new.html.django',
-        success_redirect='event_registration_new_success',
-        create_new=True,
-    )
-
-
-@login_required
-def event_registration_edit(request: HttpRequest, event_code: str):
-    return render_event_registration_form(
-        request,
-        event_code=event_code,
-        form_template='dds_registration/event_registration_edit.html.django',
-        success_redirect='event_registration_edit_success',
-    )
-
-
-def show_registration_form_success(request: HttpRequest, event_code: str, template: str):
-    user = request.user
-    if not user.is_authenticated:
-        return redirect('index')
-
-    # TODO: To check if active registration is present?
-
-    # Try to get event object by code...
-    try:
-        event = Event.objects.get(code=event_code)
-    except Exception as err:
-        error_text = 'Not found event "{}"'.format(event_code)
-        messages.error(request, error_text)
-        #  sError = errors.toString(err, show_stacktrace=False)
-        sTraceback = str(traceback.format_exc())
-        debug_data = {
-            'event_code': event_code,
-            'err': err,
-            'traceback': sTraceback,
-        }
-        LOG.error('%s (redirecting to profile): %s', error_text, debug_data)
-        # Redirect to profile page with error messages (see above)
-        return redirect('profile')
-
-    context = {
-        'event_code': event_code,
-        'event': event,
-    }
-    return render(request, template, context)
-
-
-@login_required
-def event_registration_new_success(request: HttpRequest, event_code: str):
-    return show_registration_form_success(
-        request, event_code=event_code, template='dds_registration/event_registration_new_success.html.django'
-    )
-
-
-@login_required
-def event_registration_edit_success(request: HttpRequest, event_code: str):
-    return show_registration_form_success(
-        request, event_code=event_code, template='dds_registration/event_registration_edit_success.html.django'
-    )
-
-
-def components_demo(request: HttpRequest):
-    return render(request, 'components-demo.html.django')
-
-
-# Misc...
-
-
-class RobotsView(TemplateView):
-    template_name = 'robots.txt'
-    content_type = 'text/plain'
-
-    def get_context_data(self, **kwargs):
-        context = super(RobotsView, self).get_context_data(**kwargs)
-        context['domain'] = Site.objects.get_current().domain
-        return context
-
-
-# Error pages...
-
-
-def page403(request, *args, **argv):
-    LOG.debug('403 error')
-    return render(request, '403.html', {}, status=403)
-
-
-def page404(request, *args, **argv):
-    LOG.debug('404 error')
-    return render(request, '404.html', {}, status=404)
-
-
-def page500(request, *args, **argv):
-    LOG.debug('500 error')
-    return render(request, '500.html', {}, status=500)
+__all__ = [
+    get_events_list,
+    get_event_registration_form_context,
+    event_registration_form,
+]
