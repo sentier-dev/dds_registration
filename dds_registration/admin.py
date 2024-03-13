@@ -99,7 +99,7 @@ admin.site.register(RegistrationOption, RegistrationOptionAdmin)
 
 
 class EventAdmin(admin.ModelAdmin):
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['registration_open']
     search_fields = [
         'title',
     ]
@@ -109,8 +109,8 @@ class EventAdmin(admin.ModelAdmin):
         'code',
         'max_participants',
         'currency',
+        'registration_open',
         'registration_close',
-        'created_at',
     )
 
 
