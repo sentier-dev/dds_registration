@@ -1,22 +1,32 @@
 {# ex: set ft=htmldjango : #}
+<!--
+  @module XXX
+  @changed 2024.03.12, 21:35
+-->
+
 {% extends "base-regular.html.django" %}
 {% load crispy_forms_tags %}
-
-{% block navbar_breadcrumbs %}
-  <li>Account</li>
-  <li class="active">Login</li>
-{% endblock %}
+{% block title %}Login — {{ block.super }}{% endblock title %}
 
 {% block content %}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Login</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
 
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
 
 <form role="form" method="post" action="{% url 'login' %}">
-{% csrf_token %}
+  {% csrf_token %}
   {{ form|crispy }}
   <input class="btn btn-primary" type="submit" value="Login" />
+  <a class="btn btn-default" href="{% url 'django_registration_register' %}">Signup</a>
+  <a class="btn btn-default" href="{% url 'password_reset' %}">Reset password</a>
   <input type="hidden" name="next" value="{{ next }}" />
 </form>
 

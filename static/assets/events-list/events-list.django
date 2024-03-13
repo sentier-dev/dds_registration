@@ -5,26 +5,33 @@
 -->
 
 {% for event_info in events %}
+  {% with event=event_info.event registration=event_info.registration %}
 
-  <p>Event: {{ event_info.event.title }}</p>
+    <h3>{{ event.title }} ({{ event.code }})</h3>
 
-  {% if event_info.event.max_participants > 0 %}
-  <p>Participants: {{event_info.event.get_active_registrations.count}}/{{event_info.event.max_participants}}</p>
-  {% endif %}
+    {% if event.max_participants > 0 %}
+    <p>Participants: {{event.get_active_registrations.count}}/{{event.max_participants}}</p>
+    {% endif %}
 
-  {% if event_info.event.registration_open %}
-  <p>Registration opens: {{event_info.event.registration_open}}</p>
-  {% endif %}
+    {% if event.registration_open %}
+    <p>Registration opens: {{event.registration_open}}</p>
+    {% endif %}
 
-  {% if event_info.event.registration_close %}
-  <p>Registration closes: {{event_info.event.registration_close}}</p>
-  {% endif %}
+    {% if event.registration_close %}
+    <p>Registration closes: {{event.registration_close}}</p>
+    {% endif %}
 
-  {% if event_info.registration %}
-  <p>Registration: +</p>
-  {% endif %}
+    <p>Payment method: {{ registration.get_payment_method_display }}</p>
 
-  {# TODO: Render events/registration well #}
+    <p>Options: {% for option in registration.options.all %}
+    {{ option.item }} {% if option.price %}({{ option.price }}){% endif %}{% if not forloop.last %}, {% endif %}
+      {% empty %}
+        No options
+      {% endfor %}</p>
 
+    <p>Paid: {{ registration.paid }}</p>
+
+    <p>Actions: <a href="{% url 'event_registration_edit' event_code=event.code %}">edit</a>, <u>cancel</u></p>
+
+  {% endwith %}
 {% endfor %}
-

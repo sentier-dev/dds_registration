@@ -1,0 +1,18 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module logged_out
+  @changed 2024.03.12, 21:35
+-->
+
+{% extends "base-regular.html.django" %}
+
+{% block title %}Logged out — {{ block.super }}{% endblock title %}
+
+
+{% block content %}
+
+<p>Thanks for spending some quality time with the web site today.</p>
+
+<p><a href="{% url 'admin:index' %}">Log in again</a></p>
+
+{% endblock %}

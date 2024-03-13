@@ -43,8 +43,7 @@ DEV = LOCAL
 env = environ.Env(
     # @see https://django-environ.readthedocs.io
     DEBUG=(bool, True),  # LOCAL  # and DEV
-    SECRET_KEY=(
-        str, 'django-insecure-1d*alw^8-nya9h#xhfjqe*5%w8!o7vy8!211ez++h!p_*nm%21'),
+    SECRET_KEY=(str, 'django-insecure-1d*alw^8-nya9h#xhfjqe*5%w8!o7vy8!211ez++h!p_*nm%21'),
     SENDGRID_API_KEY=(str, ''),
 )
 environ.Env.read_env(posixpath.join(BASE_DIR, '.env'))

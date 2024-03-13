@@ -8,6 +8,8 @@
 
 {% load crispy_forms_tags %}
 
+{% block title %}Profile — {{ block.super }}{% endblock title %}
+
 {% block content %}
 {{ block.super }}
 
@@ -36,7 +38,7 @@
   {% include "assets/events-list/events-list.django" %}
 {% else %}
   <p class="dimmed-info">
-    You don't have any events yet.
+    You don't have any registrations yet.
   </p>
 {% endif %}
 
