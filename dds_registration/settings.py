@@ -235,6 +235,7 @@ ACCOUNT_ACTIVATION_DAYS = 7   # One-week activation window
 
 # @see https://docs.sendgrid.com/for-developers/sending-email/django
 DEFAULT_FROM_EMAIL = 'noreply@d-d-s.ch'
+# TODO: Store parameters in `django-preferences` (see)?
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_HOST_USER = 'apikey'   # this is exactly the value 'apikey'
 EMAIL_PORT = 587

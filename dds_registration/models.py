@@ -10,11 +10,7 @@ from django.urls import reverse
 from django.contrib.auth.models import (
     Group,
     User,
-    # BaseUserManager,
-    # AbstractBaseUser,
 )
-
-#  from django.db.models import Q, UniqueConstraint
 
 from django.db.models.signals import post_save
 
@@ -32,19 +28,22 @@ def random_code(length=random_code_length):
 
 
 class Event(models.Model):
-    code = models.TextField(unique=True, default=random_code)   # Show as an input
-    title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
+    code = models.TextField(
+        unique=True, default=random_code)   # Show as an input
+    title = models.TextField(unique=True, null=False,
+                             blank=False)  # Show as an input
     description = models.TextField(blank=True)
-    registration_open = models.DateField(auto_now=True, help_text='Date registration opens')
-    registration_close = models.DateField(blank=True, null=True, help_text='Date registration closes')
+    registration_open = models.DateField(
+        auto_now_add=True, help_text='Date registration opens')
+    registration_close = models.DateField(
+        blank=True, null=True, help_text='Date registration closes')
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text='Maximum number of participants to this event (0 = no limit)',
     )
     currency = models.TextField(null=True, blank=True)  # Show as an input
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # TODO: Add closed/finished status?
 
     def get_active_registrations(self):
         """
@@ -75,7 +74,7 @@ class Event(models.Model):
         ]
         items = [
             ' '.join(filter(None, map(str, name_items))),
-            self.created_at.strftime(dateTimeFormat) if self.created_at else None,
+            # self.created_at.strftime(dateTimeFormat) if self.created_at else None,
         ]
         info = ', '.join(filter(None, map(str, items)))
         return info
@@ -101,8 +100,10 @@ class Registration(models.Model):
     Ex `Booking` class in OneEvent
     """
 
-    event = models.ForeignKey(Event, related_name='registrations', on_delete=models.CASCADE)
-    user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
+    event = models.ForeignKey(
+        Event, related_name='registrations', on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, related_name='registrations', on_delete=models.CASCADE)
     options = models.ManyToManyField(RegistrationOption)
 
     # Payment method:
@@ -111,7 +112,8 @@ class Registration(models.Model):
         ('INVOICE', 'Invoice'),
     ]
     DEFAULT_PAYMENT_METHOD = 'STRIPE'
-    payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
+    payment_method = models.TextField(
+        choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
 
     paid = models.BooleanField(default=False)
     paid_date = models.DateTimeField(blank=True, null=True)
@@ -133,7 +135,8 @@ class Registration(models.Model):
         items = [
             self.user.get_full_name(),
             self.user.email,
-            self.created_at.strftime(dateTimeFormat) if self.created_at else None,
+            self.created_at.strftime(
+                dateTimeFormat) if self.created_at else None,
         ]
         info = ', '.join(filter(None, map(str, items)))
         return info
@@ -149,7 +152,8 @@ class Message(models.Model):
     def __str__(self):
         items = [
             self.event,
-            self.created_at.strftime(dateTimeFormat) if self.created_at else None,
+            self.created_at.strftime(
+                dateTimeFormat) if self.created_at else None,
             'emailed' if self.emailed else None,
         ]
         info = ', '.join(filter(None, map(str, items)))
@@ -158,16 +162,20 @@ class Message(models.Model):
 
 class DiscountCode(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    code = models.TextField(default=partial(random_code, length=4))  # Show as an input
+    code = models.TextField(default=partial(
+        random_code, length=4))  # Show as an input
     # pyright: ignore [reportArgumentType]
     only_registration = models.BooleanField(default=True)
-    percentage = models.IntegerField(help_text='Value as a percentage, like 10', blank=True, null=True)
-    absolute = models.FloatField(help_text='Absolute amount of discount', blank=True, null=True)
+    percentage = models.IntegerField(
+        help_text='Value as a percentage, like 10', blank=True, null=True)
+    absolute = models.FloatField(
+        help_text='Absolute amount of discount', blank=True, null=True)
 
     def __str__(self):
         items = [
             self.event,
-            self.created_at.strftime(dateTimeFormat) if self.created_at else None,
+            self.created_at.strftime(
+                dateTimeFormat) if self.created_at else None,
         ]
         info = ', '.join(filter(None, map(str, items)))
         return info
@@ -177,8 +185,10 @@ class GroupDiscount(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     only_registration = models.BooleanField(default=True)
-    percentage = models.IntegerField(help_text='Value as a percentage, like 10', blank=True, null=True)
-    absolute = models.FloatField(help_text='Absolute amount of discount', blank=True, null=True)
+    percentage = models.IntegerField(
+        help_text='Value as a percentage, like 10', blank=True, null=True)
+    absolute = models.FloatField(
+        help_text='Absolute amount of discount', blank=True, null=True)
 
     def __str__(self):
         items = [
