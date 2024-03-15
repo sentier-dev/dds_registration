@@ -3,6 +3,7 @@ import random
 from functools import partial
 from datetime import date
 
+from django.contrib.sites.models import Site  # To access site properties
 from django import forms
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -66,6 +67,10 @@ class Event(models.Model):
     def new_registration_url(self):
         return reverse('event_registration_new', args=(self.code,))
 
+    def new_registration_full_url(self):
+        site = Site.objects.get_current()
+        return 'https://' + site.domain + reverse('event_registration_new', args=(self.code,))
+
     def __str__(self):
         name_items = [
             self.title,
@@ -77,6 +82,8 @@ class Event(models.Model):
         ]
         info = ', '.join(filter(None, map(str, items)))
         return info
+
+    new_registration_full_url.short_description = 'New event registration url'
 
 
 class RegistrationOption(models.Model):
