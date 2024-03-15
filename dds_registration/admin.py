@@ -99,7 +99,10 @@ admin.site.register(RegistrationOption, RegistrationOptionAdmin)
 
 
 class EventAdmin(admin.ModelAdmin):
-    readonly_fields = ['registration_open']
+    readonly_fields = [
+        'registration_open',
+        'new_registration_url',
+    ]
     search_fields = [
         'title',
     ]
@@ -111,6 +114,7 @@ class EventAdmin(admin.ModelAdmin):
         'currency',
         'registration_open',
         'registration_close',
+        'new_registration_url',
     )
 
 

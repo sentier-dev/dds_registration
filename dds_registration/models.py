@@ -63,9 +63,8 @@ class Event(models.Model):
         today = date.today()
         return (today >= self.registration_open) and (not self.registration_close or today <= self.registration_close)
 
-    def url(self):
-        # ???
-        reverse('event_view', args=(self.unique_code,))
+    def new_registration_url(self):
+        return reverse('event_registration_new', args=(self.code,))
 
     def __str__(self):
         name_items = [
