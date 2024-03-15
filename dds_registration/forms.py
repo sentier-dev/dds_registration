@@ -1,5 +1,8 @@
 from django.forms.models import ModelForm
 from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm
+
 
 from .models import (
     Event,
@@ -39,3 +42,18 @@ class DiscountCodeAdminForm(ModelForm):
             'code': textInputWidget,
         }
         fields = '__all__'
+
+
+class SignUpForm(UserCreationForm):
+    class Meta:
+        model = get_user_model()
+        fields = (
+            # TODO: Add address
+            'username',
+            'email',
+            'password1',
+            'password2',
+            'first_name',
+            'last_name',
+            # 'address',
+        )
