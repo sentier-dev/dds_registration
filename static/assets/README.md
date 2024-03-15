@@ -14,7 +14,7 @@ For example> the configurations could look like this:
 ('text/x-scss', 'sass --embed-source-map {infile} {outfile}'),
 ```
 
-It requires sass compiler installed and available in the PATH.
+It requires sass compiler installed and available in the PATH (It's possible to install it globally from cli with node: `npm i -g sass`).
 
 Set `USE_DJANGO_PREPROCESSORS` in `dds_registration/settings.py` to allow preprocess filters.
 
