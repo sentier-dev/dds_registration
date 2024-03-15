@@ -56,7 +56,7 @@ class Event(models.Model):
 
     def clean(self):
         super(Event, self).clean()
-        if self.registration_close and self.registration_open >= self.registration_close:
+        if self.registration_close and self.registration_open and self.registration_open >= self.registration_close:
             raise ValidationError('Registration must open before it closes')
 
     def in_registration_window(self):
