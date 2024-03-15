@@ -1,6 +1,8 @@
 {# ex: set ft=htmldjango : #}
-<li class="nav-item"><a class="nav-link" href="{% url 'components_demo' %}">Features</a></li>
-{# djlint:off #}
-<li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a></li>
-<li class="nav-item"><a class="nav-link" href="/faq">FAQ</a></li>
-{# djlint:on #}
+{% comment %}
+  <li class="nav-item"><a class="nav-link" href="{% url 'components_demo' %}">Features</a></li>
+  {# djlint:off #}
+  <li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a></li>
+  <li class="nav-item"><a class="nav-link" href="/faq">FAQ</a></li>
+  {# djlint:on #}
+{% endcomment %}
