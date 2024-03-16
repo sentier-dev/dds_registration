@@ -49,11 +49,12 @@ class SignUpForm(UserCreationForm):
         model = get_user_model()
         fields = (
             # TODO: Add address
+            # 'address',
             'username',
+            'first_name',
+            'last_name',
+            #  'profile.address',
             'email',
             'password1',
             'password2',
-            'first_name',
-            'last_name',
-            # 'address',
         )

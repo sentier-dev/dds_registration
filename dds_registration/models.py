@@ -196,13 +196,6 @@ class GroupDiscount(models.Model):
         return info
 
 
-class CustomUser(AbstractUser):
-    address = models.TextField()
-
-
-#  class User(AbstractUser):
-#      """
-#      Customized user.
-#      """
+#  class Profile(models.Model):
+#      user = models.OneToOneField(User, on_delete=models.CASCADE)
 #      address = models.TextField()
-

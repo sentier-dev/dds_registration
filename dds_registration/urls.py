@@ -19,12 +19,12 @@ urlpatterns = [
         include('django_registration.backends.activation.urls'),
     ),
     path('accounts/', include('django.contrib.auth.urls')),
-    path(
-        # Overrided registration form (with extra fields)
-        'accounts/signup/',
-        views.RegistrationView.as_view(),
-        name='django_registration_signup',
-    ),
+    #  path(
+    #      # Overrided registration form (with extra fields)
+    #      'accounts/signup/',
+    #      views.SignUpView.as_view(),
+    #      name='django_registration_register',
+    #  ),
     path('profile', views.profile, name='profile'),
     path('event/<str:event_code>/registration/new', views.event_registration_new, name='event_registration_new'),
     path(

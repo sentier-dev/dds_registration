@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 
 from .forms import (
     EventAdminForm,
@@ -15,7 +16,7 @@ from .models import (
     Message,
     Registration,
     RegistrationOption,
-    #  AppUser,
+    #  Profile,
 )
 
 
@@ -24,7 +25,18 @@ admin.site.register(GroupDiscount)
 admin.site.register(Message)
 
 
+#  class ProfileInline(admin.StackedInline):
+#      model = Profile
+#      verbose_name_plural = 'Profile'
+
+
 class UserAdmin(BaseUserAdmin):
+    #  inlines = (ProfileInline, )
+    #  def get_inline_instances(self, request, obj=None):
+    #      if not obj:
+    #          return list()
+    #      return super(UserAdmin, self).get_inline_instances(request, obj)
+
     list_display = (
         'username',
         'email',
@@ -32,8 +44,13 @@ class UserAdmin(BaseUserAdmin):
         'last_name',
         'is_active',
         'is_staff',
+        #  'profile.address',
+        #  'address',
         #  'is_superuser',
     )
+
+    def get_address(self):
+        return self.profile.address
 
 
 admin.site.unregister(User)
@@ -99,6 +116,7 @@ admin.site.register(RegistrationOption, RegistrationOptionAdmin)
 
 
 class EventAdmin(admin.ModelAdmin):
+    # TODO: Show linked options (in columns and in the form)?
     readonly_fields = [
         'registration_open',
         'new_registration_full_url',

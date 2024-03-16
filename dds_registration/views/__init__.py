@@ -18,7 +18,7 @@ from .event_registration import (
 )
 
 from .user import (
-    RegistrationView,
+    SignUpView,
 )
 
 from .system import (

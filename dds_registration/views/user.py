@@ -10,9 +10,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.views import generic
 
-#  from django_registration import RegistrationView as BaseCoreRegistrationView
-from django_registration.views import RegistrationView as BaseRegistrationView
-
+from django_registration.views import RegistrationView as BaseSignUpView
 
 from ..forms import SignUpForm
 
@@ -24,5 +22,5 @@ import logging
 LOG = logging.getLogger(__name__)
 
 
-class RegistrationView(BaseRegistrationView):
+class SignUpView(BaseSignUpView):
     form_class = SignUpForm
