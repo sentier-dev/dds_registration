@@ -196,6 +196,13 @@ class GroupDiscount(models.Model):
         return info
 
 
-#  class Profile(models.Model):
-#      user = models.OneToOneField(User, on_delete=models.CASCADE)
-#      address = models.TextField()
+class Profile(models.Model):
+    """
+    Profile is optional now. It's required to use `Profile.objects.get_or_create`, for example to ensure profile object.
+    """
+
+    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
+    address = models.TextField()
+
+    def __str__(self):
+        return self.user.username

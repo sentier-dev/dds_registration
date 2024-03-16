@@ -29,7 +29,7 @@
     data-user-email="{{ user.email }}"
     data-user-last-login="{{ user.last_login }}"
   >
-    Welcome, {{ user.get_full_name|default:user.username }}. Thanks for logging in.
+    Welcome, {{ user.get_full_name|default:user.username }}.
   </p>
 {% endif %}
 
@@ -41,5 +41,11 @@
     You don't have any registrations yet.
   </p>
 {% endif %}
+
+<div>
+  <a class="btn btn-primary" href="{% url 'profile_edit' %}">Edit profile</a>
+  <a class="btn btn-primary" href="{% url 'password_change' %}">Change password</a>
+</div>
+
 
 {% endblock content %}

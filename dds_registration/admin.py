@@ -16,7 +16,7 @@ from .models import (
     Message,
     Registration,
     RegistrationOption,
-    #  Profile,
+    Profile,
 )
 
 
@@ -25,13 +25,13 @@ admin.site.register(GroupDiscount)
 admin.site.register(Message)
 
 
-#  class ProfileInline(admin.StackedInline):
-#      model = Profile
-#      verbose_name_plural = 'Profile'
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    verbose_name_plural = 'Profile'
 
 
 class UserAdmin(BaseUserAdmin):
-    #  inlines = (ProfileInline, )
+    inlines = (ProfileInline,)
     #  def get_inline_instances(self, request, obj=None):
     #      if not obj:
     #          return list()

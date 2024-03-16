@@ -22,7 +22,10 @@
   {% csrf_token %}
   <ul class="dropdown-menu" id="user-menu">
     <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
-    <li><a class="dropdown-item" href="{% url 'password_change' %}">Password change</a></li>
+    <li><a class="dropdown-item" href="{% url 'profile_edit' %}">Edit profile</a></li>
+    {% comment %}
+      <li><a class="dropdown-item" href="{% url 'password_change' %}">Change password</a></li>
+    {% endcomment %}
     <li><hr class="dropdown-divider"></li>
     <li><a
       class="dropdown-item"

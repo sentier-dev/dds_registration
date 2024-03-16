@@ -1,0 +1,48 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module activation_failed.html
+  @changed 2024.03.11, 18:47
+-->
+
+{% extends "base-regular.html.django" %}
+
+{% block title %}Activation failed — {{ block.super }}{% endblock %}
+
+{% block content %}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Activation failed</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+<p>
+  Your activation has failed.
+</p>
+
+{% include "assets/render-messages/render-messages.django" %}
+
+{% if activation_error %}
+  {% if activation_error.message %}
+    <p>
+      {{ activation_error.message }}
+    </p>
+  {% endif %}
+
+  <!--
+  {% if activation_error.code %}
+    <p>
+      Code: {{ activation_error.code }}
+    </p>
+  {% endif %}
+
+  {% if activation_error.params %}
+    <p>
+      Params: {{ activation_error.params }}
+    </p>
+  {% endif %}
+  -->
+{% endif %}
+
+{% endblock %}

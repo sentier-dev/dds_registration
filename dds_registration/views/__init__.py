@@ -18,7 +18,8 @@ from .event_registration import (
 )
 
 from .user import (
-    SignUpView,
+    # SignUpView,
+    edit_user_profile,
 )
 
 from .system import (
