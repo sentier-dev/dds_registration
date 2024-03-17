@@ -77,3 +77,29 @@
     background-color: $primaryColor;
     border-color: $primaryColor;
 }
+
+.table-primary-header {
+  thead th {
+    background-color: $primaryColor;
+    color: #fff;
+  }
+  th, td {
+    border-right-width: var(--bs-border-width);
+    &:first-child {
+      border-left-width: var(--bs-border-width);
+    }
+  }
+}
+
+.btn-icon {
+  padding-left: 0;
+  padding-right: 0;
+  // For md size:
+  width: 38px;
+  height: 38px;
+  &, & > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

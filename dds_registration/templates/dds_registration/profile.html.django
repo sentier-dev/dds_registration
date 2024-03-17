@@ -34,7 +34,7 @@
 {% endif %}
 
 {% if events %}
-  <p>Your registrations:</p>
+  <h3 class="primary-color">Your registrations:</h3>
   {% include "assets/events-list/events-list.django" %}
 {% else %}
   <p class="dimmed-info">

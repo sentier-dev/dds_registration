@@ -116,6 +116,29 @@ body {
   border-color: #486;
 }
 
+.table-primary-header thead th {
+  background-color: #486;
+  color: #fff;
+}
+.table-primary-header th, .table-primary-header td {
+  border-right-width: var(--bs-border-width);
+}
+.table-primary-header th:first-child, .table-primary-header td:first-child {
+  border-left-width: var(--bs-border-width);
+}
+
+.btn-icon {
+  padding-left: 0;
+  padding-right: 0;
+  width: 38px;
+  height: 38px;
+}
+.btn-icon, .btn-icon > i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /**
  * @module page-header-navbar.scss
  * @changed 2024.03.08, 12:00
@@ -253,5 +276,34 @@ body {
 }
 .main-page-splash > .content h1 {
   font-weight: 400;
+}
+
+/**
+ * @module events-list.scss
+ * @changed 2024.03.18, 00:57
+ */
+/**
+ * @module variables.scss
+ * @changed 2024.03.08, 12:00
+ */
+.events-list-table {
+  /*
+  .col-registration
+  .col-event
+  .col-participants
+  .col-opens
+  .col-closes
+  .col-payment
+  .col-options
+  .col-paid
+  .col-actions
+  */
+}
+.events-list-table .col-actions,
+.events-list-table .col-payment,
+.events-list-table .col-registration,
+.events-list-table .col-participants,
+.events-list-table .col-paid {
+  text-align: center;
 }
 /*# sourceMappingURL=styles.css.map */

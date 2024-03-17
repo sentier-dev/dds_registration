@@ -4,34 +4,66 @@
   @changed 2024.03.11, 01:03
 -->
 
+{% if events %}
+<table class="events-list-table table table-striped table-primary-header">
+  <thead>
+    <tr>
+      <th class="col-event" rowspan="2" scope="col">Event</th>
+      <th class="col-participants" rowspan="2" scope="col">Participants</th>
+      <th class="col-registration" colspan="2" scope="col" align="center">Registration</th>
+      <th class="col-payment" rowspan="2" scope="col">Payment</th>
+      <th class="col-options" rowspan="2" scope="col">Options</th>
+      <th class="col-paid" rowspan="2" scope="col">Paid</th>
+      <th class="col-actions" rowspan="2" scope="col">Actions</th>
+    </tr>
+    <tr>
+      <th class="col-opens" scope="col">Opens</th>
+      <th class="col-closes" scope="col">Closes</th>
+    </tr>
+  </thead>
+  <tbody>
 {% for event_info in events %}
   {% with event=event_info.event registration=event_info.registration %}
+    <tr data-event-code="{{ event.code }}">
+      <th class="col-event" scope="row">
+        {{ event.title }}
+      </th>
+      <td class="col-participants">
+        {% if event.max_participants > 0 %}
+          {{event.get_active_registrations.count}}/{{event.max_participants}}
+        {% endif %}
+      </td>
+      <td class="col-opens">
+        {% if event.registration_open %}
+          {{event.registration_open}}
+        {% endif %}
+      </td>
+      <td class="col-closes">
+        {% if event.registration_close %}
+          Registration closes: {{event.registration_close}}
+        {% endif %}
+      </td>
+      <td class="col-payment">
+        {{ registration.get_payment_method_display }}
+      </td>
+      <td class="col-options">
+        {% for option in registration.options.all %}
+        <div>{{ option.item }} {% if option.price %}({{ option.price }}){% endif %}</div>
+        {% empty %}
+          —
+        {% endfor %}
+      </td>
+      <td class="col-paid">
+        {% if registration.paid %}Yes{% else %}No{% endif %}
+      </td>
+      <td class="col-actions">
+        <a class="btn btn-primary btn-icon" title="Edit" href="{% url 'event_registration_edit' event_code=event.code %}"><i class="bi bi-pencil"></i></a>
+        <a class="btn btn-primary btn-icon" title="Cancel" disabled><i class="bi bi-x-lg"></i></a>
+      </td>
 
-    <h3>{{ event.title }} ({{ event.code }})</h3>
-
-    {% if event.max_participants > 0 %}
-    <p>Participants: {{event.get_active_registrations.count}}/{{event.max_participants}}</p>
-    {% endif %}
-
-    {% if event.registration_open %}
-    <p>Registration opens: {{event.registration_open}}</p>
-    {% endif %}
-
-    {% if event.registration_close %}
-    <p>Registration closes: {{event.registration_close}}</p>
-    {% endif %}
-
-    <p>Payment method: {{ registration.get_payment_method_display }}</p>
-
-    <p>Options: {% for option in registration.options.all %}
-    {{ option.item }} {% if option.price %}({{ option.price }}){% endif %}{% if not forloop.last %}, {% endif %}
-      {% empty %}
-        No options
-      {% endfor %}</p>
-
-    <p>Paid: {{ registration.paid }}</p>
-
-    <p>Actions: <a href="{% url 'event_registration_edit' event_code=event.code %}">edit</a>, <u>cancel</u></p>
-
+    </tr>
   {% endwith %}
 {% endfor %}
+  </tbody>
+</table>
+{% endif %}
