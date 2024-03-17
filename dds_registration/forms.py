@@ -61,6 +61,7 @@ class SignUpForm(UserCreationForm):
 class UpdateUserForm(forms.ModelForm):
     #  username = forms.CharField(required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    is_active = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     class Meta:
         model = User
@@ -69,6 +70,7 @@ class UpdateUserForm(forms.ModelForm):
             'email',  # Needs re-activation
             'first_name',
             'last_name',
+            'is_active',
         ]
 
 

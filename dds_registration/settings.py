@@ -227,6 +227,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
 
+REGISTRATION_SALT = 'OdUqhiXaWN'  # Random salt for registration keys (django_registration)
+
 # Registration
 # @see https://django-registration.readthedocs.io
 

@@ -43,9 +43,12 @@
 {% endif %}
 
 <div>
+  {# TODO: Put common actions toolbar here #}
   <a class="btn btn-primary" href="{% url 'profile_edit' %}">Edit profile</a>
+  {% comment %}
   <a class="btn btn-primary" href="{% url 'password_change' %}">Change password</a>
+  <a class="btn btn-primary" href="{% url 'password_reset' %}">Reset password</a>
+  {% endcomment %}
 </div>
-
 
 {% endblock content %}

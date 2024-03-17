@@ -24,6 +24,8 @@ from ..models import (
     Profile,
 )
 
+from .helpers import send_re_actvation_email
+
 
 LOG = logging.getLogger(__name__)
 
@@ -34,14 +36,16 @@ LOG = logging.getLogger(__name__)
 
 
 @login_required
-def edit_user_profile(request):
+def edit_user_profile(request: HttpRequest):
     """
     @see https://dev.to/earthcomfy/django-update-user-profile-33ho
     """
     try:
+        success = True
+        user = request.user
         if request.method == 'POST':
-            user_form = UpdateUserForm(request.POST, instance=request.user)
-            profile, created = Profile.objects.get_or_create(user=request.user)
+            user_form = UpdateUserForm(request.POST, instance=user)
+            profile, created = Profile.objects.get_or_create(user=user)
             profile_form = UpdateProfileForm(
                 request.POST,
                 #  request.FILES,
@@ -49,26 +53,41 @@ def edit_user_profile(request):
             )
             if user_form.is_valid() and profile_form.is_valid():
                 user_data = user_form.cleaned_data
-                #  old_user = User.objects.get(id=request.user.id)
+                #  old_user = User.objects.get(id=user.id)
                 # old_user.email != user_data['email']
                 email_has_changed = 'email' in user_form.changed_data
                 profile_data = profile_form.cleaned_data
-                LOG.debug(
-                    'save params: %s',
-                    {
-                        'email_has_changed': email_has_changed,
-                    },
-                )
+                debug_data = {
+                    'email_has_changed': email_has_changed,
+                }
+                LOG.debug('Save params: %s', debug_data)
                 # TODO: Send email activation request and make the user inactive
-                LOG.debug('save user data: %s', user_data)
-                LOG.debug('save profile data: %s', profile_data)
+                LOG.debug('Save user data: %s', user_data)
+                LOG.debug('Save profile data: %s', profile_data)
                 user_form.save()
                 profile_form.save()
+                if email_has_changed:
+                    debug_data = {
+                        'email_has_changed': email_has_changed,
+                        'user_form': user_form,
+                    }
+                    LOG.debug('Email has changed: %s', debug_data)
+                    send_re_actvation_email(request, user)
+                    #  user_form.fields['is_active'] = False
+                    user.is_active = False
+                    user.save()
+                    messages.success(
+                        request,
+                        'Your email has already changed. Now you have to re-activate your account. Please check your e-mail for an activation message.',
+                    )
+                    # TODO: Use specific template
+                    return redirect('django_registration_complete')
                 messages.success(request, 'Your profile is updated successfully')
-                return redirect('profile')
+                if success:
+                    return redirect('profile')
         else:
-            user_form = UpdateUserForm(instance=request.user)
-            profile, created = Profile.objects.get_or_create(user=request.user)
+            user_form = UpdateUserForm(instance=user)
+            profile, created = Profile.objects.get_or_create(user=user)
             profile_form = UpdateProfileForm(instance=profile)
         LOG.debug('debug profile_form: %s', profile_form)
         context = {

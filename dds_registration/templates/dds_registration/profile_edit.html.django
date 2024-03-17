@@ -28,11 +28,12 @@
     {{ user_form|crispy }}
     {{ profile_form|crispy }}
 
-    <br>
-
-    <input type="submit" class="btn btn-primary" value="Save" />
-    <button type="reset" class="btn btn-default">Reset</button>
-    <a class="btn btn-secondary" href="{% url 'password_change' %}">Change password</a>
+    <div class="common-actions">
+      <input type="submit" class="btn btn-primary" value="Save" />
+      <button type="reset" class="btn btn-default">Reset changes</button>
+      <a class="btn btn-link" href="{% url 'password_change' %}">Change password</a>
+      <a class="btn btn-link" href="{% url 'password_reset' %}">Reset password</a>
+    </div>
 </form>
 
 {% endblock content %}

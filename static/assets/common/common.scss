@@ -12,3 +12,10 @@
 .primary-color {
   color: $primaryColor;
 }
+
+.common-actions {
+  a:not(.btn) {
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}

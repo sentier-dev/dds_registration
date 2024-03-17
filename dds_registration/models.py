@@ -1,8 +1,10 @@
+import socket
 import string
 import random
 from functools import partial
 from datetime import date
 
+from django.conf import settings
 from django.contrib.sites.models import Site  # To access site properties
 from django import forms
 from django.db import models
@@ -69,7 +71,13 @@ class Event(models.Model):
 
     def new_registration_full_url(self):
         site = Site.objects.get_current()
-        return 'https://' + site.domain + reverse('event_registration_new', args=(self.code,))
+        scheme = 'https'
+        # For dev-server use http
+        if settings.LOCAL:
+            # TODO: Determine actual protocol scheme
+            # Eg, with request: `scheme = 'https' if request.is_secure() else 'http'``
+            scheme = 'http'
+        return scheme + '://' + site.domain + reverse('event_registration_new', args=(self.code,))
 
     def __str__(self):
         name_items = [

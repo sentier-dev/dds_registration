@@ -17,11 +17,11 @@
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
 
+{% include "assets/render-messages/render-messages.django" %}
+
 <p>
   Your activation has failed.
 </p>
-
-{% include "assets/render-messages/render-messages.django" %}
 
 {% if activation_error %}
   {% if activation_error.message %}

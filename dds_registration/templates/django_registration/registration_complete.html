@@ -17,6 +17,8 @@
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
 
+{% include "assets/render-messages/render-messages.django" %}
+
 <p>
   We’ve emailed you the activation email.
   Please check your mail to complete the registration process.
