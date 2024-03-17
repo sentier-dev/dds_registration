@@ -26,4 +26,19 @@
     text-align: center;
   }
 
+  tbody {
+    th, td {
+      vertical-align: middle;
+    }
+    .col-event {
+      color: $primaryColor;
+    }
+    .col-actions-wrapper {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }
+
 }
