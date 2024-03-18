@@ -6,6 +6,6 @@ __all__ = (
 
 #  from .models import AppUser
 
-__version__ = "0.0.8"
-__timestamp__ = "2024.03.18 02:21 +0700"
-__timetag__ = "240318-0221"
+__version__ = "0.0.9"
+__timestamp__ = "2024.03.19 01:46 +0700"
+__timetag__ = "240319-0146"
