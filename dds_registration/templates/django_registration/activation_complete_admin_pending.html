@@ -17,11 +17,13 @@
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
 
+{% include "assets/render-messages/render-messages.django" %}
+
 <p>
-    Your account is now activated.
-    {% if not user.is_authenticated %}
-    Once a site administrator activates your account you can <a href="{% url 'login' %}">log in</a>.
-    {% endif %}
+  Your account is now activated.
+  {% if not user.is_authenticated %}
+  Once a site administrator activates your account you can <a href="{% url 'login' %}">log in</a>.
+  {% endif %}
 </p>
 
 {% endblock %}

@@ -29,8 +29,9 @@
 
   {% include "assets/event_registration_form/event_registration_form.django" %}
 
-  <fieldset class="mb3 form-group">
+  <fieldset class="common-actions mb3 form-group">
     <input class="btn btn-primary" type="submit" value="Save" />
+    <a class="btn btn-default" href="{% url 'profile' %}">Back to profile</a>
   </fieldset>
 
 </form>

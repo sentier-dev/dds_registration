@@ -1,0 +1,44 @@
+/**
+ * @module events-list.scss
+ * @changed 2024.03.18, 00:57
+ */
+
+@import "../shared";
+
+.events-list-table {
+  /*
+  .col-registration
+  .col-event
+  .col-participants
+  .col-opens
+  .col-closes
+  .col-payment
+  .col-options
+  .col-paid
+  .col-actions
+  */
+
+  .col-actions,
+  .col-payment,
+  .col-registration,
+  .col-participants,
+  .col-paid {
+    text-align: center;
+  }
+
+  tbody {
+    th, td {
+      vertical-align: middle;
+    }
+    .col-event {
+      color: $primaryColor;
+    }
+    .col-actions-wrapper {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }
+
+}

@@ -18,11 +18,17 @@
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
 
+{% include "assets/render-messages/render-messages.django" %}
+
 <form method="post">
   {% csrf_token %}
   {{ form|crispy }}
-  <input class="btn btn-primary" type="submit" value="Sign up" />
-  <a class="btn btn-default" href="{% url 'login' %}">Log in</a>
+
+  <div class="common-actions">
+    <input class="btn btn-primary" type="submit" value="Sign up" />
+    <a class="btn btn-link" href="{% url 'login' %}">Log in</a>
+  </div>
+
   <input type="hidden" name="next" value="{{ next }}" />
 </form>
 

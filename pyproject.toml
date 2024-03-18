@@ -74,8 +74,8 @@ dev = [
     "pytest-randomly",
     "setuptools",
     "blue>=0.9.1",  # Python formatter, based on black, but wit a support (at least) for single quotes coding style
-    "pyright>=1.1.353",  # TODO: Remove from shared deps
-    "djlint>=1.34.1",  # TODO: Remove from shared deps (?)
+    "pyright>=1.1.353",  # TODO: Linter for vim environment. Remove from shared deps
+    "djlint>=1.34.1",  # TODO: Linter for vscode. Remove from shared deps (?)
 ]
 
 [tool.djlint]

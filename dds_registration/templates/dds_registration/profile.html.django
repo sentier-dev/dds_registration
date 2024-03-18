@@ -29,17 +29,26 @@
     data-user-email="{{ user.email }}"
     data-user-last-login="{{ user.last_login }}"
   >
-    Welcome, {{ user.get_full_name|default:user.username }}. Thanks for logging in.
+    Welcome, {{ user.get_full_name|default:user.username }}.
   </p>
 {% endif %}
 
 {% if events %}
-  <p>Your registrations:</p>
+  <h3 class="primary-color">Your registrations:</h3>
   {% include "assets/events-list/events-list.django" %}
 {% else %}
   <p class="dimmed-info">
     You don't have any registrations yet.
   </p>
 {% endif %}
+
+<div>
+  {# TODO: Put common actions toolbar here #}
+  <a class="btn btn-primary" href="{% url 'profile_edit' %}">Edit profile</a>
+  {% comment %}
+  <a class="btn btn-primary" href="{% url 'password_change' %}">Change password</a>
+  <a class="btn btn-primary" href="{% url 'password_reset' %}">Reset password</a>
+  {% endcomment %}
+</div>
 
 {% endblock content %}

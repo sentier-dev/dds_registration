@@ -1,5 +1,5 @@
 # @module dds_registration/views/__init__.py
-# @changed 2024.03.13, 16:09
+# @changed 2024.03.15, 19:53
 
 
 from .root import (
@@ -15,6 +15,11 @@ from .event_registration import (
     event_registration_edit_success,
     event_registration_invoice,
     event_registration_payment,
+)
+
+from .user import (
+    # SignUpView,
+    edit_user_profile,
 )
 
 from .system import (

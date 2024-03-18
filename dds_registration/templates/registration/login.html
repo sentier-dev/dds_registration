@@ -21,12 +21,18 @@
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
 
+{% include "assets/render-messages/render-messages.django" %}
+
 <form role="form" method="post" action="{% url 'login' %}">
   {% csrf_token %}
   {{ form|crispy }}
-  <input class="btn btn-primary" type="submit" value="Login" />
-  <a class="btn btn-default" href="{% url 'django_registration_register' %}">Signup</a>
-  <a class="btn btn-default" href="{% url 'password_reset' %}">Reset password</a>
+
+  <div class="common-actions">
+    <input class="btn btn-primary" type="submit" value="Login" />
+    <a class="btn btn-link" href="{% url 'django_registration_register' %}">Sign up</a>
+    <a class="btn btn-link" href="{% url 'password_reset' %}">Reset password</a>
+  </div>
+
   <input type="hidden" name="next" value="{{ next }}" />
 </form>
 

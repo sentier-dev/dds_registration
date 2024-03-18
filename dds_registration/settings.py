@@ -222,9 +222,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+#  AUTH_USER_MODEL = APP_NAME + '.CustomUser'
 #  AUTH_PROFILE_MODULE = APP_NAME + '.User'
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
+
+REGISTRATION_SALT = 'OdUqhiXaWN'  # Random salt for registration keys (django_registration)
 
 # Registration
 # @see https://django-registration.readthedocs.io
