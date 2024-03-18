@@ -22,7 +22,7 @@ VAT CHE-329.638.515
 """
 invoice_no = '#2324'
 invoice_date = 'May 4, 2023'
-payment_terms = 'Within **30 business days** of invoice issuance.'
+payment_terms = 'Within **30 business days** of invoice issuance'
 #  payment_details_title = '**Payment details:**'
 payment_details = """
 Account Holder: Départ de Sentier, Dorfsteig 8, 5223 Riniken AG, Switzerland
@@ -66,7 +66,6 @@ def test_create_invoice_pdf():
         'invoice_no': invoice_no,
         'invoice_date': invoice_date,
         'payment_terms': payment_terms,
-        #  'payment_details_title': payment_details_title,
         'payment_details': payment_details,
         'table_data': table_data,
     }

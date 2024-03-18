@@ -163,7 +163,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     # Try to find active registrations for this event (prevent constrain exception)...
     try:
         # TODO: Go to the next stage with a message text?
-        regs = Registration.objects.filter(event=event, active=True)
+        regs = Registration.objects.filter(event=event, user=user, active=True)
         regs_count = len(regs)
         has_reg = bool(regs_count)
         if not create_new:
@@ -385,10 +385,12 @@ def calculate_total_registration_price(registration: Registration) -> int:
 
 def get_event_registration_context(request: HttpRequest, event_code: str):
     user = request.user
+    scheme = 'https' if request.is_secure() else 'http'
     context = {
         'event_code': event_code,
         'user': user,
         'site': get_current_site(request),
+        'scheme': scheme,
     }
     event = None
     registration = None
@@ -398,6 +400,8 @@ def get_event_registration_context(request: HttpRequest, event_code: str):
         registration = event.registrations.get(user=user, active=True)
         if not registration:
             raise Exception('Not found active registrations')
+        context.event = event
+        context.registration = registration
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         error_text = 'Not found event code "{}": {}'.format(event_code, sError)

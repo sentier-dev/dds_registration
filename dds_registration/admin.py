@@ -59,7 +59,7 @@ admin.site.register(User, UserAdmin)
 
 class RegistrationAdmin(admin.ModelAdmin):
     # NOTE: Trying to show non-editable fields (this approach doesn't work)
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['invoice_no', 'created_at', 'updated_at']
     search_fields = [
         # TODO?
         #  'user',  # Unsupported lookup 'icontains' for ForeignKey or join on the field not permitted.
@@ -69,6 +69,7 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     list_display = (
         'user_column',
+        'invoice_name',
         'event',
         'payment_method',
         'options_column',
@@ -87,6 +88,12 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     user_column.short_description = 'User'
     user_column.admin_order_field = 'user'
+
+    def invoice_name(self, reg):
+        return 'Invoice #{}'.format(reg.invoice_no)
+
+    invoice_name.short_description = 'Invoice'
+    invoice_name.admin_order_field = 'invoice_no'
 
     def options_column(self, reg):
         return ', '.join([p.item for p in reg.options.all()])

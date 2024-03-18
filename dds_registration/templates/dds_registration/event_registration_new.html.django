@@ -25,6 +25,20 @@
 <form class="data-form" method="post">
   {% csrf_token %}
 
+  <div class="event-info mb-3">
+    <p><span class="item-label">Event:</span> {{ event.title }}</p>
+    {% if event.description %}
+    <p><span class="item-label">Description:</span> {{ event.description }}</p>
+    {% endif %}
+    {% if event.registration_open %}
+      <p><span class="item-label">Registration opens:</span> {{ event.registration_open }}</p>
+    {% endif %}
+    {% if event.registration_close %}
+      <p><span class="item-label">Registration closes:</span> {{ event.registration_close }}</p>
+    {% endif %}
+    {# TODO: Add extra information about the event? #}
+  </div>
+
   <input type="hidden" name="event_code" value="{{ event_code }}" />
 
   {% include "assets/event_registration_form/event_registration_form.django" %}

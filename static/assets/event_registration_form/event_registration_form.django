@@ -75,3 +75,11 @@
   </fieldset>
 {% endif %}
 
+<fieldset id="options_basic" class="mb3 form-group">
+  <legend class="primary-color"><label for="@extra_invoice_text" class="form-label">Optional invoice text</label></legend>
+  <div class="mb-3">
+    {% comment %} <label for="@extra_invoice_text" class="form-label">Optional invoice text</label> {% endcomment %}
+    <textarea class="form-control" id="@extra_invoice_text" rows="5"></textarea>
+  </div>
+</fieldset>
+

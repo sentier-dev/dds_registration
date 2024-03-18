@@ -78,6 +78,7 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
     pdf_font_size = pdf.font_size
     line_height = pdf_font_size * 1.3
     vertical_space = line_height / 2
+    large_vertical_space = vertical_space * 2
     small_vertical_space = vertical_space / 2
     tiny_vertical_space = vertical_space / 4
 
@@ -109,23 +110,12 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
     max_right_top = max(left_stop_pos, right_stop_pos)
 
     # Put the title (invoice no), with an extra offset...
-    pdf.set_xy(left_column_pos, max_right_top + 2 * vertical_space)
+    pdf.set_xy(left_column_pos, max_right_top + large_vertical_space)
     pdf.multi_cell(text='Invoice ' + invoice_no, w=left_column_width, new_x='LEFT', new_y='NEXT', h=line_height)
-
-    if optional_text:
-        pdf.set_y(pdf.get_y() + small_vertical_space)
-        pdf.multi_cell(text=optional_text, w=left_column_width, new_x='LEFT', new_y='NEXT', h=line_height)
 
     pdf.set_y(pdf.get_y() + vertical_space)
 
-    # Make striped table condition...
-    class EvenOddCellFillMode:
-        @staticmethod
-        def should_fill_cell(i, j):
-            return i % 2 and j % 2
-
-    greyscale = 240
-
+    # Set gray color for table border
     pdf.set_draw_color(200)
 
     # @see https://py-pdf.github.io/fpdf2/Tables.html
@@ -136,7 +126,8 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
         padding=2,
         markdown=True,
         v_align='T',
-        cell_fill_color=greyscale,
+        # Stripped background
+        cell_fill_color=240,
         cell_fill_mode='ROWS',
     ) as table:
         for data_row in table_data:
@@ -145,18 +136,38 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
                 row.cell(str(data))
 
     # Put bottom texts...
-    pdf.set_y(pdf.get_y() + vertical_space)
-    pdf.multi_cell(text='Invoice date: ' + invoice_date, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height)
 
     pdf.set_y(pdf.get_y() + small_vertical_space)
-    pdf.multi_cell(
-        text='Payment terms: ' + payment_terms, markdown=True, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height
-    )
 
-    pdf.set_y(pdf.get_y() + small_vertical_space)
-    pdf.multi_cell(text='**Payment details:**', markdown=True, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height)
+    if invoice_date:
+        pdf.set_y(pdf.get_y() + small_vertical_space)
+        pdf.multi_cell(text='Invoice date: ' + invoice_date, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height)
 
-    pdf.set_y(pdf.get_y() + tiny_vertical_space)
-    pdf.multi_cell(text=payment_details.strip(), markdown=True, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height)
+    if payment_terms:
+        pdf.set_y(pdf.get_y() + small_vertical_space)
+        pdf.multi_cell(
+            text='Payment terms: ' + payment_terms,
+            markdown=True,
+            w=page_width,
+            new_x='LEFT',
+            new_y='NEXT',
+            h=line_height,
+        )
+
+    if payment_details:
+        pdf.set_y(pdf.get_y() + small_vertical_space)
+        pdf.multi_cell(
+            text='**Payment details:**', markdown=True, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height
+        )
+        pdf.set_y(pdf.get_y() + tiny_vertical_space)
+        pdf.multi_cell(
+            text=payment_details.strip(), markdown=True, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height
+        )
+
+    if optional_text:
+        pdf.set_y(pdf.get_y() + large_vertical_space)
+        pdf.multi_cell(
+            text='__{}__'.format(optional_text), markdown=True, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height
+        )
 
     return pdf
