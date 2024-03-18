@@ -1,4 +1,3 @@
-import socket
 import string
 import random
 from functools import partial
@@ -6,20 +5,14 @@ from datetime import date
 
 from django.conf import settings
 from django.contrib.sites.models import Site  # To access site properties
-from django import forms
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.urls import reverse
-from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import (
     Group,
     User,
 )
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-
-from django.db.models.signals import post_save
 
 from core.constants.date_time_formats import dateTimeFormat
 

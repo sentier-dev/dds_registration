@@ -1,24 +1,19 @@
 # @module dds_registration/views/event_registration.py
-# @changed 2024.03.13, 17:47
+# @changed 2024.03.19, 01:40
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.sites.shortcuts import get_current_site
-from django.http import HttpRequest
-from django.shortcuts import render, redirect
-from django.template.loader import render_to_string
-from django.conf import settings
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
 
-from functools import reduce
 import traceback
 import logging
 
 from core.helpers.errors import errorToString
+from core.helpers.create_invoice_pdf import create_invoice_pdf
 
-from ..models import (
-    Event,
-    Registration,
-)
+from .get_invoice_context import get_invoice_context
+
 
 from .helpers import (
     event_registration_form,
@@ -69,8 +64,12 @@ def event_registration_edit_success(request: HttpRequest, event_code: str):
 def event_registration_invoice(request: HttpRequest, event_code: str):
     # TODO: Generate invoice pdf
     template = 'dds_registration/event_registration_invoice.html.django'
-    context = get_event_registration_context(request, event_code)
-    return render(request, template, context)
+    context = get_invoice_context(request, event_code)
+    show_debug = False
+    if show_debug:
+        return render(request, template, context)
+    pdf = create_invoice_pdf(context)
+    return HttpResponse(bytes(pdf.output()), content_type='application/pdf')
 
 
 @login_required

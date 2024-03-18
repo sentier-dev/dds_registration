@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.contrib.auth.models import User
 
 from functools import reduce
 import traceback
@@ -94,7 +95,7 @@ def send_re_actvation_email(request: HttpRequest, user: AbstractBaseUser | Anony
         raise err
 
 
-def get_events_list(request: HttpRequest, events: list[Event], show_archived=False):
+def get_events_list(request: HttpRequest, events: list[Event]):
     if not events or not events.count():
         return None
     result = []
@@ -137,6 +138,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     reg_options = None
     checked_option_ids = []  # Will be got from post request, see below
     payment_method = Registration.DEFAULT_PAYMENT_METHOD
+    extra_invoice_text = ''
     # Is data ready to save
     data_ready = False
 
@@ -225,11 +227,13 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     # Get data from registration object, if it's found...
     if reg:
         payment_method = reg.payment_method
+        extra_invoice_text = reg.extra_invoice_text
         options = reg.options
         checked_option_ids = list(map(lambda item: item.id, options.all()))
         debug_data = {
             'reg': reg,
             'payment_method': payment_method,
+            'extra_invoice_text': extra_invoice_text,
             'checked_option_ids': checked_option_ids,
         }
         LOG.debug('Object data: %s', debug_data)
@@ -239,12 +243,14 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     if has_post_data:
         # Get payment method...
         payment_method = request.POST.get('payment_method', Registration.DEFAULT_PAYMENT_METHOD)
+        extra_invoice_text = request.POST.get('extra_invoice_text', '')
         # Retrieve new options list from the post data...
         new_checked_option_ids = request.POST.getlist('checked_option_ids')
         checked_option_ids = list(map(int, new_checked_option_ids))
         debug_data = {
             'request.POST': request.POST,
             'payment_method': payment_method,
+            'extra_invoice_text': extra_invoice_text,
             'checked_option_ids': checked_option_ids,
         }
         LOG.debug('Post data: %s', debug_data)
@@ -281,6 +287,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
         context['checked_option_ids'] = checked_option_ids
         context['PAYMENT_METHODS'] = Registration.PAYMENT_METHODS
         context['payment_method'] = payment_method
+        context['extra_invoice_text'] = extra_invoice_text
         # If data_ready: save data and go to the next stage
         if data_ready:
             # TODO: If data_ready: save data and go to the next stage
@@ -292,6 +299,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
                 reg.user = user
             # Set/update parameters...
             reg.payment_method = payment_method
+            reg.extra_invoice_text = extra_invoice_text
             if create_new:
                 reg.save()  # Save object before set many-to-many relations
             reg.options.set(options)
@@ -300,6 +308,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
                 'options': options,
                 'checked_option_ids': checked_option_ids,
                 'payment_method': payment_method,
+                'extra_invoice_text': extra_invoice_text,
             }
             LOG.debug('Creating a registration: %s', debug_data)
             # TODO: Send an e-mail message (if registration has been created)...
@@ -397,11 +406,11 @@ def get_event_registration_context(request: HttpRequest, event_code: str):
     # Try to get event object by code...
     try:
         event = Event.objects.get(code=event_code)
-        registration = event.registrations.get(user=user, active=True)
+        registration = event.registrations.get(user=user, event=event, active=True)
         if not registration:
             raise Exception('Not found active registrations')
-        context.event = event
-        context.registration = registration
+        context['event'] = event
+        context['registration'] = registration
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         error_text = 'Not found event code "{}": {}'.format(event_code, sError)
@@ -463,10 +472,20 @@ def send_event_registration_success_message(request: HttpRequest, event_code: st
         raise err
 
 
+def get_full_user_name(user: User) -> str:
+    if not user:
+        return ''
+    full_name = user.get_full_name()
+    if not full_name:
+        full_name = user.username
+    return full_name
+
+
 __all__ = [
     get_events_list,
     get_event_registration_form_context,
     event_registration_form,
     show_registration_form_success,
     get_event_registration_context,
+    get_full_user_name,
 ]
