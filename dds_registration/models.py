@@ -14,12 +14,10 @@ from django.contrib.auth.models import (
 )
 
 
-from core.constants.date_time_formats import dateTimeFormat
+from .core.constants.date_time_formats import dateTimeFormat
 
 
 alphabet = string.ascii_lowercase + string.digits
-
-
 random_code_length = 8
 
 

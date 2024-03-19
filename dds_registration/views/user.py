@@ -1,24 +1,14 @@
-# @module dds_registration/views/user.py
-# @changed 2024.03.15, 19:53
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpRequest
 from django.shortcuts import render, redirect
-from django.template.loader import render_to_string
-from django.conf import settings
-from django.views import generic
 
-# from django_registration.views import RegistrationView as BaseSignUpView
-
-from functools import reduce
 import traceback
 import logging
 
 from core.helpers.errors import errorToString
 
-from ..forms import SignUpForm, UpdateUserForm, UpdateProfileForm
+from ..forms import UpdateUserForm, UpdateProfileForm
 
 from ..models import (
     Profile,
@@ -28,11 +18,6 @@ from .helpers import send_re_actvation_email
 
 
 LOG = logging.getLogger(__name__)
-
-
-# class SignUpView(BaseSignUpView):
-#     # NOTE: It causes a bug: `NonImplemented`
-#     form_class = SignUpForm
 
 
 @login_required
