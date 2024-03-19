@@ -143,3 +143,6 @@ dmypy.json
 *.tmp
 *.zip
 *.tgz
+
+# Demo generated invoice pdf
+test.pdf

@@ -1,4 +1,3 @@
-import socket
 import string
 import random
 from functools import partial
@@ -6,20 +5,14 @@ from datetime import date
 
 from django.conf import settings
 from django.contrib.sites.models import Site  # To access site properties
-from django import forms
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.urls import reverse
-from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import (
     Group,
     User,
 )
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-
-from django.db.models.signals import post_save
 
 from core.constants.date_time_formats import dateTimeFormat
 
@@ -45,6 +38,9 @@ class Event(models.Model):
         help_text='Maximum number of participants to this event (0 = no limit)',
     )
     currency = models.TextField(null=True, blank=True)  # Show as an input
+
+    payment_deadline_days = models.IntegerField(default=30)
+    payment_details = models.TextField(blank=True, default='')
 
     # TODO: Add closed/finished status?
 
@@ -114,6 +110,8 @@ class Registration(models.Model):
     Ex `Booking` class in OneEvent
     """
 
+    invoice_no = models.AutoField(primary_key=True)
+
     event = models.ForeignKey(Event, related_name='registrations', on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
     options = models.ManyToManyField(RegistrationOption)
@@ -125,6 +123,8 @@ class Registration(models.Model):
     ]
     DEFAULT_PAYMENT_METHOD = 'STRIPE'
     payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
+
+    extra_invoice_text = models.TextField(blank=True, default='')
 
     paid = models.BooleanField(default=False)
     paid_date = models.DateTimeField(blank=True, null=True)

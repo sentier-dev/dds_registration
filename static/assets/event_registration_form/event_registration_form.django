@@ -1,7 +1,7 @@
 {# ex: set ft=htmldjango : #}
 <!--
   @module event_registration_form.django
-  @changed 2024.03.12, 23:14
+  @changed 2024.03.19, 01:42
 -->
 
 <fieldset id="payment_method" class="mb3 form-group">
@@ -74,4 +74,12 @@
     {% endfor %}
   </fieldset>
 {% endif %}
+
+<!-- Invoice text -->
+<fieldset id="options_basic" class="mb3 form-group">
+  <legend class="primary-color"><label for="@extra_invoice_text" class="form-label">Optional invoice text</label></legend>
+  <div class="mb-3">
+    <textarea class="form-control" id="@extra_invoice_text" name="extra_invoice_text" rows="5">{{ extra_invoice_text }}</textarea>
+  </div>
+</fieldset>
 
