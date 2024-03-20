@@ -1,10 +1,10 @@
 {
   "projectName": "dds_registration",
-  "timestamp": "2024.03.20 13:10 +0700",
-  "timetag": "240320-1310",
-  "version": "0.0.10",
-  "currentTimeStr": "2024.03.20 13:10 +0700",
-  "currentTimeTag": "240320-1310",
-  "gitCommitHash": "c0e8251",
-  "gitBranch": "31-cancel-registration"
+  "timestamp": "2024.03.20 18:19 +0700",
+  "timetag": "240320-1819",
+  "version": "0.0.11",
+  "currentTimeStr": "2024.03.20 18:19 +0700",
+  "currentTimeTag": "240320-1819",
+  "gitCommitHash": "624e688",
+  "gitBranch": "33-templates-folder"
 }
