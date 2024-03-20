@@ -118,6 +118,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "livereload",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -154,7 +155,6 @@ MIDDLEWARE = [
 # Add livereload app...
 # @see https://pypi.org/project/django-livereload/
 # Run the reload server with a command: `python manage.py livereload static`
-INSTALLED_APPS.insert(0, "livereload")
 if False or DEV:
     MIDDLEWARE.append("livereload.middleware.LiveReloadScript")
 

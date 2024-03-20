@@ -6,6 +6,7 @@ import environ
 
 APP_NAME = "dds_registration"
 SITE_ID = 1
+LOCAL=False
 
 env = environ.Env(
     # @see https://django-environ.readthedocs.io
@@ -63,6 +64,7 @@ CSRF_TRUSTED_ORIGINS = ["https://events.d-d-s.ch"]
 # Application definition
 
 INSTALLED_APPS = [
+    "livereload",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -95,7 +97,7 @@ ROOT_URLCONF = "dds_registration.urls"
 TEMPLATES_PATH = BASE_DIR / APP_NAME / "templates"
 TEMPLATE_DIRS = [
     TEMPLATES_PATH,
-    # STATIC_ROOT,
+    STATIC_ROOT,
 ]
 
 TEMPLATES = [
