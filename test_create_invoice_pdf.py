@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from core.helpers.create_invoice_pdf import create_invoice_pdf, TInvoicePdfParams
+from dds_registration.core.helpers.create_invoice_pdf import create_invoice_pdf, TInvoicePdfParams
 
 # External parameters
 

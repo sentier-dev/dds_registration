@@ -15,7 +15,7 @@ from django.http import HttpRequest
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 
-from core.helpers.errors import errorToString
+from .core.helpers.errors import errorToString
 
 from ..models import Event, Registration, RegistrationOption
 
