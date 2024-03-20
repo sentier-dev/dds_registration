@@ -4,7 +4,7 @@ from django.forms import ModelForm
 from django.contrib import messages
 from django.http import HttpRequest
 
-from core.helpers.utils import capitalize_id
+from .core.helpers.utils import capitalize_id
 
 
 __all__ = [
