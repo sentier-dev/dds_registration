@@ -50,6 +50,8 @@ urlpatterns = [
         views.event_registration_cancel_process,
         name='event_registration_cancel_process',
     ),
+    # NOTE: It looks that this route (for `event_registration_edit`) has been lost during conflict resolvings
+    path('event/<str:event_code>/registration/edit', views.event_registration_edit, name='event_registration_edit'),
     path(
         'event/<str:event_code>/registration/edit/success',
         views.event_registration_edit_success,
