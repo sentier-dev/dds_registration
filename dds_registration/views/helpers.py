@@ -253,30 +253,34 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     # Final step: prepare data, save created registration, render form...
     try:
         # NOTE: It's required to have at least one checked basic option! Going to check it...
+        reg_options_addons = reg_options.filter(add_on=True)  # Unused
         reg_options_basic = reg_options.filter(add_on=False)
         reg_options_basic_ids = list(map(lambda item: item.id, reg_options_basic))
         reg_options_basic_checked_ids = list(set(checked_option_ids) & set(reg_options_basic_ids))
         has_reg_options_basic_checked = bool(len(reg_options_basic_checked_ids))
+        many_reg_options_basic_checked = has_reg_options_basic_checked and len(reg_options_basic_checked_ids) > 1
         if not has_reg_options_basic_checked:
-            # Continue form edit and show message
+            # Return to form editing and show message
             error_text = 'At least one basic option should be selected'
-            debug_data = {
-                'reg_options': reg_options,
-                'reg_options_basic': reg_options_basic,
-                'reg_options_basic_ids': reg_options_basic_ids,
-                'reg_options_basic_checked_ids': reg_options_basic_checked_ids,
-                'has_reg_options_basic_checked': has_reg_options_basic_checked,
-                'checked_option_ids': checked_option_ids,
-            }
-            LOG.error('Checking error: %s: %s', error_text, debug_data)
+            # Silently make the first available (if any) basic option selected...
             if len(reg_options_basic_ids):
-                # Silently make the first basic option selected (if no user data has posted yet)...
                 checked_option_ids.append(reg_options_basic_ids[0])
             if has_post_data:
                 # If had user data posted then show an error mnessgae...
                 messages.warning(request, error_text)
             data_ready = False
-        #  reg_options_addons = reg_options.filter(add_on=True)
+        elif many_reg_options_basic_checked:
+            # Return to form editing and show message
+            error_text = 'Only one basic option should be selected'
+            # Remove the extra elements from the ids list (use only first element)
+            checked_option_ids = list(map(lambda item: item.id, reg_options_addons))
+            checked_option_ids.append(reg_options_basic_ids[0])
+            if has_post_data:
+                # If had user data posted then show an error mnessgae...
+                messages.warning(request, error_text)
+            data_ready = False
+        context['reg_options_basic'] = reg_options_basic
+        context['reg_options_addons'] = reg_options_addons
         context['checked_option_ids'] = checked_option_ids
         context['PAYMENT_METHODS'] = Registration.PAYMENT_METHODS
         context['payment_method'] = payment_method

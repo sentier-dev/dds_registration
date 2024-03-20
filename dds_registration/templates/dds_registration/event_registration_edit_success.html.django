@@ -24,6 +24,6 @@
 
 <p>Your registration for the event <strong>{{ event.title }}</strong> has been successfully saved.</p>
 
-<p>You can <a href="{% url 'event_registration_edit' event_code=event_code %}">edit</a> it again or <u>cancel</u> it, or go to <a href="{% url 'profile' %}">profile</a> to view all your registrations.</p>
+<p>You can <a href="{% url 'event_registration_edit' event_code=event_code %}">edit</a> it again or <a href="{% url 'event_registration_cancel' event_code=event_code %}">cancel</a> it, or go to <a href="{% url 'profile' %}">profile</a> to view all your registrations.</p>
 
 {% endblock content %}
