@@ -6,7 +6,7 @@ if !exists('g:lvmrc_called')
   " Add exclusions for Ctrl-P lookup...
 
   " Ignore vendor/static files (add pattern to the end of exclusions list)...
-  let g:ctrlp_custom_ignore['dir'] = substitute(g:ctrlp_custom_ignore['dir'], ')$', '|static[\\/](vendor|admin|django)$)', '')
+  let g:ctrlp_custom_ignore['dir'] = substitute(g:ctrlp_custom_ignore['dir'], ')$', '|(src|static)[\\/](vendor|admin|django)$)', '')
   " NOTE: It seems that this code runs for each file
 
   let g:lvmrc_called = 1

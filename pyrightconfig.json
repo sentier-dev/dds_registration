@@ -16,6 +16,7 @@
     "*cache",
     "static/CACHE",
     "static/vendor",
+    "src/vendor",
     "__pycache__",
     "node_modules",
   ],
