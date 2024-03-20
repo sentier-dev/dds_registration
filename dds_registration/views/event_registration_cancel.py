@@ -109,8 +109,7 @@ def get_event_registration_cancel_context(request: HttpRequest, event_code: str)
         regs_count = len(regs)
         has_reg = bool(regs_count)
         if not has_reg:
-            msg_text = 'Not found an active registration for the event "{}"'.format(
-                event.title)
+            msg_text = 'Not found an active registration for the event "{}"'.format(event.title)
             debug_data = {
                 'event_code': event_code,
             }
@@ -122,8 +121,7 @@ def get_event_registration_cancel_context(request: HttpRequest, event_code: str)
         else:
             registration = regs[0]
     except Exception as err:
-        error_text = 'Got error while tried to check existed registrations for event "{}"'.format(
-            event_code)
+        error_text = 'Got error while tried to check existed registrations for event "{}"'.format(event_code)
         messages.error(request, error_text)
         #  sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())
@@ -168,8 +166,7 @@ def event_registration_cancel_confirm_form(
     form_template: str,
     success_redirect: str = None,
 ):
-    context = get_event_registration_cancel_context(
-        request, event_code=event_code)
+    context = get_event_registration_cancel_context(request, event_code=event_code)
     # Redirect on errors or other special cases...
     if 'redirect' in context and context['redirect']:
         if context['redirect'] == 'SUCCESS':
@@ -188,8 +185,7 @@ def event_registration_cancel_process_action(
     event_code: str,
     success_redirect: str = None,
 ):
-    context = get_event_registration_cancel_context(
-        request, event_code=event_code)
+    context = get_event_registration_cancel_context(request, event_code=event_code)
     # Redirect on errors or other special cases...
     if 'redirect' in context and context['redirect']:
         if context['redirect'] == 'SUCCESS':
