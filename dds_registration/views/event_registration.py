@@ -12,9 +12,11 @@ import logging
 from core.helpers.errors import errorToString
 from core.helpers.create_invoice_pdf import create_invoice_pdf
 
+from .event_registration_cancel import (
+    event_registration_cancel_confirm_form,
+    event_registration_cancel_process_action,
+)
 from .get_invoice_context import get_invoice_context
-
-
 from .helpers import (
     event_registration_form,
     show_registration_form_success,
@@ -43,6 +45,26 @@ def event_registration_edit(request: HttpRequest, event_code: str):
         event_code=event_code,
         form_template='dds_registration/event_registration_edit.html.django',
         success_redirect='event_registration_edit_success',
+    )
+
+
+@login_required
+def event_registration_cancel_confirm(request: HttpRequest, event_code: str):
+    return event_registration_cancel_confirm_form(
+        request,
+        event_code=event_code,
+        form_template='dds_registration/event_registration_cancel_confirm.html.django',
+        success_redirect='profile',
+    )
+
+
+@login_required
+def event_registration_cancel_process(request: HttpRequest, event_code: str):
+    return event_registration_cancel_process_action(
+        request,
+        event_code=event_code,
+        #  form_template=None,
+        success_redirect='profile',
     )
 
 

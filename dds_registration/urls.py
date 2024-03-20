@@ -20,7 +20,7 @@ urlpatterns = [
     ),
     path('accounts/', include('django.contrib.auth.urls')),
     #  path(
-    #      # Overrided registration form (with extra fields), causes error
+    #      # Overriden registration form (with extra fields), causes error
     #      'accounts/signup',
     #      views.SignUpView.as_view(),
     #      name='django_registration_register',
@@ -38,6 +38,16 @@ urlpatterns = [
         name='event_registration_new_success',
     ),
     path('event/<str:event_code>/registration/edit', views.event_registration_edit, name='event_registration_edit'),
+    path(
+        'event/<str:event_code>/registration/cancel',
+        views.event_registration_cancel_confirm,
+        name='event_registration_cancel',
+    ),
+    path(
+        'event/<str:event_code>/registration/cancel/process',
+        views.event_registration_cancel_process,
+        name='event_registration_cancel_process',
+    ),
     path(
         'event/<str:event_code>/registration/edit/success',
         views.event_registration_edit_success,

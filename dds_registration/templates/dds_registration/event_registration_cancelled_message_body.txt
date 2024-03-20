@@ -1,0 +1,5 @@
+{# ex: set ft=htmldjango : #}
+You already canceled registration for the event {{ event.title }}.
+
+
+Sincerely, {{ site.name }} Management

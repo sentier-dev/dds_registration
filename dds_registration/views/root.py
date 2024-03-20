@@ -38,7 +38,7 @@ def profile(request: HttpRequest):
     if events_list and len(events_list):
         context['events'] = events_list
     # else:
-    #     messages.info(request, "You don't have any registrations yet")
+    #     messages.info(request, "You don't have any active registrations yet")
     return render(request, 'dds_registration/profile.html.django', context)
 
 
