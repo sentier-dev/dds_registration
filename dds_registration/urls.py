@@ -6,7 +6,7 @@ from django.views.decorators.cache import cache_page
 from . import views
 
 cache_timeout = 15 * 60  # in seconds: {min}*60
-if settings.LOCAL or settings.DEBUG:
+if settings.DEV or settings.DEBUG:
     cache_timeout = 0
 
 
