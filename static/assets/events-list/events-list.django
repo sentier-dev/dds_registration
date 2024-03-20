@@ -59,11 +59,14 @@
         </td>
         <td class="col-actions">
           <div class="col-actions-wrapper">
-            <a class="btn btn-primary btn-icon" title="Edit" href="{% url 'event_registration_edit' event_code=event.code %}"><i class="bi bi-pencil"></i></a>
-            <a class="btn btn-primary btn-icon" title="Cancel" disabled><i class="bi bi-x-lg"></i></a>
+            <a class="btn btn-primary btn-icon" title="Edit registration" href="{% url 'event_registration_edit' event_code=event.code %}">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <a class="btn btn-primary btn-icon" title="Cancel registration" href="{% url 'event_registration_cancel' event_code=event.code %}">
+              <i class="bi bi-x-lg"></i>
+            </a>
           </div>
         </td>
-
       </tr>
     {% endwith %}
   {% endfor %}

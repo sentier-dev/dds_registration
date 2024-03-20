@@ -114,6 +114,10 @@ class Registration(models.Model):
 
     event = models.ForeignKey(Event, related_name='registrations', on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
+
+    # If the registration has cancelled, the `active` status should be set to false
+    active = models.BooleanField(default=True)
+
     options = models.ManyToManyField(RegistrationOption)
 
     # Payment method:
@@ -128,9 +132,6 @@ class Registration(models.Model):
 
     paid = models.BooleanField(default=False)
     paid_date = models.DateTimeField(blank=True, null=True)
-
-    # If the registration has cancelled, the `active` status should be set to false
-    active = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

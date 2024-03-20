@@ -38,7 +38,8 @@
   {% include "assets/events-list/events-list.django" %}
 {% else %}
   <p class="dimmed-info">
-    You don't have any registrations yet.
+    You don't have any active registrations yet.
+    You must receive an invitation to the event from its owner to be able to apply for registration.
   </p>
 {% endif %}
 

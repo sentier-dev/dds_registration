@@ -15,6 +15,8 @@ from .event_registration import (
     event_registration_edit_success,
     event_registration_invoice,
     event_registration_payment,
+    event_registration_cancel_confirm,
+    event_registration_cancel_process,
 )
 
 from .user import (

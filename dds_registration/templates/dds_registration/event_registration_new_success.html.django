@@ -22,8 +22,15 @@
 
 {% include "assets/render-messages/render-messages.django" %}
 
-<p>Your registration for the event {{ event.title }} has been successfully created.</p>
+<p>Your registration for the event <strong>{{ event.title }}</strong> has been successfully created.</p>
 
-<p>Now you can <a href="{% url 'event_registration_edit' event_code=event_code %}">edit</a> or <u>cancel</u> it, or go to <a href="{% url 'profile' %}">profile</a> to view all your registrations.</p>
+<p>Now you can:</p>
+<ul>
+  <li><a href="{% url 'event_registration_payment' event_code=event.code %}">View your payment info,</a></li>
+  <li><a href="{% url 'event_registration_invoice' event_code=event.code %}">Download an invoice,</a></li>
+  <li><a href="{% url 'event_registration_edit' event_code=event_code %}">Edit,</a></li>
+  <li><a href="{% url 'event_registration_cancel' event_code=event_code %}">Cancel,</a></li>
+  <li><a href="{% url 'profile' %}">Go to the profile</a> to view all your registrations.</li>
+  </ul>
 
 {% endblock content %}

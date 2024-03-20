@@ -1,0 +1,33 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module dds_registration/templates/dds_registration/event_registration_cancel_confirm.html.django
+  @changed 2024.03.20, 12:26
+-->
+
+{% extends "base-regular.html.django" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Registration cancel confirmation — {{ block.super }}{% endblock title %}
+
+{% block content %}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Registration cancel confirmation</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+{% include "assets/render-messages/render-messages.django" %}
+
+<p>Are you sure you want to cancel registration for the event <strong>{{ event.title }}</strong>?</p>
+
+<form method="post" action="{% url 'event_registration_cancel_process' event_code=event_code %}">
+  {% csrf_token %}
+  <div class="submit-row">
+    <input class="btn btn-danger" type="submit" value="Yes, I want to confirm cancellation" />
+    <a class="btn btn-primary" href="{% url 'profile' %}" onClick="history.back(); return false">No, go back</a>
+  </div>
+</form>
+
+{% endblock %}
