@@ -1,7 +1,7 @@
 __all__ = (
-    "__version__",
-    "__timestamp__",
-    "__timetag__",
+    __version__,
+    __timestamp__,
+    __timetag__,
 )
 
 #  from .models import AppUser

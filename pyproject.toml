@@ -97,7 +97,6 @@ target-version = ['py37']
 include = "\\.py$"
 force-exclude = '''
 ^/.*/migrations/
-| ^/dds_registration/__init__
 | ^/.git/
 | ^/node_modules/
 | ^/.vscode/

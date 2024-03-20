@@ -126,6 +126,10 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
@@ -243,7 +247,7 @@ ACCOUNT_ACTIVATION_DAYS = 7   # One-week activation window
 DEFAULT_FROM_EMAIL = 'noreply@d-d-s.ch'
 # TODO: Store parameters in `django-preferences` (see)?
 EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_HOST_USER = 'apikey'   # this is exactly the value 'apikey'
+EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 # NOTE: Set your `SENDGRID_API_KEY` in `.env` (see `.env.SAMPLE` for example)
@@ -359,6 +363,8 @@ PASS_VARIABLES = {
     # NOTE: Site url and name should be taken from site data via `get_current_site`
     'SITE_NAME': SITE_NAME,
     'SITE_TITLE': SITE_TITLE,
+    'SITE_DESCRIPTION': SITE_DESCRIPTION,
+    'SITE_KEYWORDS': SITE_KEYWORDS,
     'SITE_DESCRIPTION': SITE_DESCRIPTION,
     'SITE_KEYWORDS': SITE_KEYWORDS,
 }

@@ -20,26 +20,19 @@ admin.site.register(Message)
 
 class ProfileInline(admin.StackedInline):
     model = Profile
-    verbose_name_plural = "Profile"
+    verbose_name_plural = 'Profile'
 
 
 class UserAdmin(BaseUserAdmin):
     inlines = (ProfileInline,)
-    #  def get_inline_instances(self, request, obj=None):
-    #      if not obj:
-    #          return list()
-    #      return super(UserAdmin, self).get_inline_instances(request, obj)
 
     list_display = (
-        "username",
-        "email",
-        "first_name",
-        "last_name",
-        "is_active",
-        "is_staff",
-        #  'profile.address',
-        #  'address',
-        #  'is_superuser',
+        'username',
+        'email',
+        'first_name',
+        'last_name',
+        'is_active',
+        'is_staff',
     )
 
     def get_address(self):
@@ -52,7 +45,7 @@ admin.site.register(User, UserAdmin)
 
 class RegistrationAdmin(admin.ModelAdmin):
     # NOTE: Trying to show non-editable fields (this approach doesn't work)
-    readonly_fields = ["invoice_no", "created_at", "updated_at"]
+    readonly_fields = ['invoice_no', 'created_at', 'updated_at']
     search_fields = [
         # TODO?
         #  'user',  # Unsupported lookup 'icontains' for ForeignKey or join on the field not permitted.
@@ -61,14 +54,14 @@ class RegistrationAdmin(admin.ModelAdmin):
     ]
 
     list_display = (
-        "user_column",
-        "invoice_name",
-        "event",
-        "payment_method",
-        "options_column",
-        "active",
-        "paid",
-        "created_at",
+        'user_column',
+        'invoice_name',
+        'event',
+        'payment_method',
+        'options_column',
+        'active',
+        'paid',
+        'created_at',
     )
 
     def user_column(self, reg):
@@ -76,23 +69,23 @@ class RegistrationAdmin(admin.ModelAdmin):
         full_name = user.get_full_name()
         name = full_name if full_name else user.username
         if user.email:
-            name += " <{}>".format(user.email)
+            name += ' <{}>'.format(user.email)
         return name
 
-    user_column.short_description = "User"
-    user_column.admin_order_field = "user"
+    user_column.short_description = 'User'
+    user_column.admin_order_field = 'user'
 
     def invoice_name(self, reg):
-        return "Invoice #{}".format(reg.invoice_no)
+        return 'Invoice #{}'.format(reg.invoice_no)
 
-    invoice_name.short_description = "Invoice"
-    invoice_name.admin_order_field = "invoice_no"
+    invoice_name.short_description = 'Invoice'
+    invoice_name.admin_order_field = 'invoice_no'
 
     def options_column(self, reg):
-        return ", ".join([p.item for p in reg.options.all()])
+        return ', '.join([p.item for p in reg.options.all()])
 
-    options_column.short_description = "Options"
-    options_column.admin_order_field = "options"
+    options_column.short_description = 'Options'
+    options_column.admin_order_field = 'options'
 
 
 admin.site.register(Registration, RegistrationAdmin)
@@ -101,14 +94,14 @@ admin.site.register(Registration, RegistrationAdmin)
 class RegistrationOptionAdmin(admin.ModelAdmin):
     form = RegistrationOptionAdminForm
     search_fields = [
-        "item",
+        'item',
         #  'event',  # NOTE: Unsupported lookup 'icontains' for ForeignKey or join on the field not permitted.
     ]
     list_display = (
-        "item",
-        "price",
-        "add_on",
-        "event",
+        'item',
+        'price',
+        'add_on',
+        'event',
     )
 
 
@@ -118,21 +111,21 @@ admin.site.register(RegistrationOption, RegistrationOptionAdmin)
 class EventAdmin(admin.ModelAdmin):
     # TODO: Show linked options (in columns and in the form)?
     readonly_fields = [
-        "registration_open",
-        "new_registration_full_url",
+        'registration_open',
+        'new_registration_full_url',
     ]
     search_fields = [
-        "title",
+        'title',
     ]
     form = EventAdminForm
     list_display = (
-        "title",
-        "code",
-        "max_participants",
-        "currency",
-        "registration_open",
-        "registration_close",
-        "new_registration_full_url",
+        'title',
+        'code',
+        'max_participants',
+        'currency',
+        'registration_open',
+        'registration_close',
+        'new_registration_full_url',
     )
 
 
@@ -142,10 +135,10 @@ admin.site.register(Event, EventAdmin)
 class DiscountCodeAdmin(admin.ModelAdmin):
     form = DiscountCodeAdminForm
     list_display = (
-        "event",
-        "code",
-        "percentage",
-        "absolute",
+        'event',
+        'code',
+        'percentage',
+        'absolute',
     )
 
 

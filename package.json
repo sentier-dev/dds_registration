@@ -29,7 +29,6 @@
     "watch-assets": "echo --Watch all assets-- && gulp watchAll",
     "livereload-server": "echo --Start livereload server-- && python manage.py livereload static",
     "start-django": "echo --Start django dev server-- && python manage.py runserver",
-    "pyformat-OLD": "echo --Run python formatter /autopep8, venv/-- && autopep8 .",
     "pyformat": "echo --Run python formatter /blue, venv/-- && blue ./**/*.py",
     "pylint": "echo --Run python linter /pyright, venv/-- && pyright .",
     "check-all": "echo --Run all python checkers /autopep8, venv/-- && npm-run-all pyformat pylint",
