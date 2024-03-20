@@ -59,7 +59,14 @@ pip install -e .
 
 ## Copy static content to `/var/www`:
 
-Tomas please fix this :)
+Tomás please fix this :)
+
+You also need to run the SASS preprocessor, which will create the `static/CACHE` directory. This also needs to be copied over to `var/www`.
+
+```bash
+npm install gulp
+npm run update-assets
+```
 
 ## Set up NGINX config
 
@@ -157,4 +164,29 @@ Environment=REGISTRATION_SALT=""
 
 [Install]
 WantedBy=multi-user.target
+```
+
+Get the permissions right:
+
+```bash
+sudo chmod 755 /etc/systemd/system/dds-registration.service
+sudo chown root:root /etc/systemd/system/dds-registration.service
+```
+
+If this is your first time, you need to enable the service:
+
+```bash
+sudo systemctl enable dds-registration
+```
+
+Otherwise, if you changed the config, you need to [reload the system.d](https://www.freedesktop.org/software/systemd/man/latest/systemctl.html#daemon-reload) config:
+
+```bash
+sudo systemctl daemon-reload
+```
+
+Then you can start the service:
+
+```bash
+sudo systemctl start dds-registration
 ```
