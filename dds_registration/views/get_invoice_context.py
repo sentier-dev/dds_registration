@@ -11,8 +11,8 @@ from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpRequest
 
-from core.constants.date_time_formats import dateFormat
-from core.helpers.errors import errorToString
+from ..core.constants.date_time_formats import dateFormat
+from ..core.helpers.errors import errorToString
 
 from ..models import Event, Profile, Registration, RegistrationOption
 from .helpers import calculate_total_registration_price, get_full_user_name
