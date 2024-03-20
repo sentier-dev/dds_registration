@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import environ
 import posixpath
@@ -85,6 +84,7 @@ COMPRESS_PRECOMPILERS = (
     #  ('text/foobar', 'path.to.MyPrecompilerFilter'),
 )
 
+# These settings already exist in `default_settings.py` Should we remove those?
 ALLOWED_HOSTS = ['events.d-d-s.ch']
 CSRF_TRUSTED_ORIGINS = ['https://events.d-d-s.ch']
 
@@ -106,7 +106,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'django_registration',
-    'dds_registration',
+    APP_NAME,
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
@@ -150,14 +150,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'dds_registration.context_processors.common_values',
+                APP_NAME + '.context_processors.common_values',
             ],
         },
         'DIRS': TEMPLATE_DIRS,
     },
 ]
 
-WSGI_APPLICATION = 'dds_registration.wsgi.application'
+WSGI_APPLICATION = APP_NAME + '.wsgi.application'
 
 DATABASES = {
     'default': {
