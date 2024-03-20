@@ -128,6 +128,33 @@ python manage.py createsuperuser
 
 ## Run the uWSGI app
 
+To run as a one-off for testing (in the `venv`):
+
 ```bash
 uwsgi --http :8076 --wsgi-file wsgi.py
+```
+
+(run from the source directory or adjust path of `wsgi.py`)
+
+Better to set up a system.d service. Create `/etc/systemd/system/dds-registration.service` with content:
+
+```
+# /etc/systemd/system/dds-registration.service
+[Unit]
+Description=DdS events registration
+After=network.target
+
+[Service]
+Type=simple
+User=cmutel
+WorkingDirectory=/home/cmutel
+ExecStart=/home/cmutel/venvs/registration/bin/uwsgi --http :8076 --wsgi-file /home/cmutel/registration/dds_registration/wsgi.py
+Restart=always
+Environment=SENDGRID_API_KEY=""
+Environment=DEBUG=0
+Environment=SECRET_KEY=""
+Environment=REGISTRATION_SALT=""
+
+[Install]
+WantedBy=multi-user.target
 ```
