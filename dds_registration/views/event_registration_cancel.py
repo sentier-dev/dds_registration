@@ -7,6 +7,7 @@ from django.http import HttpRequest
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
 
 import traceback
 import logging
@@ -63,7 +64,14 @@ def send_event_registration_cancelled_message(request: HttpRequest, context: dic
 
 
 def get_event_registration_cancel_context(request: HttpRequest, event_code: str):
-    context = {'success': None, 'redirect': None, 'event_code': event_code, 'event': None, 'registration': None}
+    context = {
+        'success': None,
+        'redirect': None,
+        'event_code': event_code,
+        'event': None,
+        'registration': None,
+        'site': get_current_site(request),
+        }
 
     user = request.user
     if not user.is_authenticated:
