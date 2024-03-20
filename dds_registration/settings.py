@@ -1,19 +1,26 @@
 from pathlib import Path
 import environ
+import os
 import posixpath
 import re
 import sys
 
 
+# Working folder
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
 # App name
 
-APP_NAME = 'dds_registration'  # Root app name
+APP_NAME = 'dds_registration'
 
 
 # Define default site id for `sites.models`
 SITE_ID = 1
 
 env = environ.Env(
+    # @see local `.dev` file and example in `.dev.SAMPLE`
     # @see https://django-environ.readthedocs.io
     DEV=(bool, False),  # Dev server mode
     DEBUG=(bool, False),  # Django debug mode
@@ -23,17 +30,24 @@ env = environ.Env(
     REGISTRATION_SALT=(str, ''),
 )
 
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
 DEV = env('DEV')
 DEBUG = env('DEBUG')
 LOCAL = env('LOCAL')
 
 SECRET_KEY = env('SECRET_KEY')
 REGISTRATION_SALT = env('REGISTRATION_SALT')
+SENDGRID_API_KEY = env('SENDGRID_API_KEY')
 
+if not SECRET_KEY or not REGISTRATION_SALT or not SENDGRID_API_KEY:
+    error_text = 'Error: Environment configuration variables are required (check for your local `.env` file, refer to `.env.SAMPLE`).'
+    raise Exception(error_text)
+
+# Preprocess scss source files wwith django filters
 USE_DJANGO_PREPROCESSORS = DEV
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 STATIC_FOLDER = 'static/'
@@ -88,20 +102,20 @@ COMPRESS_PRECOMPILERS = (
 ALLOWED_HOSTS = ['events.d-d-s.ch']
 CSRF_TRUSTED_ORIGINS = ['https://events.d-d-s.ch']
 
+if LOCAL:
+    # Allow work with local server in local dev mode
+    ALLOWED_HOSTS.append('localhost')
+
 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.sessions',
     'django.contrib.sites',
+    'django.contrib.staticfiles',
     'compressor',
     'crispy_forms',
     'crispy_bootstrap5',
@@ -126,6 +140,15 @@ MIDDLEWARE = [
 # @see https://pypi.org/project/django-livereload/
 # Run the reload server with a command: `python manage.py livereload static`
 INSTALLED_APPS.insert(0, 'livereload')
+# TODO: Do we actually need livereload in production? I remember some issues with it. Can we completely remove it from production?
+# There is already present the check in the `dds_registration/templates/base-core.html.django` template:
+# ```
+#  {% if settings.DEV %}
+#  {% load livereload_tags %}
+#  {% endif %}
+# ```
+# -- but probably it doesn't work?
+
 if DEV:
     MIDDLEWARE.append('livereload.middleware.LiveReloadScript')
 
@@ -197,10 +220,7 @@ EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_PASSWORD = env('SENDGRID_API_KEY')
-if not EMAIL_HOST_PASSWORD:
-    error_text = 'Error: Environment variable SENDGRID_API_KEY required.'
-    raise Exception(error_text)
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -290,15 +310,15 @@ Registration
 Events
 """
 SITE_KEYWORDS = re.sub(r'\s*[\n\r]+\s*', ', ', SITE_KEYWORDS.strip())
+# TODO: Issue #30: Add correct tags, resources for SSO, search engines and social networks (open graph etc)
 
 # Pass settings to context...
 PASS_VARIABLES = {
     'DEBUG': DEBUG,  # Pass django debug flag to the code (from environment)
     'DEV': DEV,  # Dev server mode (from the environment)
-    'LOCAL': LOCAL,  # Local server mode (from the environment)
+    'LOCAL': LOCAL,  # Local dev server mode (from the environment)
     'USE_DJANGO_PREPROCESSORS': USE_DJANGO_PREPROCESSORS,
-    #  'ASSETS_FOLDER': ASSETS_FOLDER,
-    # NOTE: Site url and name should be taken from site data via `get_current_site`
+    # NOTE: Site url and name could be taken from site data via `get_current_site`
     'SITE_NAME': SITE_NAME,
     'SITE_TITLE': SITE_TITLE,
     'SITE_DESCRIPTION': SITE_DESCRIPTION,
