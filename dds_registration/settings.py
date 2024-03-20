@@ -28,9 +28,11 @@ env = environ.Env(
     SECRET_KEY=(str, ''),
     SENDGRID_API_KEY=(str, ''),
     REGISTRATION_SALT=(str, ''),
+    DEFAULT_FROM_EMAIL=(str, 'events@d-d-s.ch'),
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, '.env.local'))
 
 DEV = env('DEV')
 DEBUG = env('DEBUG')
@@ -41,7 +43,7 @@ REGISTRATION_SALT = env('REGISTRATION_SALT')
 SENDGRID_API_KEY = env('SENDGRID_API_KEY')
 
 if not SECRET_KEY or not REGISTRATION_SALT or not SENDGRID_API_KEY:
-    error_text = 'Error: Environment configuration variables are required (check for your local `.env` file, refer to `.env.SAMPLE`).'
+    error_text = 'Error: Environment configuration variables are required (check for your local `.env*` files, refer to `.env.SAMPLE`).'
     raise Exception(error_text)
 
 # Preprocess scss source files wwith django filters
@@ -90,12 +92,6 @@ COMPRESS_PRECOMPILERS = (
     # - https://sass-lang.com/install/
     # - https://github.com/sass/dart-sass/releases/latest
     # @see https://django-compressor.readthedocs.io/en/stable/settings.html#django.conf.settings.COMPRESS_PRECOMPILERS
-    #  ('text/x-scss', 'django_libsass.SassCompiler'),  # NOTE: DEPRECATED!
-    #  ('text/coffeescript', 'coffee --compile --stdio'),
-    #  ('text/less', 'lessc {infile} {outfile}'),
-    #  ('text/x-sass', 'sass {infile} {outfile}'),
-    #  ('text/stylus', 'stylus < {infile} > {outfile}'),
-    #  ('text/foobar', 'path.to.MyPrecompilerFilter'),
 )
 
 # These settings already exist in `default_settings.py` Should we remove those?
@@ -214,12 +210,13 @@ REGISTRATION_SALT = env('REGISTRATION_SALT')  # Random salt for registration key
 
 ACCOUNT_ACTIVATION_DAYS = 7   # One-week activation window
 
-# @see https://docs.sendgrid.com/for-developers/sending-email/django
-DEFAULT_FROM_EMAIL = 'noreply@d-d-s.ch'
+# NOTE: It's possible to store some of these parameters (`DEFAULT_FROM_EMAIL`, definitely) in the site preferences or in the `.env*` files
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+# @see https://docs.sendgrid.com/for-developers/sending-email/django
 EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 
 LANGUAGE_CODE = 'en-us'
