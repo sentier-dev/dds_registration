@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
 from django.shortcuts import redirect, render
 
-from .core.helpers.errors import errorToString
+from ..core.helpers.errors import errorToString
 
 from ..forms import UpdateProfileForm, UpdateUserForm
 from ..models import Profile

@@ -9,8 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
-from .core.helpers.create_invoice_pdf import create_invoice_pdf
-from .core.helpers.errors import errorToString
+from ..core.helpers.create_invoice_pdf import create_invoice_pdf
+from ..core.helpers.errors import errorToString
 
 from .event_registration_cancel import (
     event_registration_cancel_confirm_form,
