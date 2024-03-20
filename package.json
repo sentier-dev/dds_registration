@@ -1,8 +1,8 @@
 {
   "name": "dds_registration",
-  "version": "0.0.10",
-  "timetag": "240320-1310",
-  "timestamp": "2024.03.20 13:10 +0700",
+  "version": "0.0.11",
+  "timetag": "240320-1819",
+  "timestamp": "2024.03.20 18:19 +0700",
   "changed": "2024.03.11, 16:50",
   "browserslist": {
     "production": [
@@ -16,8 +16,8 @@
       "last 1 safari version"
     ]
   },
-  "dependencies": {},
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^9.0.0",
     "gulp-sass": "^5.1.0",
@@ -28,8 +28,8 @@
     "update-assets": "echo --Update all assets-- && gulp updateAll",
     "watch-assets": "echo --Watch all assets-- && gulp watchAll",
     "livereload-server": "echo --Start livereload server-- && python manage.py livereload static",
+    "start-django-dev": "echo --Start django dev server-- && cross-env DEV=True DEBUG=True LOCAL=True python manage.py runserver",
     "start-django": "echo --Start django dev server-- && python manage.py runserver",
-    "pyformat-OLD": "echo --Run python formatter /autopep8, venv/-- && autopep8 .",
     "pyformat": "echo --Run python formatter /blue, venv/-- && blue ./**/*.py",
     "pylint": "echo --Run python linter /pyright, venv/-- && pyright .",
     "check-all": "echo --Run all python checkers /autopep8, venv/-- && npm-run-all pyformat pylint",

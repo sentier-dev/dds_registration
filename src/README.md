@@ -1,6 +1,8 @@
 # Assets
 
 
+Here are stored source files: template blocks (for include into templates, not templates themselves) and scss style sources (potentially, scripts).
+
 There are two ways to deal with assets supposed to preprocessed, like styles:
 
 
