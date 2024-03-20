@@ -46,6 +46,10 @@ if not SECRET_KEY or not REGISTRATION_SALT or not SENDGRID_API_KEY:
     error_text = 'Error: Environment configuration variables are required (check for your local `.env*` files, refer to `.env.SAMPLE`).'
     raise Exception(error_text)
 
+if not SECRET_KEY or not REGISTRATION_SALT or not SENDGRID_API_KEY:
+    error_text = 'Error: Environment configuration variables are required (check for your local `.env` file, refer to `.env.SAMPLE`).'
+    raise Exception(error_text)
+
 # Preprocess scss source files wwith django filters
 USE_DJANGO_PREPROCESSORS = DEV
 
@@ -318,6 +322,8 @@ PASS_VARIABLES = {
     # NOTE: Site url and name could be taken from site data via `get_current_site`
     'SITE_NAME': SITE_NAME,
     'SITE_TITLE': SITE_TITLE,
+    'SITE_DESCRIPTION': SITE_DESCRIPTION,
+    'SITE_KEYWORDS': SITE_KEYWORDS,
     'SITE_DESCRIPTION': SITE_DESCRIPTION,
     'SITE_KEYWORDS': SITE_KEYWORDS,
     'SITE_DESCRIPTION': SITE_DESCRIPTION,
