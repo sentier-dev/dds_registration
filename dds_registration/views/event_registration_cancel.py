@@ -71,7 +71,7 @@ def get_event_registration_cancel_context(request: HttpRequest, event_code: str)
         'event': None,
         'registration': None,
         'site': get_current_site(request),
-        }
+    }
 
     user = request.user
     if not user.is_authenticated:
