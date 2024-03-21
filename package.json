@@ -3,7 +3,7 @@
   "version": "0.0.12",
   "timetag": "240321-0117",
   "timestamp": "2024.03.21 01:17 +0700",
-  "changed": "2024.03.11, 16:50",
+  "changed": "2024.03.21, 17:54",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -27,7 +27,7 @@
   "scripts": {
     "update-assets": "echo --Update all assets-- && gulp updateAll",
     "watch-assets": "echo --Watch all assets-- && gulp watchAll",
-    "livereload-server": "echo --Start livereload server-- && python manage.py livereload static",
+    "livereload-server": "echo --Start livereload server-- && python manage.py livereload src static",
     "start-django-dev": "echo --Start django dev server-- && cross-env DEV=True DEBUG=True LOCAL=True python manage.py runserver",
     "start-django": "echo --Start django dev server-- && python manage.py runserver",
     "pyformat": "echo --Run python formatter /blue, venv/-- && blue ./**/*.py",

@@ -24,6 +24,7 @@ class Event(models.Model):
     code = models.TextField(unique=True, default=random_code)  # Show as an input
     title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
     description = models.TextField(blank=True)
+    public = models.BooleanField(default=False)
     registration_open = models.DateField(auto_now_add=True, help_text='Date registration opens')
     registration_close = models.DateField(blank=True, null=True, help_text='Date registration closes')
     max_participants = models.PositiveIntegerField(
@@ -42,6 +43,25 @@ class Event(models.Model):
         Return the active registrations
         """
         return self.registrations.all().filter(active=True)
+
+    def get_active_user_registration(self, user: User | None):
+        """
+        Get the user registration for this event
+        """
+        # Return empty list if no user has specified
+        if not user:
+            return []
+        active_user_registrations = self.registrations.all().filter(active=True, user=user)
+        if len(active_user_registrations):
+            return active_user_registrations[0]
+        return None
+
+    def has_active_user_registration(self, user: User | None):
+        """
+        Has the user registration for this event?
+        """
+        active_user_registration = self.get_active_user_registration(user)
+        return bool(active_user_registration)
 
     def __unicode__(self):
         return self.name

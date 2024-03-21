@@ -35,7 +35,7 @@
 
 {% if events %}
   <h3 class="primary-color">Your registrations:</h3>
-  {% include "assets/events-list/events-list.django" %}
+  {% include "assets/events-list-table/events-list-table.django" %}
 {% else %}
   <p class="dimmed-info">
     You don't have any active registrations yet.

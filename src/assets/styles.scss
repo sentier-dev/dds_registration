@@ -1,11 +1,13 @@
 /**
  * @module styles.scss
- * @changed 2024.03.11, 13:52
+ * @changed 2024.03.21, 16:50
  */
 
 @import 'common/common.scss';
 @import 'common/forms.scss';
 @import 'common/customize.scss';
+
+// @import 'test/test.scss'; // DEBUG
 
 @import 'body/body.scss';
 @import 'forms/data-form.scss';
@@ -16,6 +18,5 @@
 @import 'page-footer-navbar/page-footer-navbar.scss';
 @import 'main-page-splash/main-page-splash.scss';
 
-@import 'events-list/events-list.scss';
-
-// @import 'test/test.scss'; // DEBUG
+@import 'events-list-table/events-list-table.scss';
+@import 'events-list-block/events-list-block.scss';

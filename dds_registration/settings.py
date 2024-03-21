@@ -138,7 +138,7 @@ MIDDLEWARE = [
 
 # Add livereload app...
 # @see https://pypi.org/project/django-livereload/
-# Run the reload server with a command: `python manage.py livereload static`
+# Run the reload server with a command: `python manage.py livereload src static`
 INSTALLED_APPS.insert(0, 'livereload')
 # TODO: Do we actually need livereload in production? I remember some issues with it. Can we completely remove it from production?
 # There is already present the check in the `dds_registration/templates/base-core.html.django` template:
@@ -207,7 +207,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
 
-REGISTRATION_SALT = env('REGISTRATION_SALT')  # Random salt for registration keys (to use in django_registration module)
+# Random salt for registration keys (to use in django_registration module)
+REGISTRATION_SALT = env('REGISTRATION_SALT')
 
 # Registration
 # @see https://django-registration.readthedocs.io
