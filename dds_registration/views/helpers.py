@@ -260,15 +260,17 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
         has_reg_options_basic_checked = bool(len(reg_options_basic_checked_ids))
         many_reg_options_basic_checked = has_reg_options_basic_checked and len(reg_options_basic_checked_ids) > 1
         if not has_reg_options_basic_checked:
-            # Return to form editing and show message
-            error_text = 'At least one basic option should be selected'
-            # Silently make the first available (if any) basic option selected...
+            # Only if any basic options already exist...
             if len(reg_options_basic_ids):
-                checked_option_ids.append(reg_options_basic_ids[0])
-            if has_post_data:
-                # If had user data posted then show an error mnessgae...
-                messages.warning(request, error_text)
-            data_ready = False
+                # Return to form editing and show message
+                error_text = 'At least one basic option should be selected'
+                # Silently make the first available (if any) basic option selected...
+                if len(reg_options_basic_ids):
+                    checked_option_ids.append(reg_options_basic_ids[0])
+                if has_post_data:
+                    # If had user data posted then show an error mnessgae...
+                    messages.warning(request, error_text)
+                data_ready = False
         elif many_reg_options_basic_checked:
             # Return to form editing and show message
             error_text = 'Only one basic option should be selected'

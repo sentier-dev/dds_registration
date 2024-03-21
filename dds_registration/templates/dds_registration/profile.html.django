@@ -23,7 +23,7 @@
 {% include "assets/render-messages/render-messages.django" %}
 
 {% if user.is_authenticated %}
-  <!-- DEMO -->
+  {# DEMO: Show an invitation or other info? #}
   <p
     data-user-name="{{ user.get_username }}"
     data-user-email="{{ user.email }}"

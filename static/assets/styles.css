@@ -1,6 +1,6 @@
 /**
  * @module styles.scss
- * @changed 2024.03.11, 13:52
+ * @changed 2024.03.21, 16:50
  */
 /**
  * @module common.scss
@@ -281,8 +281,8 @@ body {
 }
 
 /**
- * @module events-list.scss
- * @changed 2024.03.18, 00:57
+ * @module events-list-table.scss
+ * @changed 2024.03.21, 16:50
  */
 /**
  * @module variables.scss
@@ -319,5 +319,38 @@ body {
   gap: 4px;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+/**
+ * @module events-list.scss
+ * @changed 2024.03.18, 00:57
+ */
+/**
+ * @module variables.scss
+ * @changed 2024.03.08, 12:00
+ */
+.events-list-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.events-list-block .events-list-item {
+  padding: 16px;
+  border-radius: 8px;
+}
+.events-list-block .events-list-item.has-registration {
+  background-color: rgba(136, 170, 153, 0.25);
+}
+.events-list-block .events-list-item > * {
+  margin-bottom: 0.5rem;
+}
+.events-list-block .events-list-item-title {
+  color: #486;
+  font-weight: 400;
+}
+.events-list-block .events-list-item-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 1rem;
 }
 /*# sourceMappingURL=styles.css.map */
