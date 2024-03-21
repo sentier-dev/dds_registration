@@ -125,6 +125,7 @@ class EventAdmin(admin.ModelAdmin):
         'currency',
         'registration_open',
         'registration_close',
+        'public',
         'new_registration_full_url',
     )
 

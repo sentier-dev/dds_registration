@@ -15,4 +15,17 @@
 
 <p>TODO: Landing page content</p>
 
+{% if events_data %}
+  <fieldset>
+    <legend>
+      <h2 class="primary-color">Currently open events</h2>
+    </legend>
+  </fieldset>
+
+{% include "assets/events-list-block/events-list-block.django" %}
+
+{# TODO: To show smth if there no available public events exist? #}
+
+{% endif %}
+
 {% endblock content %}

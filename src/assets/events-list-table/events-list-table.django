@@ -1,7 +1,7 @@
 {# ex: set ft=htmldjango : #}
 <!--
-  @module events-list.django
-  @changed 2024.03.11, 01:03
+  @module events-list-table.django
+  @changed 2024.03.21, 16:50
 -->
 
 {% if events %}
