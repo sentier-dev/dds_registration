@@ -10,7 +10,10 @@
     {% with event=data.event user_registration=data.user_registration user_has_registration=data.user_has_registration %}
     <div class="events-list-item {% if user_registration %}has-registration{% endif %}">
 
-        <h3 class="events-list-item-title">{{ event.title }}</h3>
+      <h3 class="events-list-item-title">
+        {{ event.title }}
+        {% if user_registration %} <i class="bi bi-check"></i>{% endif %}
+      </h3>
 
         {% if event.description %}
           <p class="events-list-item-description">{{ event.description }}</p>
