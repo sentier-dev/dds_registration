@@ -127,8 +127,8 @@ class Event(models.Model):
         """
         Get the user registration for this event
         """
-        # Return empty list if no user has specified
-        if not user:
+        # Return empty list if no user has specified or it's a `lazy user` (not from system)
+        if not user or not user.id:
             return []
         active_user_registrations = self.registrations.all().filter(active=True, user=user)
         if len(active_user_registrations):

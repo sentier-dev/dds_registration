@@ -146,3 +146,7 @@ dmypy.json
 
 # Demo generated invoice pdf
 test.pdf
+
+# Temporarily exposed packages (for dev/debug)
+django
+django_registration
