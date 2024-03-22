@@ -2,6 +2,7 @@
 # @changed 2024.03.15, 19:53
 
 
+from .registration import DdsRegistrationView
 from .event_registration import (
     event_registration_edit,
     event_registration_edit_success,

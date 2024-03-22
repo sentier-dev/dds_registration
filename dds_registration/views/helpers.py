@@ -8,7 +8,7 @@ from functools import reduce
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.sites.shortcuts import get_current_site
 from django.core import signing
 from django.http import HttpRequest
@@ -17,7 +17,7 @@ from django.template.loader import render_to_string
 
 from ..core.helpers.errors import errorToString
 
-from ..models import Event, Registration, RegistrationOption
+from ..models import Event, Registration, RegistrationOption, User
 
 # For django_registration related stuff, see:
 # .venv/Lib/site-packages/django_registration/backends/activation/views.py
@@ -476,7 +476,7 @@ def get_full_user_name(user: User) -> str:
         return ''
     full_name = user.get_full_name()
     if not full_name:
-        full_name = user.username
+        full_name = user.email
     return full_name
 
 
