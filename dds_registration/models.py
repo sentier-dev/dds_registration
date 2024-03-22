@@ -4,7 +4,7 @@ from datetime import date
 from functools import partial
 
 from django.conf import settings
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.sites.models import Site  # To access site properties
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -18,6 +18,85 @@ random_code_length = 8
 
 def random_code(length=random_code_length):
     return ''.join(random.choices(alphabet, k=length))
+
+
+class User(AbstractUser):
+
+    # NOTE: It seems to be imposible to completely remove the `username` because it's used in django_registration
+    # username = None
+
+    email = models.EmailField(unique=True)
+    address = models.TextField(blank=True, default='')
+
+    # NOTE: Using the email field for the username is incompatible with `django_registration`:
+    # @see https://django-registration.readthedocs.io/en/3.4/custom-user.html#compatibility-of-the-built-in-workflows-with-custom-user-models
+    # The username and email fields must be distinct. If you wish to use the
+    # email address as the username, you will need to write your own completely
+    # custom registration form.
+
+    # Username isn't used by itself, but it's still used in the django_registration internals. Both these fields are synced.
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
+    # These variables are used to determine if email or username have changed on save
+    _original_email = None
+    _original_username = None
+
+    class Meta(AbstractUser.Meta):
+        #  # TODO: Add correct check if email and username are the same?
+        #  constraints = [
+        #      models.CheckConstraint(
+        #          check=models.Q(email=models.F('username')),
+        #          name='username_is_email',
+        #      )
+        #  ]
+        pass
+
+    def sync_email_and_username(self):
+        # Check if email or username had changed?
+        email_changed = self.email != self._original_email
+        username_changed = self.username != self._original_username
+        # Auto sync username and email
+        if email_changed:
+            self.username = self.email
+        elif username_changed:
+            self.email = self.username
+        if email_changed or username_changed:
+            self._original_email = self.email
+            self._original_username = self.username
+            # TODO: To do smth else if email has changed?
+
+    def clean(self):
+        # NOTE: This method is called before `save`: it's useless to compare email and here
+        #  from django.core.exceptions import ValidationError
+        #  if self.email != self.username:
+        #      raise ValidationError('Email and username should be equal')
+        self.sync_email_and_username()
+        return super(User, self).clean()
+
+    def save(self, *args, **kwargs):
+        self.sync_email_and_username()
+        return super(User, self).save(*args, **kwargs)
+
+    def __init__(self, *args, **kwargs):
+        super(User, self).__init__(*args, **kwargs)
+        self._original_email = self.email
+        self._original_username = self.username
+
+
+#  # UNUSED: Address has integrated into the base user model
+#  class Profile(models.Model):
+#      """
+#      Profile is optional now. It's required to use `Profile.objects.get_or_create`, for example to ensure profile object.
+#      """
+#
+#      user = models.OneToOneField(
+#          User, related_name='profile', on_delete=models.CASCADE)
+#      address = models.TextField()
+#
+#      def __str__(self):
+#          return self.user.username
 
 
 class Event(models.Model):
@@ -126,6 +205,7 @@ class Registration(models.Model):
     invoice_no = models.AutoField(primary_key=True)
 
     event = models.ForeignKey(Event, related_name='registrations', on_delete=models.CASCADE)
+    #  user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
 
     # If the registration has cancelled, the `active` status should be set to false
@@ -218,15 +298,3 @@ class GroupDiscount(models.Model):
         ]
         info = ', '.join(filter(None, map(str, items)))
         return info
-
-
-class Profile(models.Model):
-    """
-    Profile is optional now. It's required to use `Profile.objects.get_or_create`, for example to ensure profile object.
-    """
-
-    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
-    address = models.TextField()
-
-    def __str__(self):
-        return self.user.username

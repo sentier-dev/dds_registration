@@ -213,6 +213,9 @@ REGISTRATION_SALT = env('REGISTRATION_SALT')
 # Registration
 # @see https://django-registration.readthedocs.io
 
+AUTH_USER_MODEL = APP_NAME + '.User'
+AUTHENTICATION_BACKENDS = [APP_NAME + '.backends.EmailBackend']
+
 ACCOUNT_ACTIVATION_DAYS = 7   # One-week activation window
 
 # NOTE: It's possible to store some of these parameters (`DEFAULT_FROM_EMAIL`, definitely) in the site preferences or in the `.env*` files

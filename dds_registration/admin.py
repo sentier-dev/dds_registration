@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
+from django.contrib.admin import SimpleListFilter
+from django.db.models import Q
 
 from .forms import DiscountCodeAdminForm, EventAdminForm, RegistrationOptionAdminForm
 from .models import (
@@ -8,9 +9,10 @@ from .models import (
     Event,
     GroupDiscount,
     Message,
-    Profile,
+    #  Profile,
     Registration,
     RegistrationOption,
+    User,
 )
 
 # Default registrations (without modifications)
@@ -18,28 +20,91 @@ admin.site.register(GroupDiscount)
 admin.site.register(Message)
 
 
-class ProfileInline(admin.StackedInline):
-    model = Profile
-    verbose_name_plural = 'Profile'
+#  # UNUSED: Address has integrated into the base user model
+#  class ProfileInline(admin.StackedInline):
+#      model = Profile
+#      verbose_name_plural = 'Profile'
+
+
+class IsRegularUserFilter(SimpleListFilter):
+    """
+    Regular user custom combined filter
+    """
+
+    title = 'is_regular_user'
+    parameter_name = 'is_regular_user'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('1', 'Yes'),
+            ('0', 'No'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == '1':
+            return queryset.filter(is_staff=False, is_superuser=False)
+        if self.value() == '0':
+            return queryset.filter(~Q(is_staff=False, is_superuser=False))
 
 
 class UserAdmin(BaseUserAdmin):
-    inlines = (ProfileInline,)
 
-    list_display = (
-        'username',
+    #  # UNUSED: Address has integrated into the base user model
+    #  inlines = (ProfileInline,)
+
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'address')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    )
+    list_display = [
         'email',
         'first_name',
         'last_name',
         'is_active',
-        'is_staff',
-    )
+        'is_regular_user',
+    ]
+    list_filter = [IsRegularUserFilter]
+    #  exclude = ['email']
+    #  readonly_fields = ['email']
+
+    def is_regular_user(self, user):
+        return not user.is_staff and not user.is_superuser
+
+    is_regular_user.short_description = 'Regular user'
+    is_regular_user.boolean = True
 
     def get_address(self):
         return self.profile.address
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['username'].label = 'Email (username)'
+        return form
 
-admin.site.unregister(User)
+    #  # TODO: Show only regular users by default?
+    #  def changelist_view(self, request, extra_context=None):
+    #      ref = request.META.get('HTTP_REFERER', '')
+    #      path = request.META.get('PATH_INFO', '')
+    #      query = request.META.get('QUERY_STRING', '')
+    #
+    #      # TODO: Detect if there weren't other parameters for this page
+    #      test = ref.split(path)[-1]
+    #      ref_default = test and not test.startswith('?')
+    #      is_default = not query
+    #
+    #      if is_default:
+    #          q = request.GET.copy()
+    #          q.setdefault('is_staff__exact', '0')
+    #          return redirect('%s?%s' % (request.path, q.urlencode()))
+    #
+    #      return super(UserAdmin, self).changelist_view(
+    #          request, extra_context=extra_context,
+    #      )
+
+
+#  admin.site.unregister(OriginalUser)  # It's not required here
 admin.site.register(User, UserAdmin)
 
 
@@ -67,7 +132,7 @@ class RegistrationAdmin(admin.ModelAdmin):
     def user_column(self, reg):
         user = reg.user
         full_name = user.get_full_name()
-        name = full_name if full_name else user.username
+        name = full_name if full_name else user.email
         if user.email:
             name += ' <{}>'.format(user.email)
         return name

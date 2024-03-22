@@ -3,27 +3,22 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.decorators.cache import cache_page
 
-from . import views
+#  from django_registration.views import RegistrationView as OriginalRegistrationView
 
-cache_timeout = 15 * 60  # in seconds: {min}*60
-if settings.DEV or settings.DEBUG:
-    cache_timeout = 0
+from . import views
+from .forms import DdsRegistrationForm
+
+cache_timeout = 0 if settings.DEV or settings.DEBUG else 15 * 60  # in seconds: {min}*60
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
     path(
-        'accounts/',
-        include('django_registration.backends.activation.urls'),
+        # Overrided registration form using updated form
+        'accounts/register/',
+        views.DdsRegistrationView.as_view(form_class=DdsRegistrationForm),
+        name='django_registration_register',
     ),
-    path('accounts/', include('django.contrib.auth.urls')),
-    #  path(
-    #      # Overriden registration form (with extra fields), causes error
-    #      'accounts/signup',
-    #      views.SignUpView.as_view(),
-    #      name='django_registration_register',
-    #  ),
+    path('', views.index, name='index'),
     path('profile', views.profile, name='profile'),
     path(
         'profile/edit',
@@ -50,7 +45,6 @@ urlpatterns = [
         views.event_registration_cancel_process,
         name='event_registration_cancel_process',
     ),
-    # NOTE: It looks that this route (for `event_registration_edit`) has been lost during conflict resolvings
     path('event/<str:event_code>/registration/edit', views.event_registration_edit, name='event_registration_edit'),
     path(
         'event/<str:event_code>/registration/edit/success',
@@ -67,8 +61,13 @@ urlpatterns = [
         views.event_registration_payment,
         name='event_registration_payment',
     ),
-    # Demo pages...
-    path('components-demo', views.components_demo, name='components_demo'),
+    # App-provided paths...
+    path('admin/', admin.site.urls),
+    path(
+        'accounts/',
+        include('django_registration.backends.activation.urls'),
+    ),
+    path('accounts/', include('django.contrib.auth.urls')),
     # Service pages...
     path(
         'robots.txt',
@@ -77,3 +76,9 @@ urlpatterns = [
     ),
     #  url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemap.sitemaps_dict}, name='sitemap'),
 ]
+
+if settings.DEV:
+    # Demo pages (for debug/dev purposes only)...
+    urlpatterns.append(
+        path('components-demo', views.components_demo, name='components_demo'),
+    )

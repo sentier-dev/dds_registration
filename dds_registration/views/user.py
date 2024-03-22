@@ -8,8 +8,7 @@ from django.shortcuts import redirect, render
 
 from ..core.helpers.errors import errorToString
 
-from ..forms import UpdateProfileForm, UpdateUserForm
-from ..models import Profile
+from ..forms import UpdateUserForm
 from .helpers import send_re_actvation_email
 
 LOG = logging.getLogger(__name__)
@@ -19,33 +18,35 @@ LOG = logging.getLogger(__name__)
 def edit_user_profile(request: HttpRequest):
     """
     @see https://dev.to/earthcomfy/django-update-user-profile-33ho
+
+    TODO: If don't need to use complex combination of two forms ()user and
+    linked profile), then we probably could use django stock form handling
+    mechanism?
     """
     try:
         success = True
         user = request.user
         if request.method == 'POST':
             user_form = UpdateUserForm(request.POST, instance=user)
-            profile, created = Profile.objects.get_or_create(user=user)
-            profile_form = UpdateProfileForm(
-                request.POST,
-                #  request.FILES,
-                instance=profile,
-            )
-            if user_form.is_valid() and profile_form.is_valid():
+            #  # UNUSED: Address has integrated into the base user model
+            #  profile, created = Profile.objects.get_or_create(user=user)
+            #  profile_form = UpdateProfileForm(
+            #      request.POST,
+            #      #  request.FILES,
+            #      instance=profile,
+            #  )
+            if user_form.is_valid():  # and profile_form.is_valid():
                 user_data = user_form.cleaned_data
-                #  old_user = User.objects.get(id=user.id)
-                # old_user.email != user_data['email']
                 email_has_changed = 'email' in user_form.changed_data
-                profile_data = profile_form.cleaned_data
+                #  profile_data = profile_form.cleaned_data
                 debug_data = {
                     'email_has_changed': email_has_changed,
                 }
                 LOG.debug('Save params: %s', debug_data)
                 # TODO: Send email activation request and make the user inactive
                 LOG.debug('Save user data: %s', user_data)
-                LOG.debug('Save profile data: %s', profile_data)
                 user_form.save()
-                profile_form.save()
+                #  profile_form.save()
                 if email_has_changed:
                     debug_data = {
                         'email_has_changed': email_has_changed,
@@ -53,7 +54,6 @@ def edit_user_profile(request: HttpRequest):
                     }
                     LOG.debug('Email has changed: %s', debug_data)
                     send_re_actvation_email(request, user)
-                    #  user_form.fields['is_active'] = False
                     user.is_active = False
                     user.save()
                     messages.success(
@@ -67,12 +67,11 @@ def edit_user_profile(request: HttpRequest):
                     return redirect('profile')
         else:
             user_form = UpdateUserForm(instance=user)
-            profile, created = Profile.objects.get_or_create(user=user)
-            profile_form = UpdateProfileForm(instance=profile)
-        LOG.debug('debug profile_form: %s', profile_form)
+            #  profile, created = Profile.objects.get_or_create(user=user)
+            #  profile_form = UpdateProfileForm(instance=profile)
         context = {
             'user_form': user_form,
-            'profile_form': profile_form,
+            #  'profile_form': profile_form,
         }
         return render(request, 'dds_registration/profile_edit.html.django', context)
     except Exception as err:

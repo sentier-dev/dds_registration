@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
 # @module get_invoice_context.py
-# @changed 2024.03.19, 01:40
+# @changed 2024.03.22, 19:21
 
 import logging
 import traceback
 from datetime import date
 
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpRequest
 
 from ..core.constants.date_time_formats import dateFormat
 from ..core.helpers.errors import errorToString
 
-from ..models import Event, Profile, Registration, RegistrationOption
+from ..models import Event, Registration, RegistrationOption, User
 from .helpers import calculate_total_registration_price, get_full_user_name
 
 LOG = logging.getLogger(__name__)
+
+# Default dds parameters
+
+# TODO: To store them in constants or in the settings or configuration?
 
 dds_name = 'Départ de Sentier'
 dds_address = """
@@ -99,13 +102,14 @@ def get_invoice_context(request: HttpRequest, event_code: str):
         registration = event.registrations.get(user=user, active=True)
         if not registration:
             raise Exception('Not found active registrations')
-        profile, created = Profile.objects.get_or_create(user=user)
+        #  # UNUSED: Address has integrated into the base user model
+        #  profile, created = .get_or_create(user=user)
         table_data = create_services_table(user, event, registration)
         payment_deadline_days = event.payment_deadline_days
         # TInvoicePdfParams data...
         optional_text = registration.extra_invoice_text
         client_name = get_full_user_name(user)
-        client_address = profile.address
+        client_address = user.address  # profile.address
         today = date.today()
         # NOTE: Probably the year in the invoice id should rely on the registration date, not on the invoice creatiion one?
         year_str = today.strftime('%y')
