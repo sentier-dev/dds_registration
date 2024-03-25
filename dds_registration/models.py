@@ -98,7 +98,7 @@ class Membership(models.Model):
 
     @property
     def until(self):
-        # XXX: Should `next` always be the next year?
+        # XXX: Should `until` always be the next year?
         return self.started + 1 if self.started else None
 
     @property
