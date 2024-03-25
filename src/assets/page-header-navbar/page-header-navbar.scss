@@ -7,6 +7,18 @@
 
 .page-header-navbar {
   padding: 0;
+  // Adaptive layout: trim too long title string with an ellipsis...
+  .main-bar {
+    flex: 1;
+    display: flex;
+    width: 100%;
+    align-items: center;
+  }
+  .navbar-brand {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   // Dark primary navbar with background decor...
   &.navbar-dark.navbar-primary {
     @include themeBackgroundBefore;
