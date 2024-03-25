@@ -31,5 +31,11 @@
   }
   .nav-link {
     white-space: nowrap;
+    color: #fff;
+    transition: all $transitionTime;
+    opacity: .85;
+    &:hover {
+      opacity: 1;
+    }
   }
 }

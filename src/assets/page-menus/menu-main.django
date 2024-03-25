@@ -12,6 +12,8 @@
   {# djlint:on #}
 {% endcomment %}
 
+<li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Admin panel</a></li>
+
 <!-- Login/logon links -->
 {% if user.is_authenticated %}
 <li class="nav-item dropdown">

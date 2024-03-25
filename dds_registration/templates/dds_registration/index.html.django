@@ -24,7 +24,7 @@
 
 {% include "assets/events-list-block/events-list-block.django" %}
 
-{# TODO: To show smth if there no available public events exist? #}
+{# TODO: To show smth if there aren't any available public events? #}
 
 {% endif %}
 

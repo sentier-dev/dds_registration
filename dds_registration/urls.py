@@ -62,7 +62,7 @@ urlpatterns = [
         name='event_registration_payment',
     ),
     # App-provided paths...
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name='admin'),
     path(
         'accounts/',
         include('django_registration.backends.activation.urls'),

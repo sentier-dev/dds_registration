@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 from pathlib import Path
 import environ
 import os
@@ -307,7 +308,7 @@ TIMEOUT = 30 if DEBUG else 300  # Short value for debug time
 # Site config
 
 # TODO: Use `Site.objects.get_current().name` (via `from django.contrib.sites.models import Site`) as site title.
-SITE_NAME = 'DdS events registration'
+SITE_NAME = 'Départ de Sentier Events and Membership Portal'
 SITE_TITLE = SITE_NAME
 SITE_DESCRIPTION = SITE_NAME
 SITE_KEYWORDS = """

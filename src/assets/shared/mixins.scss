@@ -5,7 +5,7 @@
   background-size: cover;
 }
 @mixin themeBackgroundBefore {
-  background-color: $primaryColor;
+  background-color: $primaryDarkColor;
   color: #fff;
   &:before {
     display: block;
@@ -15,7 +15,7 @@
     bottom: 0;
     right: 0;
     left: 0;
-    opacity: .15;
+    opacity: 0.05;
     @include themeBackground;
   }
   .container-fluid {
