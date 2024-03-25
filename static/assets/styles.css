@@ -152,6 +152,17 @@ body {
 .page-header-navbar {
   padding: 0;
 }
+.page-header-navbar .main-bar {
+  flex: 1;
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+.page-header-navbar .navbar-brand {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .page-header-navbar.navbar-dark.navbar-primary {
   background-color: #375;
   color: #fff;
@@ -284,6 +295,121 @@ body {
 }
 .main-page-splash > .content h1 {
   font-weight: 400;
+}
+
+/**
+ * @module membership-splash
+ * @changed 2024.03.08, 17:06
+ */
+/**
+ * @module variables.scss
+ * @changed 2024.03.08, 12:00
+ */
+.membership-splash {
+  overflow: hidden;
+  position: relative;
+  padding: 12px;
+}
+.membership-splash.dark {
+  background-color: #375;
+  color: #fff;
+}
+.membership-splash.dark:before {
+  display: block;
+  content: " ";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  opacity: 0.05;
+  background-image: url("/static/images/splash/curves-bg/curves-x.svg");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.membership-splash.dark .container-fluid {
+  z-index: 1;
+}
+.membership-splash.light {
+  background-color: rgba(136, 170, 153, 0.1);
+}
+.membership-splash.light:before {
+  display: block;
+  content: " ";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  opacity: 0.05;
+  background-image: url("/static/images/splash/curves-bg/curves-x.svg");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.membership-splash.light .container-fluid {
+  z-index: 1;
+}
+.membership-splash > .content {
+  position: relative;
+}
+.membership-splash .content-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 2;
+}
+.membership-splash .content-block {
+  padding-top: 1em;
+}
+.membership-splash .content-block h1 {
+  font-weight: 300;
+}
+@media (min-width: 768px) {
+  .membership-splash .content-block {
+    font-size: 120%;
+  }
+  .membership-splash .content-block h1 {
+    font-size: 180%;
+  }
+}
+@media (min-width: 992px) {
+  .membership-splash .content-block {
+    font-size: 140%;
+  }
+  .membership-splash .content-block h1 {
+    font-size: 200%;
+  }
+}
+.membership-splash.membership-splash-default .content-block {
+  max-width: 480px;
+}
+.membership-splash.membership-splash-user .content-block {
+  max-width: 720px;
+}
+.membership-splash .visual-cell {
+  background-image: url("/static/images/splash/membership/dds-painting.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  min-height: 320px;
+  align-self: flex-start;
+}
+@media (max-width: 992px) {
+  .membership-splash .visual-cell {
+    display: none;
+  }
+}
+.membership-splash a:not(.btn) {
+  color: #fff;
+  transition: all 250ms;
+  text-decoration-thickness: 2px;
+  text-decoration-line: underline;
+  opacity: 0.8;
+}
+.membership-splash a:not(.btn):hover {
+  opacity: 1;
 }
 
 /**
