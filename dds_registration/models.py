@@ -121,6 +121,7 @@ class Event(models.Model):
     def can_register(self):
         return self.registration_open <= date.today() <= self.registration_close
 
+
     def get_active_registrations(self):
         """
         Return the active registrations

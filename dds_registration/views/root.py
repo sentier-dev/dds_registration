@@ -1,47 +1,73 @@
 # @module views
-# @changed 2024.03.21, 17:23
+# @changed 2024.03.25, 16:07
 
 import logging
+import traceback
 from functools import reduce
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
 from django.shortcuts import redirect, render
 
-from ..models import Event
+from ..core.helpers.errors import errorToString
+
+from ..models import Event, Registration
 from .helpers import get_events_list
 
 LOG = logging.getLogger(__name__)
 
 
 def index(request: HttpRequest):
-    user = request.user
-    events = Event.objects.filter(public=True)
-    #  # This user' events' registrations...
-    #  registered_events = {}
-    #  if user.is_authenticated:
-    #      registered_events = {event.code: event.has_active_user_registration(user) for event in events}
-    # Prepare data to display...
-    events_data = []
-    for event in events:
-        user_registration = event.get_active_user_registration(user)
-        data = {
-            'event_code': event.code,
-            'event': event,
-            'user_registration': user_registration,
-            'user_has_registration': bool(user_registration),
+    try:
+        user = request.user
+        # Get active and available public events list...
+        public_events_data = []
+        public_events = Event.objects.filter(public=True)
+        for event in public_events:
+            # Only if registration has open...
+            if event.can_register():
+                registration = event.get_active_user_registration(user)
+                data = {
+                    'event_code': event.code,
+                    'event': event,
+                    'registration': registration,
+                    'user_has_registration': bool(registration),
+                }
+                public_events_data.append(data)
+        # Get the list of events with user's registrations...
+        user_events_data = []
+        user_registrations = Registration.objects.filter(
+            user=user, active=True) if user.is_authenticated else []
+        for registration in user_registrations:
+            event = registration.event
+            data = {
+                'event_code': event.code,
+                'event': event,
+                'registration': registration,
+                'user_has_registration': True,
+            }
+            user_events_data.append(data)
+        context = {
+            'public_events_data': public_events_data,
+            'user_events_data': user_events_data,
         }
-        events_data.append(data)
-    context = {
-        'events_data': events_data,
-    }
-    #  debug_data = {
-    #      #  'registered_events': registered_events,
-    #      'events': events,
-    #      'context': context,
-    #  }
-    #  LOG.debug('Render landing', debug_data)
-    return render(request, 'dds_registration/index.html.django', context)
+        debug_data = {
+            'public_events_data': public_events_data,
+            'user_events_data': user_events_data,
+            'user_registrations': user_registrations,
+            'context': context,
+        }
+        LOG.debug('Render landing', debug_data)
+        return render(request, 'dds_registration/index.html.django', context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            'err': err,
+            'traceback': sTraceback,
+        }
+        LOG.error('Caught error %s (re-raising): %s', sError, debug_data)
+        raise err
 
 
 @login_required

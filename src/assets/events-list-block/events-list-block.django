@@ -4,15 +4,15 @@
   @changed 2024.03.11, 01:03
 -->
 
-{% if events_data %}
-  <div class="events-list-block">
-    {% for data in events_data %}
-    {% with event=data.event user_registration=data.user_registration user_has_registration=data.user_has_registration %}
-    <div class="events-list-item {% if user_registration %}has-registration{% endif %}">
+{% if event_list_data %}
+  <div class="events-list-block mb-3">
+    {% for data in event_list_data %}
+    {% with event=data.event registration=data.registration user_has_registration=data.user_has_registration %}
+    <div class="events-list-item {% if registration %}has-registration{% endif %}">
 
       <h3 class="events-list-item-title">
         {{ event.title }}
-        {% if user_registration %} <i class="bi bi-check"></i>{% endif %}
+        {% if registration %} <i class="bi bi-check"></i>{% endif %}
       </h3>
 
         {% if event.description %}
@@ -20,9 +20,9 @@
         {% endif %}
 
         <div class="events-list-item-details">
-          {% if user_registration %}
+          {% if registration %}
             <div class="events-list-item-info" id="registered">
-              <span class="item-label">Registration date:</span> {{ user_registration.created_at }}
+              <span class="item-label">Registration date:</span> {{ registration.created_at }}
             </div>
           {% else %}
             {% if event.registration_open %}
@@ -40,7 +40,7 @@
 
         {% if user.is_authenticated %}
           <p class="events-list-item-actions">
-            {% if user_registration %}
+            {% if registration %}
               <a href="{% url 'event_registration_edit' event_code=event.code %}">Show your registration</a>
             {% else %}
               <a href="{% url 'event_registration_new' event_code=event.code %}">Register to the event</a>

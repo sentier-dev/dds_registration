@@ -15,14 +15,31 @@
 
 <p>TODO: Landing page content</p>
 
-{% if events_data %}
+{% if user_events_data %}
+  <fieldset>
+    <legend>
+      <h2 class="primary-color">Your events</h2>
+    </legend>
+  </fieldset>
+
+{% with event_list_data=user_events_data %}
+  {% include "assets/events-list-block/events-list-block.django" %}
+{% endwith %}
+
+{# TODO: To show smth if there aren't any available public events? #}
+
+{% endif %}
+
+{% if public_events_data %}
   <fieldset>
     <legend>
       <h2 class="primary-color">Currently open events</h2>
     </legend>
   </fieldset>
 
-{% include "assets/events-list-block/events-list-block.django" %}
+{% with event_list_data=public_events_data %}
+  {% include "assets/events-list-block/events-list-block.django" %}
+{% endwith %}
 
 {# TODO: To show smth if there aren't any available public events? #}
 
