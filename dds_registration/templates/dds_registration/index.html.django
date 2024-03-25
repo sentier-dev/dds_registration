@@ -1,19 +1,20 @@
 {# ex: set ft=htmldjango : #}
-{% extends "base-main.html.django" %}
+{% extends "base-layout.html.django" %}
 
-{% load crispy_forms_tags %}
-
-{% block navbar_breadcrumbs %}
-    <li>Account</li>
-    <li class="active">Login</li>
-{% endblock %}
+{% block body_class %}index{% endblock body_class %}
 
 {% block content %}
 {{ block.super }}
 
 {% include "assets/render-messages/render-messages.django" %}
 
-<p>TODO: Landing page content</p>
+{% with user_authenticated=user.is_authenticated %}
+  {% if user_authenticated %}
+    {% include "assets/membership-splash/membership-splash-user.django" %}
+  {% else %}
+    {% include "assets/membership-splash/membership-splash-default.django" %}
+  {% endif %}
+{% endwith %}
 
 {% if user_events_data %}
   <fieldset>
