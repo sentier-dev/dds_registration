@@ -1,0 +1,19 @@
+{# ex: set ft=htmldjango : #}
+
+<div class="col content-cell content-cell-default">
+  <div class="content-block">
+    {% comment %}
+      <h1><a href="{% url 'index' %}">Become a member!</a></h1>
+    {% endcomment %}
+    <p>Membership is for one calendar year, and costs €25 for
+    academics and €50 for everyone else. Members get a newsletter, a vote
+    at the General Assembly, and discounts on selected DdS events.</p>
+    <p>
+      {% comment %}
+        {# Button option for a dark theme #}
+        <a class="btn btn-outline-light btn-lg" href="{% url 'index' %}">Become a member!</a>
+      {% endcomment %}
+      <a class="btn btn-outline-dark btn-lg" href="{% url 'index' %}">Become a member!</a>
+    </p>
+  </div>
+</div>

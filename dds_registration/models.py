@@ -85,20 +85,6 @@ class User(AbstractUser):
         self._original_username = self.username
 
 
-#  # UNUSED: Address has integrated into the base user model
-#  class Profile(models.Model):
-#      """
-#      Profile is optional now. It's required to use `Profile.objects.get_or_create`, for example to ensure profile object.
-#      """
-#
-#      user = models.OneToOneField(
-#          User, related_name='profile', on_delete=models.CASCADE)
-#      address = models.TextField()
-#
-#      def __str__(self):
-#          return self.user.username
-
-
 class Membership(models.Model):
     user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
     started = models.IntegerField(default=lambda: date.today().year)
@@ -133,11 +119,10 @@ class Event(models.Model):
     payment_deadline_days = models.IntegerField(default=30)
     payment_details = models.TextField(blank=True, default='')
 
-    # TODO: Add closed/finished status?
-
     @property
     def can_register(self):
-        return self.registration_open <= date.today() <= self.registration_close
+        today = date.today()
+        return self.registration_open >= today and (not self.registration_close or today <= self.registration_close)
 
     def get_active_registrations(self):
         """

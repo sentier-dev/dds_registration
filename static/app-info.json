@@ -1,10 +1,10 @@
 {
   "projectName": "dds_registration",
-  "timestamp": "2024.03.21 19:27 +0700",
-  "timetag": "240321-1927",
-  "version": "0.0.13",
-  "currentTimeStr": "2024.03.21 19:27 +0700",
-  "currentTimeTag": "240321-1927",
-  "gitCommitHash": "8f0aa20",
-  "gitBranch": "36-link-to-invoice"
+  "timestamp": "2024.03.25 19:17 +0700",
+  "timetag": "240325-1917",
+  "version": "0.0.14",
+  "currentTimeStr": "2024.03.25 19:17 +0700",
+  "currentTimeTag": "240325-1917",
+  "gitCommitHash": "77fe119",
+  "gitBranch": "39-landing-content-for-the-main-page"
 }

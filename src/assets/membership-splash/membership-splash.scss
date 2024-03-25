@@ -1,0 +1,79 @@
+/**
+ * @module membership-splash
+ * @changed 2024.03.08, 17:06
+ */
+
+@use 'sass:color';
+
+@import "../shared";
+
+.membership-splash {
+  overflow: hidden;
+  position: relative;
+  padding: 12px;
+  // Theming...
+  &.dark {
+    @include themeBackgroundBefore;
+  }
+  &.light {
+    background-color: color.change($primaryLightColor, $alpha: 0.1);
+    @include themeBackgroundBaseBefore;
+  }
+  // Ensure z-index for content...
+  > .content {
+    position: relative;
+  }
+  .content-cell {
+    // text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 2;
+  }
+  .content-block {
+    padding-top: 1em;
+    h1 {
+      font-weight: 300;
+    }
+    @media (min-width: $screenMdMin) {
+      font-size: 120%;
+      h1 {
+        font-size: 180%;
+      }
+    }
+    @media (min-width: $screenLgMin) {
+      font-size: 140%;
+      h1 {
+        font-size: 200%;
+      }
+    }
+  }
+  &.membership-splash-default .content-block {
+    max-width: 480px;
+  }
+  &.membership-splash-user .content-block {
+    max-width: 720px;
+  }
+  .visual-cell {
+    @media (max-width: $screenMdMax) {
+      // Hide on small screens
+      display: none;
+    }
+    background-image: url('/static/images/splash/membership/dds-painting.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    min-height: 320px;
+    align-self: flex-start;
+  }
+  a:not(.btn) {
+    color: #fff;
+    transition: all $transitionTime;
+    text-decoration-thickness: 2px;
+    text-decoration-line: underline;
+    opacity: .8;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
