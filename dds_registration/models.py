@@ -122,7 +122,7 @@ class Event(models.Model):
     @property
     def can_register(self):
         today = date.today()
-        return self.registration_open >= today and (not self.registration_close or today <= self.registration_close)
+        return today >= self.registration_open and (not self.registration_close or today <= self.registration_close)
 
     def get_active_registrations(self):
         """
