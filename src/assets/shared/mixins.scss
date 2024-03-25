@@ -4,9 +4,7 @@
   background-repeat: no-repeat;
   background-size: cover;
 }
-@mixin themeBackgroundBefore {
-  background-color: $primaryDarkColor;
-  color: #fff;
+@mixin themeBackgroundBaseBefore {
   &:before {
     display: block;
     content: ' ';
@@ -22,5 +20,8 @@
     z-index: 1;
   }
 }
-
-
+@mixin themeBackgroundBefore {
+  background-color: $primaryDarkColor;
+  color: #fff;
+  @include themeBackgroundBaseBefore;
+}
