@@ -153,7 +153,7 @@ body {
   padding: 0;
 }
 .page-header-navbar.navbar-dark.navbar-primary {
-  background-color: #486;
+  background-color: #375;
   color: #fff;
 }
 .page-header-navbar.navbar-dark.navbar-primary:before {
@@ -164,7 +164,7 @@ body {
   bottom: 0;
   right: 0;
   left: 0;
-  opacity: 0.15;
+  opacity: 0.05;
   background-image: url("/static/images/splash/curves-bg/curves-x.svg");
   background-position: center top;
   background-repeat: no-repeat;
@@ -192,6 +192,12 @@ body {
 }
 .page-header-navbar .nav-link {
   white-space: nowrap;
+  color: #fff;
+  transition: all 250ms;
+  opacity: 0.85;
+}
+.page-header-navbar .nav-link:hover {
+  opacity: 1;
 }
 
 /**
@@ -252,7 +258,7 @@ body {
  * @changed 2024.03.08, 12:00
  */
 .main-page-splash {
-  background-color: #486;
+  background-color: #375;
   color: #fff;
   position: relative;
 }
@@ -264,7 +270,7 @@ body {
   bottom: 0;
   right: 0;
   left: 0;
-  opacity: 0.15;
+  opacity: 0.05;
   background-image: url("/static/images/splash/curves-bg/curves-x.svg");
   background-position: center top;
   background-repeat: no-repeat;
