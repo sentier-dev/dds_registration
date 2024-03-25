@@ -104,8 +104,8 @@ class Event(models.Model):
     title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
     description = models.TextField(blank=True)
     public = models.BooleanField(default=False)
-    registration_open = models.DateField(auto_now_add=True, help_text='Date registration opens')
-    registration_close = models.DateField(blank=True, null=True, help_text='Date registration closes')
+    registration_open = models.DateField(auto_now_add=True, help_text='Date registration opens (inclusive)')
+    registration_close = models.DateField(blank=True, help_text='Date registration closes (inclusive)')
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text='Maximum number of participants to this event (0 = no limit)',
@@ -116,6 +116,10 @@ class Event(models.Model):
     payment_details = models.TextField(blank=True, default='')
 
     # TODO: Add closed/finished status?
+
+    @property
+    def can_register(self):
+        return self.registration_open <= date.today() <= self.registration_close
 
     def get_active_registrations(self):
         """
