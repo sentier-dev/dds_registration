@@ -86,7 +86,7 @@ class User(AbstractUser):
 
 
 class Membership(models.Model):
-    user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='memberships', on_delete=models.CASCADE)
     started = models.IntegerField(default=lambda: date.today().year)
     until = models.IntegerField(default=lambda: date.today().year)
     honorary = models.BooleanField(default=False)
