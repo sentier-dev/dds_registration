@@ -36,8 +36,7 @@ def index(request: HttpRequest):
                 public_events_data.append(data)
         # Get the list of events with user's registrations...
         user_events_data = []
-        user_registrations = Registration.objects.filter(
-            user=user, active=True) if user.is_authenticated else []
+        user_registrations = Registration.objects.filter(user=user, active=True) if user.is_authenticated else []
         for registration in user_registrations:
             event = registration.event
             data = {
