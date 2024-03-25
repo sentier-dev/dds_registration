@@ -25,7 +25,7 @@ def index(request: HttpRequest):
         public_events = Event.objects.filter(public=True)
         for event in public_events:
             # Only if registration has open...
-            if event.can_register():
+            if event.can_register:
                 registration = event.get_active_user_registration(user)
                 data = {
                     'event_code': event.code,
