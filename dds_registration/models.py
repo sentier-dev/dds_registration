@@ -89,17 +89,9 @@ class User(AbstractUser):
 
 class Membership(models.Model):
     user = models.ForeignKey(User, related_name='memberships', on_delete=models.CASCADE)
-    # NOTE: Using different date comparsion method, using real dates, not only years...
     started = models.IntegerField(default=this_year)
-    #  # OLD CODE: It causes an error during migration creation: `ValueError: Cannot serialize function: lambda`
-    #  started = models.IntegerField(default=lambda: date.today().year)
-    #  until = models.IntegerField(default=lambda: date.today().year)
+    until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
-
-    @property
-    def until(self):
-        # XXX: Should `until` always be the next year?
-        return self.started + 1 if self.started else None
 
     @property
     def active(self) -> bool:
