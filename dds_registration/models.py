@@ -11,6 +11,8 @@ from django.db import models
 from django.urls import reverse
 
 from .core.constants.date_time_formats import dateTimeFormat
+from .core.helpers.dates import this_year
+
 
 alphabet = string.ascii_lowercase + string.digits
 random_code_length = 8
@@ -88,7 +90,7 @@ class User(AbstractUser):
 class Membership(models.Model):
     user = models.ForeignKey(User, related_name='memberships', on_delete=models.CASCADE)
     # NOTE: Using different date comparsion method, using real dates, not only years...
-    started = models.DateTimeField(auto_now_add=True)
+    started = models.IntegerField(default=this_year)
     #  # OLD CODE: It causes an error during migration creation: `ValueError: Cannot serialize function: lambda`
     #  started = models.IntegerField(default=lambda: date.today().year)
     #  until = models.IntegerField(default=lambda: date.today().year)
@@ -96,19 +98,12 @@ class Membership(models.Model):
 
     @property
     def until(self):
-        """
-        Make a date one year ahead from the `started` date.
-        TODO: To use a constant for the 'membership period'?
-        """
-        started = self.started
-        if not started:
-            # Just for case of delayed initialization
-            started = date.today()
-        return started.replace(started.year + 1)
+        # XXX: Should `next` always be the next year?
+        return self.started + 1 if self.started else None
 
     @property
     def active(self) -> bool:
-        return date.today() <= self.until
+        return this_year() <= self.until
 
     @classmethod
     def is_member(cls, user: User) -> bool:
@@ -124,8 +119,7 @@ class Event(models.Model):
     description = models.TextField(blank=True)
     public = models.BooleanField(default=False)
     registration_open = models.DateField(auto_now_add=True, help_text='Date registration opens (inclusive)')
-    # Returned `null=True` here to allow to store an 'empty' dates. Is that ok?
-    registration_close = models.DateField(blank=True, null=True, help_text='Date registration closes (inclusive)')
+    registration_close = models.DateField(help_text='Date registration closes (inclusive)')
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text='Maximum number of participants to this event (0 = no limit)',
@@ -138,7 +132,7 @@ class Event(models.Model):
     @property
     def can_register(self):
         today = date.today()
-        return today >= self.registration_open and (not self.registration_close or today <= self.registration_close)
+        return today >= self.registration_open and today <= self.registration_close
 
     def get_active_registrations(self):
         """
