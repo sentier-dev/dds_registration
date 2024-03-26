@@ -273,6 +273,14 @@ class Message(models.Model):
         return info
 
 
+class Invoice(models.Model):
+    created = models.DateField(auto_now_add=True)
+    data = models.JSONField()
+    template = models.TextField()
+    pdf = models.BinaryField()
+    paid = models.BooleanField(default=False)
+
+
 class DiscountCode(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     code = models.TextField(default=partial(random_code, length=4))  # Show as an input
