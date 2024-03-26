@@ -1,0 +1,40 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module membership_test.html.django
+  @changed 2024.03.26, 21:31
+-->
+
+{% extends "base-regular.html.django" %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Membership test — {{ block.super }}{% endblock title %}
+
+{% block content %}
+{{ block.super }}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Membership test</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+{% include "assets/render-messages/render-messages.django" %}
+
+<p>Action: {{ action }}</p>
+<p>MembershipType: {{ membership_type }}</p>
+
+<form class="data-form" method="post">
+  {% csrf_token %}
+
+  <div>Form...</div>
+
+  <fieldset class="mb3 form-group">
+    <input class="btn btn-primary" type="submit" value="Test" />
+    <a class="btn btn-default" href="{% url 'index' %}" onClick="history.back(); return false">Back</a>
+  </fieldset>
+
+</form>
+
+{% endblock content %}

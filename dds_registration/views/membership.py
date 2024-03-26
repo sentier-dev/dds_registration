@@ -3,9 +3,11 @@
 
 import logging
 import traceback
+import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpRequest, HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.shortcuts import redirect, render
 
@@ -46,7 +48,7 @@ class check_for_available_membership:
             memberships = Membership.objects.filter(user=user)
             # Are there memberships for this user?
             if memberships and len(memberships):
-                messages.success(request, "You're already a member or have been registered as a future member!")
+                messages.success(request, "You're already a member (or waiting for your membership activation)")
                 # TODO: Display the membership data on the profile page?
                 self.response = redirect("profile")
                 self.success = False
@@ -65,7 +67,7 @@ def check_if_it_possible_to_become_a_member(request: HttpRequest):
         memberships = Membership.objects.filter(user=user)
         # Has member user(s)?
         if memberships and len(memberships):
-            messages.success(request, "You're already a member or have been registered as a future member!")
+            messages.success(request, "You're already a member (or waiting for your membership activation)")
             # TODO: Display the membership data on the profile page?
             return redirect("profile")
     return None
@@ -98,8 +100,8 @@ def membership_proceed(request: HttpRequest):
         if not membership_type:
             messages.error(request, "You have to choose membership type")
             return redirect("membership_start")
-        is_invoice = "INVLICE" in membership_type
-        is_academic = "INVLICE" in membership_type
+        is_invoice = Membership.is_membership_type_invoice(membership_type)
+        is_academic = Membership.is_membership_type_academic(membership_type)
         debug_data = {
             "is_invoice": is_invoice,
             "is_academic": is_academic,
@@ -137,7 +139,7 @@ def membership_proceed_success(request: HttpRequest):
     context = {
         "action": "membership_proceed_success",
     }
-    return render(request, "dds_registration/membership_proceed.html.django", context)
+    return render(request, "dds_registration/membership_test.html.django", context)
 
 
 #  @login_required
@@ -152,8 +154,65 @@ def membership_proceed_success(request: HttpRequest):
 #      return HttpResponse(bytes(pdf.output()), content_type="application/pdf")
 
 
-__all__ = [
-    membership_start,
-    membership_proceed,
-    membership_proceed_success,
-]
+@csrf_exempt
+def membership_stripe_webhook(request: HttpRequest):
+    try:
+        method = request.method
+        if method != 'POST':
+            raise Exception('Expecting post data request')
+        json_payload = request.body.decode("utf-8")
+        payload = json.loads(json_payload)
+        data = payload['data'] if 'data' in payload else {}
+        object = data['object'] if 'object' in data else {}
+        payload_type = payload.get('type')  # Expecting `payment_intent.succeeded`
+        payload_request = payload.get('request')
+        status = object.get('status')  # Expecting 'succeeded'
+        #  Parsed data example:
+        #  'id': 'evt_3OybccL41uPceS6J0bUl44n0'
+        #  'object': 'event'
+        #  'api_version': '2022-11-15'
+        #  'created': 1711465746
+        #  'data': {'object': {'id': 'pi_3OybccL41uPceS6J07wyCykn', 'object': 'payment_intent', 'amount': 2000, 'amount_capturable': 0, 'amount_details': {...}, 'amount_received': 0, 'application': None, 'application_fee_amount': None, 'automatic_payment_methods': None, 'canceled_at': None, 'cancellation_reason': None, 'capture_method': 'automatic', 'client_secret': 'pi_3OybccL41uPceS6J07wyCykn_secret_QR4X27IfkXe58qhNUTn6W9LaY', 'confirmation_method': 'automatic', 'created': 1711465746, 'currency': 'usd', 'customer': None, 'description': '(created by Stripe CLI)', 'invoice': None, ...}}
+        #  'livemode': False
+        #  'pending_webhooks': 2
+        #  'request': {'id': 'req_vurnMXFvwMjR9n', 'idempotency_key': 'af178ca4-a2b6-43c3-af8a-b227a60ffc20'}
+        #  'type': 'payment_intent.created'
+        sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+        debug_data = {
+            'payload_type': payload_type,
+            'payload_request': payload_request,
+            "status": status,
+            "object": object,
+            #  "data": data,
+            #  "parsed": parsed,
+            #  "payload": payload,
+            "sig_header": sig_header,
+            #  "method": method,
+            #  "request": request,
+        }
+        LOG.debug("membership_stripe_webhook: %s", debug_data)
+        context = {
+            "action": "membership_stripe_webhook",
+        }
+        return render(request, "dds_registration/membership_test.html.django", context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        sTraceback = str(traceback.format_exc())
+        error_text = "Error processing stripe webhook: {}".format(sError)
+        messages.error(request, error_text)
+        debug_data = {
+            "err": err,
+            "traceback": sTraceback,
+            "sError": sError,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        # Redirect to profile page with error messages (see above)
+        #  return redirect("profile")
+        raise err
+
+
+#  __all__ = [
+#      membership_start,
+#      membership_proceed,
+#      membership_proceed_success,
+#  ]

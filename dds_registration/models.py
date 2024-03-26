@@ -113,6 +113,12 @@ class Membership(models.Model):
     DEFAULT_MEMBERSHIP_TYPE = "NORMAL_CREDIT_CARD"
     membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
 
+    def is_membership_type_invoice(membership_type: str) -> bool:
+        return "INVOICE" in membership_type
+
+    def is_membership_type_academic(membership_type: str) -> bool:
+        return "ACADEMIC" in membership_type
+
     @property
     def active(self) -> bool:
         return self.paid and this_year() <= self.until
