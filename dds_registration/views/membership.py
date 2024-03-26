@@ -121,6 +121,7 @@ def membership_proceed(request: HttpRequest):
             return redirect("membership_proceed_invoice")
         # Go to stripe site...
         stripe_link = academic_membership_stripe_payment_link if is_academic else regular_membership_stripe_payment_link
+        stripe_link += '?client_reference_id=TEST'
         return redirect(stripe_link)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
@@ -156,6 +157,15 @@ def membership_proceed_test(request: HttpRequest, payment_id: str):
             #  "request": request,
         }
         LOG.debug("membership_proceed_test: %s", debug_data)
+        context = {
+            "action": "membership_proceed_test",
+        }
+        return render(request, "dds_registration/membership_test.html.django", context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        sTraceback = str(traceback.format_exc())
+        error_text = "Error on membership_test: {}".format(sError)
+        messages.error(request, error_text)
         context = {
             "action": "membership_proceed_test",
         }
