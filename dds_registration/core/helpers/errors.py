@@ -13,14 +13,14 @@ def errorToString(error, show_stacktrace=False):
     """
     errorName = type(error).__name__
     errorExtra = str(error)
-    errorArg = str(error.args[0]) if error.args and error.args[0] else ''
+    errorArg = str(error.args[0]) if error.args and error.args[0] else ""
     if errorArg and errorArg != errorExtra:
-        errorExtra += ' (' + errorArg + ')'
-    errorStr = errorName + ': ' + errorExtra
+        errorExtra += " (" + errorArg + ")"
+    errorStr = errorName + ": " + errorExtra
     if show_stacktrace:
         stack = traceback.format_exc()
         if stack:
-            errorStr += '\n' + stack
+            errorStr += "\n" + stack
     return errorStr
 
 
@@ -31,6 +31,6 @@ def errorToString(error, show_stacktrace=False):
 
 
 __all__ = [  # Exporting objects...
-    'errorToString',
+    "errorToString",
     #  'errorToBlockString',
 ]

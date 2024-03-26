@@ -47,7 +47,7 @@ def quoteStr(s, addQuotes=False, quoteDouble=False, quoteSingle=True):
     """
     if not isinstance(s, str):  # type(s) != str:
         if s is None:
-            s = ''
+            s = ""
         else:
             s = str(s)
     if quoteDouble:
@@ -71,12 +71,12 @@ def dictFromClass(cls):
 
 def truncateLongString(s, maxLength=0):
     if maxLength and len(s) >= maxLength:
-        s = s[0 : maxLength - 3] + '...'
+        s = s[0 : maxLength - 3] + "..."
     return s
 
 
 def prepareLongString(s, maxLength=0):
-    s = re.sub(r'\s+\n', '\n', s)
+    s = re.sub(r"\s+\n", "\n", s)
     return truncateLongString(s, maxLength)
 
 
@@ -89,7 +89,7 @@ def getTrace(appendStr=None):
     #  modName = modNameMatch.group(1) if modNameMatch else modPath
     #  funcName = lastTrace[2]
     strList = [
-        '@',
+        "@",
         # __name__,
         # NOTE: This code isn't supposed for production mode (at least for Django v.5.0.2)
         #  modName,
@@ -97,7 +97,7 @@ def getTrace(appendStr=None):
         appendStr,
     ]
     filteredList = list(filter(None, strList))
-    traceResult = ':'.join(filteredList)
+    traceResult = ":".join(filteredList)
     #  print('@:testUtils:getTrace', {
     #      #  'traceResult': traceResult,
     #      #  'traces': traces,
@@ -110,24 +110,24 @@ def getTrace(appendStr=None):
 
 
 def capitalize_id(id: str):
-    if id == 'uuid':
-        return 'UUID'
-    text = re.sub(r'_', ' ', id)
+    if id == "uuid":
+        return "UUID"
+    text = re.sub(r"_", " ", id)
     text = text.capitalize()
     return text
 
 
 __all__ = [  # Exporting objects...
-    'empty',
-    'notEmpty',
-    'hasNotEmpty',
-    'getObjKey',
-    'msTimeFromSec',
-    'msTimeFromMin',
-    'quoteStr',
-    'dictFromClass',
-    'truncateLongString',
-    'prepareLongString',
-    'getTrace',
-    'capitalize_id',
+    "empty",
+    "notEmpty",
+    "hasNotEmpty",
+    "getObjKey",
+    "msTimeFromSec",
+    "msTimeFromMin",
+    "quoteStr",
+    "dictFromClass",
+    "truncateLongString",
+    "prepareLongString",
+    "getTrace",
+    "capitalize_id",
 ]

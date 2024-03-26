@@ -8,7 +8,7 @@ from .core.helpers.utils import capitalize_id
 
 
 __all__ = [
-    'pass_form_errors_to_messages',
+    "pass_form_errors_to_messages",
 ]
 
 
@@ -22,8 +22,8 @@ def pass_form_errors_to_messages(request: HttpRequest, form: ModelForm):
     if len(error_items):
         # TODO: Show errors?
         # Data example: {'name': ['This field is required.'], 'email': ['This field is required.']}
-        LOG('Form has errors')
+        LOG("Form has errors")
         # Pass messages to the client...
         for error, texts in error_items:
-            msg = capitalize_id(error) + ': ' + ' '.join(texts)
+            msg = capitalize_id(error) + ": " + " ".join(texts)
             messages.error(request, msg)

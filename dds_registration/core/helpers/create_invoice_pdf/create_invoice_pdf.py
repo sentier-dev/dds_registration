@@ -5,8 +5,8 @@ from typing import TypedDict
 import posixpath
 
 __all__ = [
-    'TInvoicePdfParams',
-    'create_invoice_pdf',
+    "TInvoicePdfParams",
+    "create_invoice_pdf",
 ]
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -29,7 +29,7 @@ class TInvoicePdfParams(TypedDict):
 
 col_widths = (15, 45, 20, 20)  # Column widths
 
-logo_svg_file = 'images/pdf-template-logo.svg'
+logo_svg_file = "images/pdf-template-logo.svg"
 
 margin_size = 20  # Default margin size
 
@@ -46,21 +46,21 @@ font_size = 12
 
 def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
     # Get params...
-    optional_text = params['optional_text']
-    client_name = params['client_name']
-    client_address = params['client_address']
-    dds_name = params['dds_name']
-    dds_address = params['dds_address']
-    invoice_no = params['invoice_no']
-    invoice_date = params['invoice_date']
-    payment_terms = params['payment_terms']
-    payment_details = params['payment_details']
-    table_data = params['table_data']
+    optional_text = params["optional_text"]
+    client_name = params["client_name"]
+    client_address = params["client_address"]
+    dds_name = params["dds_name"]
+    dds_address = params["dds_address"]
+    invoice_no = params["invoice_no"]
+    invoice_date = params["invoice_date"]
+    payment_terms = params["payment_terms"]
+    payment_details = params["payment_details"]
+    table_data = params["table_data"]
 
     # Create pdf...
-    pdf = FPDF(unit='mm', format='A4')
+    pdf = FPDF(unit="mm", format="A4")
 
-    pdf.set_title('Invoice {} ({})'.format(invoice_no, client_name))
+    pdf.set_title("Invoice {} ({})".format(invoice_no, client_name))
 
     # Set pdf margins...
     pdf.set_margins(left=margin_size, top=margin_size, right=margin_size)
@@ -72,7 +72,7 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
     pdf.add_page()
 
     # Set font...
-    pdf.set_font('times', size=font_size)
+    pdf.set_font("times", size=font_size)
 
     # Get derived dimensions...
     pdf_font_size = pdf.font_size
@@ -90,19 +90,19 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
 
     # Left (client) address column...
     pdf.set_xy(left_column_pos, margin_size + top_offset)
-    pdf.multi_cell(text=client_name, w=left_column_width, new_x='LEFT', new_y='NEXT', h=line_height)
+    pdf.multi_cell(text=client_name, w=left_column_width, new_x="LEFT", new_y="NEXT", h=line_height)
 
     pdf.set_y(pdf.get_y() + small_vertical_space)
-    pdf.multi_cell(text=client_address.strip(), w=left_column_width, new_x='LEFT', new_y='NEXT', h=line_height)
+    pdf.multi_cell(text=client_address.strip(), w=left_column_width, new_x="LEFT", new_y="NEXT", h=line_height)
 
     left_stop_pos = pdf.get_y()
 
     # Right (client) address column...
     pdf.set_xy(right_column_pos, margin_size + top_offset)
-    pdf.multi_cell(text=dds_name, w=right_column_width, new_x='LEFT', new_y='NEXT', h=line_height)
+    pdf.multi_cell(text=dds_name, w=right_column_width, new_x="LEFT", new_y="NEXT", h=line_height)
 
     pdf.set_xy(right_column_pos, pdf.get_y() + small_vertical_space)
-    pdf.multi_cell(text=dds_address.strip(), w=right_column_width, new_x='LEFT', new_y='NEXT', h=line_height)
+    pdf.multi_cell(text=dds_address.strip(), w=right_column_width, new_x="LEFT", new_y="NEXT", h=line_height)
 
     right_stop_pos = pdf.get_y()
 
@@ -111,7 +111,7 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
 
     # Put the title (invoice no), with an extra offset...
     pdf.set_xy(left_column_pos, max_right_top + large_vertical_space)
-    pdf.multi_cell(text='Invoice ' + invoice_no, w=left_column_width, new_x='LEFT', new_y='NEXT', h=line_height)
+    pdf.multi_cell(text="Invoice " + invoice_no, w=left_column_width, new_x="LEFT", new_y="NEXT", h=line_height)
 
     pdf.set_y(pdf.get_y() + vertical_space)
 
@@ -121,14 +121,14 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
     # @see https://py-pdf.github.io/fpdf2/Tables.html
     with pdf.table(
         col_widths=col_widths,
-        text_align='LEFT',
+        text_align="LEFT",
         line_height=line_height,
         padding=2,
         markdown=True,
-        v_align='T',
+        v_align="T",
         # Stripped background
         cell_fill_color=240,
-        cell_fill_mode='ROWS',
+        cell_fill_mode="ROWS",
     ) as table:
         for data_row in table_data:
             row = table.row()
@@ -141,33 +141,33 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
 
     if invoice_date:
         pdf.set_y(pdf.get_y() + small_vertical_space)
-        pdf.multi_cell(text='Invoice date: ' + invoice_date, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height)
+        pdf.multi_cell(text="Invoice date: " + invoice_date, w=page_width, new_x="LEFT", new_y="NEXT", h=line_height)
 
     if payment_terms:
         pdf.set_y(pdf.get_y() + small_vertical_space)
         pdf.multi_cell(
-            text='Payment terms: ' + payment_terms,
+            text="Payment terms: " + payment_terms,
             markdown=True,
             w=page_width,
-            new_x='LEFT',
-            new_y='NEXT',
+            new_x="LEFT",
+            new_y="NEXT",
             h=line_height,
         )
 
     if payment_details:
         pdf.set_y(pdf.get_y() + small_vertical_space)
         pdf.multi_cell(
-            text='**Payment details:**', markdown=True, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height
+            text="**Payment details:**", markdown=True, w=page_width, new_x="LEFT", new_y="NEXT", h=line_height
         )
         pdf.set_y(pdf.get_y() + tiny_vertical_space)
         pdf.multi_cell(
-            text=payment_details.strip(), markdown=True, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height
+            text=payment_details.strip(), markdown=True, w=page_width, new_x="LEFT", new_y="NEXT", h=line_height
         )
 
     if optional_text:
         pdf.set_y(pdf.get_y() + large_vertical_space)
         pdf.multi_cell(
-            text='__{}__'.format(optional_text), markdown=True, w=page_width, new_x='LEFT', new_y='NEXT', h=line_height
+            text="__{}__".format(optional_text), markdown=True, w=page_width, new_x="LEFT", new_y="NEXT", h=line_height
         )
 
     return pdf
