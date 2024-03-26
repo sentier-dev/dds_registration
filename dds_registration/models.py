@@ -11,6 +11,8 @@ from django.db import models
 from django.urls import reverse
 
 from .core.constants.date_time_formats import dateTimeFormat
+from .core.helpers.dates import this_year
+
 
 alphabet = string.ascii_lowercase + string.digits
 random_code_length = 8
@@ -86,14 +88,14 @@ class User(AbstractUser):
 
 
 class Membership(models.Model):
-    user = models.ForeignKey(User, related_name='registrations', on_delete=models.CASCADE)
-    started = models.IntegerField(default=lambda: date.today().year)
-    until = models.IntegerField(default=lambda: date.today().year)
+    user = models.ForeignKey(User, related_name='memberships', on_delete=models.CASCADE)
+    started = models.IntegerField(default=this_year)
+    until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
 
     @property
     def active(self) -> bool:
-        return date.today().year <= self.until
+        return this_year() <= self.until
 
     @classmethod
     def is_member(cls, user: User) -> bool:
@@ -109,7 +111,7 @@ class Event(models.Model):
     description = models.TextField(blank=True)
     public = models.BooleanField(default=False)
     registration_open = models.DateField(auto_now_add=True, help_text='Date registration opens (inclusive)')
-    registration_close = models.DateField(blank=True, help_text='Date registration closes (inclusive)')
+    registration_close = models.DateField(help_text='Date registration closes (inclusive)')
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text='Maximum number of participants to this event (0 = no limit)',
@@ -122,7 +124,7 @@ class Event(models.Model):
     @property
     def can_register(self):
         today = date.today()
-        return self.registration_open >= today and (not self.registration_close or today <= self.registration_close)
+        return today >= self.registration_open and today <= self.registration_close
 
     def get_active_registrations(self):
         """

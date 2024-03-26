@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>{% block title %}{{ settings.SITE_TITLE }}{% endblock title %}</title>
+  <title>{% block title %}{{ site.name }}{% endblock title %}</title>
   <meta name="description" content="{% block meta_description %}{{ settings.SITE_DESCRIPTION }}{% endblock meta_description %}" />
   <meta name="keywords" content="{% block meta_keywords %}{{ settings.SITE_KEYWORDS }}{% endblock meta_keywords %}" />
   <meta charset="utf-8" />
