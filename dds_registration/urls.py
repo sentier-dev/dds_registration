@@ -9,7 +9,6 @@ from django.views.decorators.cache import cache_page
 from . import views
 from .views import membership as membership_views
 from .views import event_registration as event_registration_views
-from .views import billing as billing_views
 from .views import registration as registration_views
 
 from .forms import DdsRegistrationForm
@@ -62,62 +61,14 @@ urlpatterns = [
         name="event_registration_edit_success",
     ),
     path(
-        # Download invoice page (delete or move to billing?)
         "event/<str:event_code>/registration/invoice",
         event_registration_views.event_registration_invoice,
         name="event_registration_invoice",
     ),
     path(
-        # Download invoice pdf (delete or move to billing?)
-        "event/<str:event_code>/registration/invoice/download",
-        event_registration_views.event_registration_invoice_download,
-        name="event_registration_invoice_download",
-    ),
-    path(
         "event/<str:event_code>/registration/payment",
         event_registration_views.event_registration_payment,
         name="event_registration_payment",
-    ),
-    # Billing...
-    path(
-        "billing/event/<str:event_code>",
-        billing_views.billing_event,
-        name="billing_event",
-    ),
-    path(
-        # Invoice created: link to download a pdf
-        "billing/event/<str:event_code>/invoice/proceed",
-        billing_views.billing_event_proceed_invoice,
-        name="billing_event_proceed_invoice",
-    ),
-    path(
-        # Invoice pdf generate and download
-        "billing/event/<str:event_code>/invoice/download",
-        billing_views.billing_event_invoice_download,
-        name="billing_event_invoice_download",
-    ),
-    path(
-        # Create stripe session (TODO: Add params for currency and amout)
-        "billing/event/<str:event_code>/payment/stripe/create_checkout_session",
-        billing_views.billing_event_payment_stripe_create_checkout_session,
-        name="billing_event_payment_stripe_create_checkout_session",
-    ),
-    path(
-        # Proceed stripe payment
-        "billing/event/<str:event_code>/payment/stripe/proceed",
-        billing_views.billing_event_stripe_payment_proceed,
-        name="billing_event_stripe_payment_proceed",
-    ),
-    path(
-        # Stripe payment success
-        "billing/event/<str:event_code>/payment/stripe/success/<str:session_id>",
-        billing_views.billing_event_stripe_payment_success,
-        name="billing_event_stripe_payment_success",
-    ),
-    path(
-        "billing/membership",
-        billing_views.billing_membership,
-        name="billing_membership",
     ),
     # Membership...
     path(
@@ -131,13 +82,6 @@ urlpatterns = [
         name="membership_proceed",
     ),
     path(
-        # TODO: Use more specific url later
-        "webhook",
-        membership_views.membership_stripe_webhook,
-        name="membership_stripe_webhook",
-    ),
-    # Stripe api
-    path(
         "membership/proceed/success",
         membership_views.membership_proceed_success,
         name="membership_proceed_success",
@@ -147,6 +91,7 @@ urlpatterns = [
         membership_views.membership_proceed_test,
         name="membership_proceed_test",
     ),
+    # TODO: Add a route with invoice download link (`membership_proceed_invoice`) + an invoice generation route itself (`membership_invoice_download`)
     # Stripe api
     path(
         # TODO: Use more specific url later
