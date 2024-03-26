@@ -101,9 +101,21 @@ class Membership(models.Model):
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
 
+    paid = models.BooleanField(default=False)
+
+    # Membership type:
+    MEMBERSHIP_TYPES = (
+        ("NORMAL_CREDIT_CARD", "Normal membership - Pay by credit card"),
+        ("NORMAL_INVOICE", "Normal membership - Pay by invoice"),
+        ("ACADEMIC_CREDIT_CARD", "Academic membership - Pay by credit card"),
+        ("ACADEMIC_INVOICE", "Academic membership - Pay by invoice"),
+    )
+    DEFAULT_MEMBERSHIP_TYPE = "NORMAL_CREDIT_CARD"
+    membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
+
     @property
     def active(self) -> bool:
-        return this_year() <= self.until
+        return self.paid and this_year() <= self.until
 
     @classmethod
     def is_member(cls, user: User) -> bool:
