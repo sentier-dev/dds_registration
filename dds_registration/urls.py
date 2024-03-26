@@ -81,18 +81,23 @@ urlpatterns = [
         membership_views.membership_proceed,
         name="membership_proceed",
     ),
+    path(
+        "membership/proceed/success",
+        membership_views.membership_proceed_success,
+        name="membership_proceed_success",
+    ),
+    path(
+        "membership/proceed/test/<str:payment_id>",
+        membership_views.membership_proceed_test,
+        name="membership_proceed_test",
+    ),
     # TODO: Add a route with invoice download link (`membership_proceed_invoice`) + an invoice generation route itself (`membership_invoice_download`)
+    # Stripe api
     path(
         # TODO: Use more specific url later
         "webhook",
         membership_views.membership_stripe_webhook,
         name="membership_stripe_webhook",
-    ),
-    # Stripe api
-    path(
-        "membership/proceed/success",
-        membership_views.membership_proceed_success,
-        name="membership_proceed_success",
     ),
     # App-provided paths...
     path("admin/", admin.site.urls, name="admin"),

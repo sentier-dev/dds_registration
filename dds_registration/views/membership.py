@@ -5,6 +5,7 @@ import logging
 import traceback
 import json
 
+from django.contrib.sites.shortcuts import get_current_site
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -118,6 +119,7 @@ def membership_proceed(request: HttpRequest):
             return redirect("membership_proceed_invoice")
         # Go to stripe site...
         stripe_link = academic_membership_stripe_payment_link if is_academic else regular_membership_stripe_payment_link
+        stripe_link += '?client_reference_id=TEST'
         return redirect(stripe_link)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
@@ -140,6 +142,37 @@ def membership_proceed_success(request: HttpRequest):
         "action": "membership_proceed_success",
     }
     return render(request, "dds_registration/membership_test.html.django", context)
+
+
+def membership_proceed_test(request: HttpRequest, payment_id: str):
+    try:
+        scheme = "https" if request.is_secure() else "http"
+        site = get_current_site(request)
+        debug_data = {
+            'scheme': scheme,
+            'payment_id': payment_id,
+            #  "method": method,
+            #  "request": request,
+        }
+        LOG.debug("membership_stripe_webhook: %s", debug_data)
+        context = {
+            "action": "membership_proceed_test",
+        }
+        return render(request, "dds_registration/membership_test.html.django", context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        sTraceback = str(traceback.format_exc())
+        error_text = "Error on membership_test: {}".format(sError)
+        messages.error(request, error_text)
+        debug_data = {
+            "err": err,
+            "traceback": sTraceback,
+            "sError": sError,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        # Redirect to profile page with error messages (see above)
+        #  return redirect("profile")
+        raise err
 
 
 #  @login_required
@@ -182,10 +215,10 @@ def membership_stripe_webhook(request: HttpRequest):
             'payload_type': payload_type,
             'payload_request': payload_request,
             "status": status,
-            "object": object,
+            #  "object": object,
             #  "data": data,
             #  "parsed": parsed,
-            #  "payload": payload,
+            "payload": payload,
             "sig_header": sig_header,
             #  "method": method,
             #  "request": request,
