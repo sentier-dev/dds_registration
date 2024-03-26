@@ -31,8 +31,8 @@ def event_registration_new(request: HttpRequest, event_code: str):
     return event_registration_form(
         request,
         event_code=event_code,
-        form_template='dds_registration/event_registration_new.html.django',
-        success_redirect='event_registration_new_success',
+        form_template="dds_registration/event_registration_new.html.django",
+        success_redirect="event_registration_new_success",
         create_new=True,
     )
 
@@ -42,8 +42,8 @@ def event_registration_edit(request: HttpRequest, event_code: str):
     return event_registration_form(
         request,
         event_code=event_code,
-        form_template='dds_registration/event_registration_edit.html.django',
-        success_redirect='event_registration_edit_success',
+        form_template="dds_registration/event_registration_edit.html.django",
+        success_redirect="event_registration_edit_success",
     )
 
 
@@ -52,8 +52,8 @@ def event_registration_cancel_confirm(request: HttpRequest, event_code: str):
     return event_registration_cancel_confirm_form(
         request,
         event_code=event_code,
-        form_template='dds_registration/event_registration_cancel_confirm.html.django',
-        success_redirect='profile',
+        form_template="dds_registration/event_registration_cancel_confirm.html.django",
+        success_redirect="profile",
     )
 
 
@@ -63,7 +63,7 @@ def event_registration_cancel_process(request: HttpRequest, event_code: str):
         request,
         event_code=event_code,
         #  form_template=None,
-        success_redirect='profile',
+        success_redirect="profile",
     )
 
 
@@ -72,7 +72,7 @@ def event_registration_new_success(request: HttpRequest, event_code: str):
     return show_registration_form_success(
         request,
         event_code=event_code,
-        template='dds_registration/event_registration_new_success.html.django',
+        template="dds_registration/event_registration_new_success.html.django",
     )
 
 
@@ -81,27 +81,27 @@ def event_registration_edit_success(request: HttpRequest, event_code: str):
     return show_registration_form_success(
         request,
         event_code=event_code,
-        template='dds_registration/event_registration_edit_success.html.django',
+        template="dds_registration/event_registration_edit_success.html.django",
     )
 
 
 @login_required
 def event_registration_invoice(request: HttpRequest, event_code: str):
     # TODO: Generate invoice pdf
-    template = 'dds_registration/event_registration_invoice.html.django'
+    template = "dds_registration/event_registration_invoice.html.django"
     context = get_invoice_context(request, event_code)
     show_debug = False
     if show_debug:
         return render(request, template, context)
     pdf = create_invoice_pdf(context)
-    return HttpResponse(bytes(pdf.output()), content_type='application/pdf')
+    return HttpResponse(bytes(pdf.output()), content_type="application/pdf")
 
 
 @login_required
 def event_registration_payment(request: HttpRequest, event_code: str):
     try:
         # TODO: Place payment link/info here
-        template = 'dds_registration/event_registration_payment.html.django'
+        template = "dds_registration/event_registration_payment.html.django"
         context = get_event_registration_context(request, event_code)
         return render(request, template, context)
     except Exception as err:
@@ -110,11 +110,11 @@ def event_registration_payment(request: HttpRequest, event_code: str):
         messages.error(request, error_text)
         sTraceback = str(traceback.format_exc())
         debug_data = {
-            'event_code': event_code,
-            'err': err,
-            'traceback': sTraceback,
+            "event_code": event_code,
+            "err": err,
+            "traceback": sTraceback,
         }
-        LOG.error('%s (redirecting to profile): %s', error_text, debug_data)
+        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
         raise Exception(error_text)
 
 

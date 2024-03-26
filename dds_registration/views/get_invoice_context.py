@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 
 # TODO: To store them in constants or in the settings or configuration?
 
-dds_name = 'Départ de Sentier'
+dds_name = "Départ de Sentier"
 dds_address = """
 Dorfsteig 8
 5223 Riniken
@@ -38,17 +38,17 @@ SWIFT-BIC: TRWIBEB1XXX
 
 table_header = (
     # Header...
-    'Quantity',
-    'Event',
-    'Option',
-    'Costs (EUR)',
+    "Quantity",
+    "Event",
+    "Option",
+    "Costs (EUR)",
 )
 
 
 def get_event_text(event: Event) -> str:
-    text = '**{}**'.format(event.title)
+    text = "**{}**".format(event.title)
     if event.description:
-        text += '\n' + event.description
+        text += "\n" + event.description
     return text
 
 
@@ -65,7 +65,7 @@ def create_services_table(user: User, event: Event, registration: Registration):
             1,
             event_text,
             opt.item,
-            opt.price if opt.price else '',
+            opt.price if opt.price else "",
         )
         if opt.price:
             total += opt.price
@@ -75,10 +75,10 @@ def create_services_table(user: User, event: Event, registration: Registration):
     rows_basic = tuple(map(add_option_row, options.filter(add_on=False)))
     rows_addon = tuple(map(add_option_row, options.filter(add_on=True)))
     total_row = (
-        '',
-        '__Total__',
-        '',
-        '__{}__'.format(total),
+        "",
+        "__Total__",
+        "",
+        "__{}__".format(total),
     )
     table = (*table, *rows_basic, *rows_addon, total_row)
     # TODO: addons, total
@@ -87,12 +87,12 @@ def create_services_table(user: User, event: Event, registration: Registration):
 
 def get_invoice_context(request: HttpRequest, event_code: str):
     user: User = request.user
-    scheme = 'https' if request.is_secure() else 'http'
+    scheme = "https" if request.is_secure() else "http"
     context = {
-        'event_code': event_code,
-        'user': user,
-        'site': get_current_site(request),
-        'scheme': scheme,
+        "event_code": event_code,
+        "user": user,
+        "site": get_current_site(request),
+        "scheme": scheme,
     }
     event: Event | None = None
     registration: Registration | None = None
@@ -101,7 +101,7 @@ def get_invoice_context(request: HttpRequest, event_code: str):
         event = Event.objects.get(code=event_code)
         registration = event.registrations.get(user=user, active=True)
         if not registration:
-            raise Exception('Not found active registrations')
+            raise Exception("Not found active registrations")
         #  # UNUSED: Address has integrated into the base user model
         #  profile, created = .get_or_create(user=user)
         table_data = create_services_table(user, event, registration)
@@ -112,38 +112,38 @@ def get_invoice_context(request: HttpRequest, event_code: str):
         client_address = user.address  # profile.address
         today = date.today()
         # NOTE: Probably the year in the invoice id should rely on the registration date, not on the invoice creatiion one?
-        year_str = today.strftime('%y')
+        year_str = today.strftime("%y")
         invoice_date = today.strftime(dateFormat)
-        invoice_no = '#{}{:0>4}'.format(year_str, registration.invoice_no)
-        payment_terms = 'Within **{} business days** of invoice issuance'.format(payment_deadline_days)
+        invoice_no = "#{}{:0>4}".format(year_str, registration.invoice_no)
+        payment_terms = "Within **{} business days** of invoice issuance".format(payment_deadline_days)
         payment_details = event.payment_details if event.payment_details else default_payment_details
         # TInvoicePdfParams data...
-        context['event'] = event
-        context['registration'] = registration
-        context['optional_text'] = optional_text
-        context['client_name'] = client_name
-        context['client_address'] = client_address
-        context['dds_name'] = dds_name
-        context['dds_address'] = dds_address
-        context['invoice_no'] = invoice_no
-        context['invoice_date'] = invoice_date
-        context['payment_terms'] = payment_terms
-        context['payment_details'] = payment_details
-        context['table_data'] = table_data
+        context["event"] = event
+        context["registration"] = registration
+        context["optional_text"] = optional_text
+        context["client_name"] = client_name
+        context["client_address"] = client_address
+        context["dds_name"] = dds_name
+        context["dds_address"] = dds_address
+        context["invoice_no"] = invoice_no
+        context["invoice_date"] = invoice_date
+        context["payment_terms"] = payment_terms
+        context["payment_details"] = payment_details
+        context["table_data"] = table_data
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         error_text = 'Not found event code "{}": {}'.format(event_code, sError)
         messages.error(request, error_text)
         sTraceback = str(traceback.format_exc())
         debug_data = {
-            'event_code': event_code,
-            'err': err,
-            'traceback': sTraceback,
+            "event_code": event_code,
+            "err": err,
+            "traceback": sTraceback,
         }
-        LOG.error('%s (redirecting to profile): %s', error_text, debug_data)
+        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
         raise Exception(error_text)
 
-    context['event'] = event
-    context['registration'] = registration
-    context['total_price'] = calculate_total_registration_price(registration)
+    context["event"] = event
+    context["registration"] = registration
+    context["total_price"] = calculate_total_registration_price(registration)
     return context

@@ -28,10 +28,10 @@ def index(request: HttpRequest):
             if event.can_register:
                 registration = event.get_active_user_registration(user)
                 data = {
-                    'event_code': event.code,
-                    'event': event,
-                    'registration': registration,
-                    'user_has_registration': bool(registration),
+                    "event_code": event.code,
+                    "event": event,
+                    "registration": registration,
+                    "user_has_registration": bool(registration),
                 }
                 public_events_data.append(data)
         # Get the list of events with user's registrations...
@@ -40,51 +40,51 @@ def index(request: HttpRequest):
         for registration in user_registrations:
             event = registration.event
             data = {
-                'event_code': event.code,
-                'event': event,
-                'registration': registration,
-                'user_has_registration': True,
+                "event_code": event.code,
+                "event": event,
+                "registration": registration,
+                "user_has_registration": True,
             }
             user_events_data.append(data)
         context = {
-            'public_events_data': public_events_data,
-            'user_events_data': user_events_data,
+            "public_events_data": public_events_data,
+            "user_events_data": user_events_data,
         }
         debug_data = {
-            'public_events_data': public_events_data,
-            'user_events_data': user_events_data,
-            'user_registrations': user_registrations,
-            'context': context,
+            "public_events_data": public_events_data,
+            "user_events_data": user_events_data,
+            "user_registrations": user_registrations,
+            "context": context,
         }
-        LOG.debug('Render landing', debug_data)
-        return render(request, 'dds_registration/index.html.django', context)
+        LOG.debug("Render landing", debug_data)
+        return render(request, "dds_registration/index.html.django", context)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())
         debug_data = {
-            'err': err,
-            'traceback': sTraceback,
+            "err": err,
+            "traceback": sTraceback,
         }
-        LOG.error('Caught error %s (re-raising): %s', sError, debug_data)
+        LOG.error("Caught error %s (re-raising): %s", sError, debug_data)
         raise err
 
 
 @login_required
 def profile(request: HttpRequest):
     if not request.user.is_authenticated:
-        return redirect('index')
-    context = {'events_shown': 'mine'}
+        return redirect("index")
+    context = {"events_shown": "mine"}
     events = Event.objects.all()  # filter(query).distinct()
     events_list = get_events_list(request, events)
     if events_list and len(events_list):
-        context['events'] = events_list
+        context["events"] = events_list
     # else:
     #     messages.info(request, "You don't have any active registrations yet")
-    return render(request, 'dds_registration/profile.html.django', context)
+    return render(request, "dds_registration/profile.html.django", context)
 
 
 def components_demo(request: HttpRequest):
-    return render(request, 'components-demo.html.django')
+    return render(request, "components-demo.html.django")
 
 
 __all__ = [
