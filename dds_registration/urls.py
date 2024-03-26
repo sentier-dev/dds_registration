@@ -131,6 +131,13 @@ urlpatterns = [
         name="membership_proceed",
     ),
     path(
+        # TODO: Use more specific url later
+        "webhook",
+        membership_views.membership_stripe_webhook,
+        name="membership_stripe_webhook",
+    ),
+    # Stripe api
+    path(
         "membership/proceed/success",
         membership_views.membership_proceed_success,
         name="membership_proceed_success",

@@ -148,6 +148,12 @@ class Membership(Model):
     def is_membership_type_academic(membership_type: str) -> bool:
         return "ACADEMIC" in membership_type
 
+    def is_membership_type_invoice(membership_type: str) -> bool:
+        return "INVOICE" in membership_type
+
+    def is_membership_type_academic(membership_type: str) -> bool:
+        return "ACADEMIC" in membership_type
+
     @property
     def active(self) -> bool:
         return this_year() <= self.until  # Issue #63: Don't use `paid` -- it has been removed
