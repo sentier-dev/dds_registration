@@ -30,7 +30,7 @@
     "livereload-server": "echo --Start livereload server-- && python manage.py livereload src static",
     "start-django-dev": "echo --Start django dev server-- && cross-env DEV=True DEBUG=True LOCAL=True python manage.py runserver",
     "start-django": "echo --Start django dev server-- && python manage.py runserver",
-    "pyformat": "echo --Run python formatter /blue, venv/-- && blue ./**/*.py",
+    "pyformat": "echo --Run python formatter /black, venv/-- && black ./**/*.py",
     "pylint": "echo --Run python linter /pyright, venv/-- && pyright .",
     "check-all": "echo --Run all python checkers /autopep8, venv/-- && npm-run-all pyformat pylint",
     "help": "echo --List all available script commands-- && npm-package-user-scripts-list"
