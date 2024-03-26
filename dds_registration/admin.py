@@ -9,21 +9,15 @@ from .models import (
     Event,
     GroupDiscount,
     Message,
-    #  Profile,
     Registration,
     RegistrationOption,
     User,
+    Membership,
 )
 
 # Default registrations (without modifications)
 admin.site.register(GroupDiscount)
 admin.site.register(Message)
-
-
-#  # UNUSED: Address has integrated into the base user model
-#  class ProfileInline(admin.StackedInline):
-#      model = Profile
-#      verbose_name_plural = 'Profile'
 
 
 class IsRegularUserFilter(SimpleListFilter):
@@ -106,6 +100,21 @@ class UserAdmin(BaseUserAdmin):
 
 #  admin.site.unregister(OriginalUser)  # It's not required here
 admin.site.register(User, UserAdmin)
+
+
+class MembershipAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "started",
+        "until",
+        "honorary",
+        "paid",
+        "active",
+        "membership_type",
+    )
+
+
+admin.site.register(Membership, MembershipAdmin)
 
 
 class RegistrationAdmin(admin.ModelAdmin):

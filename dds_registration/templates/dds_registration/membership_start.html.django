@@ -1,0 +1,58 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module membership_start.html.django
+  @changed 2024.03.26, 15:03
+-->
+
+{% extends "base-regular.html.django" %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Start an membership — {{ block.super }}{% endblock title %}
+
+{% block content %}
+{{ block.super }}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Start an membership</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+{% include "assets/render-messages/render-messages.django" %}
+
+<p>Membership info...</p>
+
+<form class="data-form" method="GET" action="{% url "membership_proceed" %}">
+  {% csrf_token %}
+
+  <fieldset id="membership_type" class="mb3 form-group">
+    <legend class="mb-3 primary-color">Membership type:</legend>
+    {% for item in MEMBERSHIP_TYPES %}
+      {% with id=item.0 name=item.1 %}
+          <div class="mb-2 form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="membership_type"
+              id="membership_type-{{ id }}"
+              value="{{ id }}"
+              {% if id == membership_type %}checked{% endif %}
+            >
+            <label class="form-check-label" for="membership_type-{{ id }}">
+              {{ name }}
+            </label>
+          </div>
+      {% endwith %}
+    {% endfor %}
+  </fieldset>
+
+  <fieldset class="mb3 form-group">
+    <input class="btn btn-primary" type="submit" value="Proceed with the payment" />
+    <a class="btn btn-default" href="{% url 'index' %}" onClick="history.back(); return false">Back</a>
+  </fieldset>
+
+</form>
+
+{% endblock content %}

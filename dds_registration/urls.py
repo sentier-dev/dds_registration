@@ -1,11 +1,16 @@
+# @module dds_registration/urls.py
+# @changed 2024.03.26, 17:04
+
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from django.views.decorators.cache import cache_page
 
-#  from django_registration.views import RegistrationView as OriginalRegistrationView
-
 from . import views
+from .views import membership as membership_views
+from .views import event_registration as event_registration_views
+from .views import registration as registration_views
+
 from .forms import DdsRegistrationForm
 
 cache_timeout = 0 if settings.DEV or settings.DEBUG else 15 * 60  # in seconds: {min}*60
@@ -13,9 +18,9 @@ cache_timeout = 0 if settings.DEV or settings.DEBUG else 15 * 60  # in seconds: 
 
 urlpatterns = [
     path(
-        # Overrided registration form using updated form
+        # Overrided registration form using updated one
         "accounts/register/",
-        views.DdsRegistrationView.as_view(form_class=DdsRegistrationForm),
+        registration_views.DdsRegistrationView.as_view(form_class=DdsRegistrationForm),
         name="django_registration_register",
     ),
     path("", views.index, name="index"),
@@ -27,39 +32,60 @@ urlpatterns = [
     ),
     path(
         "event/<str:event_code>/registration/new",
-        views.event_registration_new,
+        event_registration_views.event_registration_new,
         name="event_registration_new",
     ),
     path(
         "event/<str:event_code>/registration/new/success",
-        views.event_registration_new_success,
+        event_registration_views.event_registration_new_success,
         name="event_registration_new_success",
     ),
     path(
         "event/<str:event_code>/registration/cancel",
-        views.event_registration_cancel_confirm,
+        event_registration_views.event_registration_cancel_confirm,
         name="event_registration_cancel",
     ),
     path(
         "event/<str:event_code>/registration/cancel/process",
-        views.event_registration_cancel_process,
+        event_registration_views.event_registration_cancel_process,
         name="event_registration_cancel_process",
     ),
-    path("event/<str:event_code>/registration/edit", views.event_registration_edit, name="event_registration_edit"),
+    path(
+        "event/<str:event_code>/registration/edit",
+        event_registration_views.event_registration_edit,
+        name="event_registration_edit",
+    ),
     path(
         "event/<str:event_code>/registration/edit/success",
-        views.event_registration_edit_success,
+        event_registration_views.event_registration_edit_success,
         name="event_registration_edit_success",
     ),
     path(
         "event/<str:event_code>/registration/invoice",
-        views.event_registration_invoice,
+        event_registration_views.event_registration_invoice,
         name="event_registration_invoice",
     ),
     path(
         "event/<str:event_code>/registration/payment",
-        views.event_registration_payment,
+        event_registration_views.event_registration_payment,
         name="event_registration_payment",
+    ),
+    # Membership...
+    path(
+        "membership/start",
+        membership_views.membership_start,
+        name="membership_start",
+    ),
+    path(
+        "membership/proceed",
+        membership_views.membership_proceed,
+        name="membership_proceed",
+    ),
+    # TODO: Add a route with invoice download link (`membership_proceed_invoice`) + an invoice generation route itself (`membership_invoice_download`)
+    path(
+        "membership/proceed/success",
+        membership_views.membership_proceed_success,
+        name="membership_proceed_success",
     ),
     # App-provided paths...
     path("admin/", admin.site.urls, name="admin"),
