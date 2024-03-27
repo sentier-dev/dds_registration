@@ -88,7 +88,15 @@ class User(AbstractUser):
 
 
 class Membership(models.Model):
+    MEMBERSHIP_TYPES = [
+        ("NORMAL", "Normal"),
+        ("BOARD", "Board member"),
+        ("HONORARY", "Honorary"),
+        ("BUSINESS", "Business"),
+    ]
+
     user = models.ForeignKey(User, related_name="memberships", on_delete=models.CASCADE)
+    membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default="NORMAL")
     started = models.IntegerField(default=this_year)
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
@@ -192,10 +200,17 @@ class Event(models.Model):
 
 
 class RegistrationOption(models.Model):
+    SUPPORTED_CURRENCIES = [
+        ("USD", "US Dollar"),
+        ("CHF", "Swiss Franc"),
+        ("EUR", "Euro"),
+        ("CAD", "Canadian Dollar"),  # AKA Loonie :)
+    ]
+
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     item = models.TextField(null=False, blank=False)  # Show as an input
     price = models.FloatField(default=0, null=False)
-    add_on = models.BooleanField(default=False)
+    currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False)
 
     def __str__(self):
         items = [
@@ -203,56 +218,6 @@ class RegistrationOption(models.Model):
             "({})".format(self.price) if self.price else None,
         ]
         info = " ".join(filter(None, map(str, items)))
-        return info
-
-
-class Registration(models.Model):
-    """
-    Ex `Booking` class in OneEvent
-    """
-
-    invoice_no = models.AutoField(primary_key=True)
-
-    event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
-    user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
-
-    # If the registration has cancelled, the `active` status should be set to false
-    active = models.BooleanField(default=True)
-
-    options = models.ManyToManyField(RegistrationOption)
-
-    # Payment method:
-    PAYMENT_METHODS = [
-        ("STRIPE", "Stripe"),
-        ("INVOICE", "Invoice"),
-    ]
-    DEFAULT_PAYMENT_METHOD = "STRIPE"
-    payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
-
-    extra_invoice_text = models.TextField(blank=True, default="")
-
-    paid = models.BooleanField(default=False)
-    paid_date = models.DateTimeField(blank=True, null=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["event", "user"],
-                condition=models.Q(active=True),
-                name="Single active registration",
-            )
-        ]
-
-    def __str__(self):
-        items = [
-            self.user.get_full_name(),
-            self.user.email,
-            self.created_at.strftime(dateTimeFormat) if self.created_at else None,
-        ]
-        info = ", ".join(filter(None, map(str, items)))
         return info
 
 
@@ -273,36 +238,122 @@ class Message(models.Model):
         return info
 
 
-class DiscountCode(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    code = models.TextField(default=partial(random_code, length=4))  # Show as an input
-    # pyright: ignore [reportArgumentType]
-    only_registration = models.BooleanField(default=True)
-    percentage = models.IntegerField(help_text="Value as a percentage, like 10", blank=True, null=True)
-    absolute = models.FloatField(help_text="Absolute amount of discount", blank=True, null=True)
+class Invoice(models.Model):
+    # Docs recommend putting these on the class:
+    # https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.Field.choices
+    INVOICE_STATUS = [
+        # Can add other possibilities later
+        ("CREATED", "Created"),
+        ("ISSUED", "Issued"),
+        ("PAID", "Paid"),
+        ("REFUNDED", "Refunded"),
+    ]
+
+    INVOICE_TEMPLATES = [
+        # Different templates for specific bank accounts
+        # and layouts
+        ("M-CHF", "Membership - Swiss Francs"),
+        ("M-EUR", "Membership - Euros"),
+        ("G-USD", "Generic - USD"),
+        ("G-CHF", "Generic - CHF"),
+        ("G-EUR", "Generic - EUR"),
+        ("G-CAD", "Generic - CAD"),
+    ]
+
+    PAYMENT_METHODS = [
+        ("STRIPE", "Stripe"),
+        ("INVOICE", "Invoice"),
+        # Not yet implemented
+        ("WISE", "Wise"),
+    ]
+
+    # Same as the actual invoice number, which normally has the form
+    # {two-digit-year}{zero-padded four digit number starting from 1}
+    invoice_no = models.IntegerField(primary_key=True)
+    created = models.DateField(auto_now_add=True)
+    status = models.TextField(choices=INVOICE_STATUS)
+    # Includes the various item descriptions, prices, and currencies
+    # and any other necessary info
+    # The specific form will depend on the template
+    data = models.JSONField()
+    template = models.TextField(choices=INVOICE_TEMPLATES)
+
+
+REGISTRATION_STATUS = [
+    # For schools
+    ("SUBMITTED", "Application submitted"),
+    ("SELECTED", "Applicant selected"),
+    ("WAITLIST", "Applicant wait listed"),
+    ("DECLINED", "Applicant declined"),
+    ("PAYMENT-PENDING", "Registered (payment pending)"),
+    ("REGISTERED", "Registered"),
+    ("WITHDRAWN", "Withdrawn"),
+]
+
+
+class Registration(models.Model):
+    """
+    Ex `Booking` class in OneEvent
+    """
+
+    invoice = models.ForeignKey(Invoice, related_name="invoices", on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
+    # Which kind of registration for the event
+    option = models.ForeignKey(RegistrationOption, related_name="options", on_delete=models.CASCADE)
+
+    status = models.TextField(choices=REGISTRATION_STATUS)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "user"],
+                condition=models.Q(active=True),
+                name="Single registration per verified user account",
+            )
+        ]
 
     def __str__(self):
         items = [
-            self.event,
+            self.user.get_full_name(),
+            self.user.email,
             self.created_at.strftime(dateTimeFormat) if self.created_at else None,
         ]
         info = ", ".join(filter(None, map(str, items)))
         return info
 
+# class DiscountCode(models.Model):
+#     event = models.ForeignKey(Event, on_delete=models.CASCADE)
+#     code = models.TextField(default=partial(random_code, length=4))  # Show as an input
+#     # pyright: ignore [reportArgumentType]
+#     only_registration = models.BooleanField(default=True)
+#     percentage = models.IntegerField(help_text="Value as a percentage, like 10", blank=True, null=True)
+#     absolute = models.FloatField(help_text="Absolute amount of discount", blank=True, null=True)
 
-class GroupDiscount(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    only_registration = models.BooleanField(default=True)
-    percentage = models.IntegerField(help_text="Value as a percentage, like 10", blank=True, null=True)
-    absolute = models.FloatField(help_text="Absolute amount of discount", blank=True, null=True)
+#     def __str__(self):
+#         items = [
+#             self.event,
+#             self.created_at.strftime(dateTimeFormat) if self.created_at else None,
+#         ]
+#         info = ", ".join(filter(None, map(str, items)))
+#         return info
 
-    def __str__(self):
-        items = [
-            self.event,
-            "registration only" if self.only_registration else None,
-            self.percentage,
-            self.absolution,
-        ]
-        info = ", ".join(filter(None, map(str, items)))
-        return info
+
+# class GroupDiscount(models.Model):
+#     event = models.ForeignKey(Event, on_delete=models.CASCADE)
+#     group = models.ForeignKey(Group, on_delete=models.CASCADE)
+#     only_registration = models.BooleanField(default=True)
+#     percentage = models.IntegerField(help_text="Value as a percentage, like 10", blank=True, null=True)
+#     absolute = models.FloatField(help_text="Absolute amount of discount", blank=True, null=True)
+
+#     def __str__(self):
+#         items = [
+#             self.event,
+#             "registration only" if self.only_registration else None,
+#             self.percentage,
+#             self.absolution,
+#         ]
+#         info = ", ".join(filter(None, map(str, items)))
+#         return info
