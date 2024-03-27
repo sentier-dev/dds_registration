@@ -121,7 +121,6 @@ def membership_proceed(request: HttpRequest):
             return redirect("membership_proceed_invoice")
         # Go to stripe site...
         stripe_link = academic_membership_stripe_payment_link if is_academic else regular_membership_stripe_payment_link
-        stripe_link += '?client_reference_id=TEST'
         return redirect(stripe_link)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
@@ -151,8 +150,8 @@ def membership_proceed_test(request: HttpRequest, payment_id: str):
         scheme = "https" if request.is_secure() else "http"
         site = get_current_site(request)
         debug_data = {
-            'scheme': scheme,
-            'payment_id': payment_id,
+            "scheme": scheme,
+            "payment_id": payment_id,
             #  "method": method,
             #  "request": request,
         }
@@ -193,15 +192,15 @@ def membership_proceed_test(request: HttpRequest, payment_id: str):
 def membership_stripe_webhook(request: HttpRequest):
     try:
         method = request.method
-        if method != 'POST':
-            raise Exception('Expecting post data request')
+        if method != "POST":
+            raise Exception("Expecting post data request")
         json_payload = request.body.decode("utf-8")
         payload = json.loads(json_payload)
-        data = payload['data'] if 'data' in payload else {}
-        object = data['object'] if 'object' in data else {}
-        payload_type = payload.get('type')  # Expecting `payment_intent.succeeded`
-        payload_request = payload.get('request')
-        status = object.get('status')  # Expecting 'succeeded'
+        data = payload["data"] if "data" in payload else {}
+        object = data["object"] if "object" in data else {}
+        payload_type = payload.get("type")  # Expecting `payment_intent.succeeded`
+        payload_request = payload.get("request")
+        status = object.get("status")  # Expecting 'succeeded'
         #  Parsed data example:
         #  'id': 'evt_3OybccL41uPceS6J0bUl44n0'
         #  'object': 'event'
@@ -212,10 +211,10 @@ def membership_stripe_webhook(request: HttpRequest):
         #  'pending_webhooks': 2
         #  'request': {'id': 'req_vurnMXFvwMjR9n', 'idempotency_key': 'af178ca4-a2b6-43c3-af8a-b227a60ffc20'}
         #  'type': 'payment_intent.created'
-        sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+        sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
         debug_data = {
-            'payload_type': payload_type,
-            'payload_request': payload_request,
+            "payload_type": payload_type,
+            "payload_request": payload_request,
             "status": status,
             #  "object": object,
             #  "data": data,

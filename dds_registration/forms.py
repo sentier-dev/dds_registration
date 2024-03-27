@@ -5,7 +5,7 @@ from django.forms.models import ModelForm
 
 from django_registration.forms import RegistrationForm as BaseRegistrationForm
 
-from .models import DiscountCode, Event, RegistrationOption, User
+from .models import Event, RegistrationOption, User
 
 # A text field to use in those TextField's which don't require large texts, but can use one-line text inputs
 textInputWidget = forms.TextInput(attrs={"class": "vLargeTextField"})
@@ -67,13 +67,14 @@ class EventAdminForm(ModelForm):
         fields = "__all__"
 
 
-class DiscountCodeAdminForm(ModelForm):
-    class Meta:
-        model = DiscountCode
-        widgets = {
-            "code": textInputWidget,
-        }
-        fields = "__all__"
+# Issue #63: Temporarily unused
+#  class DiscountCodeAdminForm(ModelForm):
+#      class Meta:
+#          model = DiscountCode
+#          widgets = {
+#              "code": textInputWidget,
+#          }
+#          fields = "__all__"
 
 
 class SignUpForm(UserCreationForm):
