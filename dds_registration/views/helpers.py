@@ -297,6 +297,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
                 reg = Registration()
                 reg.event = event
                 reg.user = user
+                # TODO: Issue #63: Create and set an invoice? + Add a template selection to the form?
             # Set/update parameters...
             #  reg.payment_method = payment_method
             #  reg.extra_invoice_text = extra_invoice_text
