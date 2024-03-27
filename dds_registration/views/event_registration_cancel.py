@@ -34,7 +34,7 @@ def send_event_registration_cancelled_message(request: HttpRequest, context: dic
     user = request.user
 
     try:
-        LOG.debug("start: %s", context)
+        # LOG.debug("start: %s", context)
         subject = render_to_string(
             template_name=email_subject_template,
             context=context,
@@ -50,7 +50,7 @@ def send_event_registration_cancelled_message(request: HttpRequest, context: dic
             "subject": subject,
             "body": body,
         }
-        LOG.debug("mail_user: %s", context)
+        # LOG.debug("mail_user: %s", context)
         user.email_user(subject, body, settings.DEFAULT_FROM_EMAIL)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
@@ -140,12 +140,12 @@ def get_event_registration_cancel_context(request: HttpRequest, event_code: str)
         debug_data = {
             "registration": registration,
         }
-        LOG.debug("Object data: %s", debug_data)
+        # LOG.debug("Object data: %s", debug_data)
         context["registration"] = registration
 
     # Final step: prepare data, save created registration, render form...
     try:
-        LOG.debug("Successfully got context: %s", context)
+        # LOG.debug("Successfully got context: %s", context)
         context["success"] = True
         return context
     except Exception as err:
