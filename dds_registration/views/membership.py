@@ -1,5 +1,5 @@
 # @module dds_registration/views/membership.py
-# @changed 2024.03.27, 16:18
+# @changed 2024.03.27, 16:46
 
 import logging
 import traceback
