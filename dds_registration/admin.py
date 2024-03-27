@@ -201,7 +201,7 @@ class EventAdmin(admin.ModelAdmin):
         "title",
         "code",
         "max_participants",
-        "currency",
+        #  "currency",
         "registration_open",
         "registration_close",
         "public",
