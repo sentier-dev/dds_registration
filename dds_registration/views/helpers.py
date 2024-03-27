@@ -130,7 +130,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     reg = None
     reg_options = None
     checked_option_ids = []  # Will be got from post request, see below
-    payment_method = Registration.DEFAULT_PAYMENT_METHOD
+    #  payment_method = Registration.DEFAULT_PAYMENT_METHOD
     extra_invoice_text = ""
     # Is data ready to save
     data_ready = False
@@ -219,14 +219,14 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
 
     # Get data from registration object, if it's found...
     if reg:
-        payment_method = reg.payment_method
-        extra_invoice_text = reg.extra_invoice_text
+        #  payment_method = reg.payment_method
+        #  extra_invoice_text = reg.extra_invoice_text
         options = reg.options
         checked_option_ids = list(map(lambda item: item.id, options.all()))
         debug_data = {
             "reg": reg,
-            "payment_method": payment_method,
-            "extra_invoice_text": extra_invoice_text,
+            #  "payment_method": payment_method,
+            #  "extra_invoice_text": extra_invoice_text,
             "checked_option_ids": checked_option_ids,
         }
         # LOG.debug("Object data: %s", debug_data)
@@ -235,15 +235,15 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     has_post_data = request.method == "POST"
     if has_post_data:
         # Get payment method...
-        payment_method = request.POST.get("payment_method", Registration.DEFAULT_PAYMENT_METHOD)
-        extra_invoice_text = request.POST.get("extra_invoice_text", "")
+        #  payment_method = request.POST.get("payment_method", Registration.DEFAULT_PAYMENT_METHOD)
+        #  extra_invoice_text = request.POST.get("extra_invoice_text", "")
         # Retrieve new options list from the post data...
         new_checked_option_ids = request.POST.getlist("checked_option_ids")
         checked_option_ids = list(map(int, new_checked_option_ids))
         debug_data = {
             "request.POST": request.POST,
-            "payment_method": payment_method,
-            "extra_invoice_text": extra_invoice_text,
+            #  "payment_method": payment_method,
+            #  "extra_invoice_text": extra_invoice_text,
             "checked_option_ids": checked_option_ids,
         }
         # LOG.debug("Post data: %s", debug_data)
@@ -253,8 +253,8 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     # Final step: prepare data, save created registration, render form...
     try:
         # NOTE: It's required to have at least one checked basic option! Going to check it...
-        reg_options_addons = reg_options.filter(add_on=True)  # Unused
-        reg_options_basic = reg_options.filter(add_on=False)
+        #  reg_options_addons = reg_options.filter(add_on=True)  # Unused
+        reg_options_basic = reg_options.all()
         reg_options_basic_ids = list(map(lambda item: item.id, reg_options_basic))
         reg_options_basic_checked_ids = list(set(checked_option_ids) & set(reg_options_basic_ids))
         has_reg_options_basic_checked = bool(len(reg_options_basic_checked_ids))
@@ -275,18 +275,19 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             # Return to form editing and show message
             error_text = "Only one basic option should be selected"
             # Remove the extra elements from the ids list (use only first element)
-            checked_option_ids = list(map(lambda item: item.id, reg_options_addons))
-            checked_option_ids.append(reg_options_basic_ids[0])
+            #  checked_option_ids = list(map(lambda item: item.id, reg_options_addons))
+            #  checked_option_ids.append(reg_options_basic_ids[0])
+            checked_option_ids = [reg_options_basic_ids[0]]
             if has_post_data:
                 # If had user data posted then show an error mnessgae...
                 messages.warning(request, error_text)
             data_ready = False
         context["reg_options_basic"] = reg_options_basic
-        context["reg_options_addons"] = reg_options_addons
+        #  context["reg_options_addons"] = reg_options_addons
         context["checked_option_ids"] = checked_option_ids
-        context["PAYMENT_METHODS"] = Registration.PAYMENT_METHODS
-        context["payment_method"] = payment_method
-        context["extra_invoice_text"] = extra_invoice_text
+        #  context["PAYMENT_METHODS"] = Registration.PAYMENT_METHODS
+        #  context["payment_method"] = payment_method
+        #  context["extra_invoice_text"] = extra_invoice_text
         # If data_ready: save data and go to the next stage
         if data_ready:
             # TODO: If data_ready: save data and go to the next stage
@@ -297,8 +298,8 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
                 reg.event = event
                 reg.user = user
             # Set/update parameters...
-            reg.payment_method = payment_method
-            reg.extra_invoice_text = extra_invoice_text
+            #  reg.payment_method = payment_method
+            #  reg.extra_invoice_text = extra_invoice_text
             if create_new:
                 reg.save()  # Save object before set many-to-many relations
             reg.options.set(options)
@@ -306,12 +307,12 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             debug_data = {
                 "options": options,
                 "checked_option_ids": checked_option_ids,
-                "payment_method": payment_method,
-                "extra_invoice_text": extra_invoice_text,
+                #  "payment_method": payment_method,
+                #  "extra_invoice_text": extra_invoice_text,
             }
-            # LOG.debug("Creating a registration: %s", debug_data)
-            # TODO: Send an e-mail message (if registration has been created)...
+            LOG.debug("Creating a registration: %s", debug_data)
             if create_new:
+                # Send an e-mail message (if registration has been created)...
                 send_event_registration_success_message(request, event_code)
             # Redirect to the success message page
             context["redirect"] = "SUCCESS"
