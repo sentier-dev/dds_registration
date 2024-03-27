@@ -5,6 +5,7 @@ import logging
 import traceback
 from functools import reduce
 
+from django.db.models import Model, Q
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -17,7 +18,7 @@ from django.template.loader import render_to_string
 
 from ..core.helpers.errors import errorToString
 
-from ..models import Event, Registration, RegistrationOption, User
+from ..models import REGISTRATION_ACTIVE_QUERY, Event, Registration, RegistrationOption, User
 
 # For django_registration related stuff, see:
 # .venv/Lib/site-packages/django_registration/backends/activation/views.py
@@ -97,7 +98,8 @@ def get_events_list(request: HttpRequest, events: list[Event]):
         if request.user.is_authenticated:
             # Look for a possible registration by the user
             try:
-                registration = event.registrations.get(user=request.user, active=True)
+                registration = event.registrations.get(REGISTRATION_ACTIVE_QUERY, user=request.user)
+                # registration = event.registrations.get(user=request.user, active=True)
                 event_info["registration"] = registration
                 result.append(event_info)
             except Registration.DoesNotExist:
@@ -158,7 +160,8 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     # Try to find active registrations for this event (prevent constrain exception)...
     try:
         # TODO: Go to the next stage with a message text?
-        regs = Registration.objects.filter(event=event, user=user, active=True)
+        regs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, event=event, user=user)
+        # regs = Registration.objects.filter(event=event, user=user, active=True)
         regs_count = len(regs)
         has_reg = bool(regs_count)
         if not create_new:
@@ -221,8 +224,11 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     if reg:
         #  payment_method = reg.payment_method
         #  extra_invoice_text = reg.extra_invoice_text
-        options = reg.options
-        checked_option_ids = list(map(lambda item: item.id, options.all()))
+        #  options = reg.options
+        option = reg.option
+        options = [option]
+        #  checked_option_ids = list(map(lambda item: item.id, options.all()))
+        checked_option_ids = list(map(lambda item: item.id, options))
         debug_data = {
             "reg": reg,
             #  "payment_method": payment_method,
@@ -292,18 +298,20 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
         if data_ready:
             # TODO: If data_ready: save data and go to the next stage
             options = RegistrationOption.objects.filter(id__in=checked_option_ids)
+            option = options[0] if len(options) else None
             if not reg and create_new:
                 # Create new object for a 'create new' strategy...
                 reg = Registration()
                 reg.event = event
                 reg.user = user
-                # TODO: Issue #63: Create and set an invoice? + Add a template selection to the form?
+            reg.option = option
+            # TODO: Issue #63: Create and set an invoice? + Add a template selection to the form?
             # Set/update parameters...
             #  reg.payment_method = payment_method
             #  reg.extra_invoice_text = extra_invoice_text
-            if create_new:
-                reg.save()  # Save object before set many-to-many relations
-            reg.options.set(options)
+            #  if create_new:
+            #      reg.save()  # Save object before set many-to-many relations
+            #  reg.options.set(options)
             reg.save()  # Save object before set many-to-many relations
             debug_data = {
                 "options": options,
@@ -387,7 +395,9 @@ def show_registration_form_success(request: HttpRequest, event_code: str, templa
 
 
 def calculate_total_registration_price(registration: Registration) -> int:
-    options = registration.options.all()
+    # options = registration.options.all()
+    option = registration.option
+    options = [option]
     options_price = reduce(lambda sum, opt: sum + opt.price if opt.price else sum, options, 0)
     total_price = options_price
     return total_price
@@ -407,7 +417,8 @@ def get_event_registration_context(request: HttpRequest, event_code: str):
     # Try to get event object by code...
     try:
         event = Event.objects.get(code=event_code)
-        registration = event.registrations.get(user=user, event=event, active=True)
+        registration = event.registrations.get(REGISTRATION_ACTIVE_QUERY, user=user, event=event)
+        # registration = event.registrations.get(user=user, event=event, active=True)
         if not registration:
             raise Exception("Not found active registrations")
         context["event"] = event

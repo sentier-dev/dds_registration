@@ -96,6 +96,7 @@ class Membership(Model):
         ("BOARD", "Board member"),
         ("HONORARY", "Honorary"),
         ("BUSINESS", "Business"),
+        ("ACADEMIC", "Academic"),  # NOTE: For 'academic' (discounted) payment type
     ]
     DEFAULT_MEMBERSHIP_TYPE = "NORMAL"
 
@@ -162,7 +163,8 @@ class Event(Model):
         """
         Return the active registrations
         """
-        return self.registrations.all().filter(active=True)
+        return self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY)
+        # return self.registrations.all().filter(active=True)
 
     def get_active_user_registration(self, user: User | None):
         """
@@ -171,7 +173,8 @@ class Event(Model):
         # Return empty list if no user has specified or it's a `lazy user` (not from system)
         if not user or not user.id:
             return []
-        active_user_registrations = self.registrations.all().filter(active=True, user=user)
+        active_user_registrations = self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY, user=user)
+        #  active_user_registrations = self.registrations.all().filter(active=True, user=user)
         if len(active_user_registrations):
             return active_user_registrations[0]
         return None
@@ -310,6 +313,9 @@ class Invoice(Model):
     template = models.TextField(choices=INVOICE_TEMPLATES)
 
 
+REGISTRATION_ACTIVE_QUERY = ~Q(status="WITHDRAWN")
+
+
 class Registration(Model):
     """
     Ex `Booking` class in OneEvent
@@ -321,15 +327,15 @@ class Registration(Model):
         ("SUBMITTED", "Application submitted"),
         ("SELECTED", "Applicant selected"),
         ("WAITLIST", "Applicant wait listed"),
-        ("DECLINED", "Applicant declined"),
+        ("DECLINED", "Applicant declined"),  # Inactive?
         ("PAYMENT-PENDING", "Registered (payment pending)"),
         ("REGISTERED", "Registered"),
-        ("WITHDRAWN", "Withdrawn"),
+        ("WITHDRAWN", "Withdrawn"),  # = Inactive
     ]
 
-    # TODO: `registration_type` with options: 'Academic', 'Normal'?
+    ACTIVE_QUERY = REGISTRATION_ACTIVE_QUERY
 
-    invoice = models.ForeignKey(Invoice, related_name="invoices", on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, related_name="invoices", on_delete=models.CASCADE, null=True)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
 
@@ -338,8 +344,8 @@ class Registration(Model):
 
     @queryable_property
     def active(self):
-        """Return the combined version info as a string."""
-        return self.status != "WITHDRAWN"
+        # TODO: To use one predefined QuerySet to determine 'active' status?
+        return self.status != "WITHDRAWN"  # DECLINED?
 
     @active.filter
     @classmethod
@@ -351,7 +357,7 @@ class Registration(Model):
         """
         if lookup != "exact":
             raise NotImplementedError()
-        return ~Q(status="WITHDRAWN")
+        return Registration.ACTIVE_QUERY  # ~Q(status="WITHDRAWN")  # DECLINED?
 
     # Which kind of registration for the event
     option = models.ForeignKey(RegistrationOption, related_name="options", on_delete=models.CASCADE)
@@ -364,17 +370,11 @@ class Registration(Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["event", "user"],
-                condition=Q(~Q(status="WITHDRAWN")),
+                condition=REGISTRATION_ACTIVE_QUERY,  # ~Q(status="WITHDRAWN")),  # DECLINED?
                 #  condition=Q(active=True),
                 name="Single registration per verified user account",
             )
         ]
-
-    @property
-    def active(self):
-        if self.status == "WITHDRAWN":
-            return False
-        return True
 
     def __str__(self):
         items = [
