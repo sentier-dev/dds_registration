@@ -8,7 +8,10 @@ from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.sites.models import Site  # To access site properties
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Model, Q
 from django.urls import reverse
+
+from queryable_properties.properties import queryable_property
 
 from .core.constants.date_time_formats import dateTimeFormat
 from .core.helpers.dates import this_year
@@ -49,7 +52,7 @@ class User(AbstractUser):
         #  # TODO: Add correct check if email and username are the same?
         #  constraints = [
         #      models.CheckConstraint(
-        #          check=models.Q(email=models.F('username')),
+        #          check=Q(email=models.F('username')),
         #          name='username_is_email',
         #      )
         #  ]
@@ -87,7 +90,7 @@ class User(AbstractUser):
         self._original_username = self.username
 
 
-class Membership(models.Model):
+class Membership(Model):
     MEMBERSHIP_TYPES = [
         ("NORMAL", "Normal"),
         ("BOARD", "Board member"),
@@ -133,7 +136,7 @@ class Membership(models.Model):
             return False
 
 
-class Event(models.Model):
+class Event(Model):
     code = models.TextField(unique=True, default=random_code)  # Show as an input
     title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
     description = models.TextField(blank=True)
@@ -144,8 +147,8 @@ class Event(models.Model):
         default=0,
         help_text="Maximum number of participants to this event (0 = no limit)",
     )
-    # XXX: Issue #63: Should we remove this `currency` field (we already have the `currency` field in the `RegistrationOption` model?
-    currency = models.TextField(null=True, blank=True)  # Show as an input
+    # Issue #63: Removed this `currency` field (we already have the `currency` field in the `RegistrationOption` model).
+    #  currency = models.TextField(null=True, blank=True)  # Show as an input
 
     payment_deadline_days = models.IntegerField(default=30)
     payment_details = models.TextField(blank=True, default="")
@@ -220,7 +223,7 @@ class Event(models.Model):
     new_registration_full_url.short_description = "New event registration url"
 
 
-class RegistrationOption(models.Model):
+class RegistrationOption(Model):
     SUPPORTED_CURRENCIES = [
         ("USD", "US Dollar"),
         ("CHF", "Swiss Franc"),
@@ -244,7 +247,7 @@ class RegistrationOption(models.Model):
         return info
 
 
-class Message(models.Model):
+class Message(Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     message = models.TextField()
     emailed = models.BooleanField(default=False)
@@ -261,7 +264,7 @@ class Message(models.Model):
         return info
 
 
-class Invoice(models.Model):
+class Invoice(Model):
     # Docs recommend putting these on the class:
     # https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.Field.choices
     INVOICE_STATUS = [
@@ -307,7 +310,7 @@ class Invoice(models.Model):
     template = models.TextField(choices=INVOICE_TEMPLATES)
 
 
-class Registration(models.Model):
+class Registration(Model):
     """
     Ex `Booking` class in OneEvent
     """
@@ -324,11 +327,31 @@ class Registration(models.Model):
         ("WITHDRAWN", "Withdrawn"),
     ]
 
+    # TODO: `registration_type` with options: 'Academic', 'Normal'?
+
     invoice = models.ForeignKey(Invoice, related_name="invoices", on_delete=models.CASCADE)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
 
-    active = models.BooleanField(default=True)
+    # NOTE: See `active` evaluated property below
+    #  active = models.BooleanField(default=True)
+
+    @queryable_property
+    def active(self):
+        """Return the combined version info as a string."""
+        return self.status != "WITHDRAWN"
+
+    @active.filter
+    @classmethod
+    def active(cls, lookup, value: bool):
+        """
+        Queryable active filter
+        TODO: To check this approach
+        @see https://django-queryable-properties.readthedocs.io/en/stable/filters.html
+        """
+        if lookup != "exact":
+            raise NotImplementedError()
+        return ~Q(status="WITHDRAWN")
 
     # Which kind of registration for the event
     option = models.ForeignKey(RegistrationOption, related_name="options", on_delete=models.CASCADE)
@@ -341,10 +364,17 @@ class Registration(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["event", "user"],
-                condition=models.Q(active=True),
+                condition=Q(~Q(status="WITHDRAWN")),
+                #  condition=Q(active=True),
                 name="Single registration per verified user account",
             )
         ]
+
+    @property
+    def active(self):
+        if self.status == "WITHDRAWN":
+            return False
+        return True
 
     def __str__(self):
         items = [
@@ -357,7 +387,7 @@ class Registration(models.Model):
 
 
 # Issue #63: Temporarily unused
-# class DiscountCode(models.Model):
+# class DiscountCode(Model):
 #     event = models.ForeignKey(Event, on_delete=models.CASCADE)
 #     code = models.TextField(default=partial(random_code, length=4))  # Show as an input
 #     # pyright: ignore [reportArgumentType]
@@ -374,7 +404,7 @@ class Registration(models.Model):
 #         return info
 #
 #
-# class GroupDiscount(models.Model):
+# class GroupDiscount(Model):
 #     event = models.ForeignKey(Event, on_delete=models.CASCADE)
 #     group = models.ForeignKey(Group, on_delete=models.CASCADE)
 #     only_registration = models.BooleanField(default=True)
