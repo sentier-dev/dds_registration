@@ -15,6 +15,7 @@ import logging
 from ..core.helpers.errors import errorToString
 
 from ..models import (
+    REGISTRATION_ACTIVE_QUERY,
     Event,
     Registration,
 )
@@ -105,7 +106,7 @@ def get_event_registration_cancel_context(request: HttpRequest, event_code: str)
     # Try to find active registrations for this event (prevent constrain exception)...
     try:
         # TODO: Go to the next stage with a message text?
-        regs = Registration.objects.filter(event=event, user=user, active=True)
+        regs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, event=event, user=user)
         regs_count = len(regs)
         has_reg = bool(regs_count)
         if not has_reg:

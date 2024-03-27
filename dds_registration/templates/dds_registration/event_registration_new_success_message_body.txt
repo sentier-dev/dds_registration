@@ -2,13 +2,14 @@
 You already created a registration for event {{ event.title }}.
 
 
-Now you should pay for your options:
+Now you should pay for your option:
 
-{% for option in registration.options.all %}- {{ option.item }}{% if option.price %} ({% if event.currency %}{{ event.currency }} {% endif %}{{ option.price }}){% endif %}
-{% empty %}(No options were set)
-{% endfor -%}
+{% comment %} {% for option in registration.options.all %}- {{ option.item }}{% if option.price %} ({% if event.currency %}{{ event.currency }} {% endif %}{{ option.price }}){% endif %} {% endcomment %}
+{% with option=registration.option %}- {{ option.item }}{% if option.price %} ({% if event.currency %}{{ event.currency }} {% endif %}{{ option.price }}){% endif %}
+{% comment %} {% empty %}(No options were set) {% endcomment %}
+{% endwith %}
 
-Total amount due: {% if event.currency %}{{ event.currency }} {% endif %}{{ total_price }}
+{% comment %} Total amount due: {% if event.currency %}{{ event.currency }} {% endif %}{{ total_price }} {% endcomment %}
 
 
 Payment:

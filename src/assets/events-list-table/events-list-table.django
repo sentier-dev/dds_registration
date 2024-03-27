@@ -31,28 +31,33 @@
         </th>
         <td class="col-participants">
           {% if event.max_participants > 0 %}
-            {{event.get_active_registrations.count}}/{{event.max_participants}}
+            {{ event.get_active_registrations.count }}/{{ event.max_participants }}
           {% endif %}
         </td>
         <td class="col-opens">
           {% if event.registration_open %}
-            {{event.registration_open}}
+            {{ event.registration_open }}
           {% endif %}
         </td>
         <td class="col-closes">
           {% if event.registration_close %}
-            {{event.registration_close}}
+            {{ event.registration_close }}
           {% endif %}
         </td>
         <td class="col-payment">
           {{ registration.get_payment_method_display }}
         </td>
         <td class="col-options">
+          {% with option=registration.option %}
+          <div>{{ option.item }} {% if option.price %}({{ option.price }}){% endif %}</div>
+          {% endwith %}
+          {% comment %}
           {% for option in registration.options.all %}
           <div>{{ option.item }} {% if option.price %}({{ option.price }}){% endif %}</div>
           {% empty %}
             —
           {% endfor %}
+          {% endcomment %}
         </td>
         <td class="col-paid">
           {% if registration.paid %}Yes{% else %}No{% endif %}

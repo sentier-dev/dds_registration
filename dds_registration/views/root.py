@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 
 from ..core.helpers.errors import errorToString
 
-from ..models import Event, Registration
+from ..models import REGISTRATION_ACTIVE_QUERY, Event, Registration
 from .helpers import get_events_list
 
 LOG = logging.getLogger(__name__)
@@ -36,7 +36,10 @@ def index(request: HttpRequest):
                 public_events_data.append(data)
         # Get the list of events with user's registrations...
         user_events_data = []
-        user_registrations = Registration.objects.filter(user=user, active=True) if user.is_authenticated else []
+        user_registrations = (
+            Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, user=user) if user.is_authenticated else []
+        )
+        #  user_registrations = Registration.objects.filter(user=user, active=True) if user.is_authenticated else []
         for registration in user_registrations:
             event = registration.event
             data = {

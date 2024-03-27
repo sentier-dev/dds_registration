@@ -24,18 +24,23 @@
 
 <p>Here comes payment info for the event <strong>{{ event.title }}</strong> ({{ event.code }}):</p>
 
-<p>Your options:</p>
+<p>Your option:</p>
 
 <ul>
+{% with option=registration.option %}
+  <li>{{ option.item }} {% if option.price %}({% if event.currency %}{{ event.currency }}{% endif %} {{ option.price }}){% endif %}</li>
+{% endfor -%}
+{% comment %}
 {% for option in registration.options.all %}
   <li>{{ option.item }} {% if option.price %}({% if event.currency %}{{ event.currency }}{% endif %} {{ option.price }}){% endif %}</li>
 {% empty %}
   <li>No options were set</li>
 {% endfor -%}
+{% endcomment %}
 </ul>
 
 <p>Total amount due: <strong>{% if event.currency %}{{ event.currency }}{% endif %} {{ total_price }}</strong></p>
 
-<p>Download <a href="{% url 'event_registration_invoice' event_code=event.code %}">invoice</a>.</li>
+<p>Download <a href="{% url 'event_registration_invoice' event_code=event.code %}">invoice</a>.</p>
 
 {% endblock content %}

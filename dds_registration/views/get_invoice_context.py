@@ -13,7 +13,7 @@ from django.http import HttpRequest
 from ..core.constants.date_time_formats import dateFormat
 from ..core.helpers.errors import errorToString
 
-from ..models import Event, Registration, RegistrationOption, User
+from ..models import REGISTRATION_ACTIVE_QUERY, Event, Registration, RegistrationOption, User
 from .helpers import calculate_total_registration_price, get_full_user_name
 
 LOG = logging.getLogger(__name__)
@@ -54,7 +54,9 @@ def get_event_text(event: Event) -> str:
 
 def create_services_table(user: User, event: Event, registration: Registration):
     table = (table_header,)
-    options = registration.options.all()
+    # options = registration.options.all()
+    option = registration.option
+    options = [option]
     event_text = get_event_text(event)
     #  count = 1
     total = 0
@@ -72,8 +74,8 @@ def create_services_table(user: User, event: Event, registration: Registration):
         #  count += 1
         return row_data
 
-    rows_basic = tuple(map(add_option_row, options.filter(add_on=False)))
-    rows_addon = tuple(map(add_option_row, options.filter(add_on=True)))
+    rows_basic = tuple(map(add_option_row, options))
+    rows_addon = []  # tuple(map(add_option_row, options.filter(add_on=True)))
     total_row = (
         "",
         "__Total__",
@@ -99,7 +101,8 @@ def get_invoice_context(request: HttpRequest, event_code: str):
     # Try to get event object by code...
     try:
         event = Event.objects.get(code=event_code)
-        registration = event.registrations.get(user=user, active=True)
+        registration = event.registrations.get(REGISTRATION_ACTIVE_QUERY, user=user)
+        # registration = event.registrations.get(user=user, active=True)
         if not registration:
             raise Exception("Not found active registrations")
         #  # UNUSED: Address has integrated into the base user model
