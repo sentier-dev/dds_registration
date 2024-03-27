@@ -3,11 +3,12 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.admin import SimpleListFilter
 from django.db.models import Q
 
-from .forms import DiscountCodeAdminForm, EventAdminForm, RegistrationOptionAdminForm
+from .forms import EventAdminForm, RegistrationOptionAdminForm
 from .models import (
-    DiscountCode,
+    # Issue #63: Temporarily unused
+    #  DiscountCode,
+    #  GroupDiscount,
     Event,
-    GroupDiscount,
     Message,
     Registration,
     RegistrationOption,
@@ -16,7 +17,7 @@ from .models import (
 )
 
 # Default registrations (without modifications)
-admin.site.register(GroupDiscount)
+#  admin.site.register(GroupDiscount)
 admin.site.register(Message)
 
 
@@ -108,7 +109,7 @@ class MembershipAdmin(admin.ModelAdmin):
         "started",
         "until",
         "honorary",
-        "paid",
+        #  "paid",
         "active",
         "membership_type",
     )
@@ -119,7 +120,11 @@ admin.site.register(Membership, MembershipAdmin)
 
 class RegistrationAdmin(admin.ModelAdmin):
     # NOTE: Trying to show non-editable fields (this approach doesn't work)
-    readonly_fields = ["invoice_no", "created_at", "updated_at"]
+    readonly_fields = [
+        #  "invoice_no",
+        "created_at",
+        "updated_at",
+    ]
     search_fields = [
         # TODO?
         #  'user',  # Unsupported lookup 'icontains' for ForeignKey or join on the field not permitted.
@@ -131,10 +136,10 @@ class RegistrationAdmin(admin.ModelAdmin):
         "user_column",
         "invoice_name",
         "event",
-        "payment_method",
+        #  "payment_method",
         "options_column",
-        "active",
-        "paid",
+        #  "active",
+        #  "paid",
         "created_at",
     )
 
@@ -174,7 +179,7 @@ class RegistrationOptionAdmin(admin.ModelAdmin):
     list_display = (
         "item",
         "price",
-        "add_on",
+        #  "add_on",
         "event",
     )
 
@@ -207,14 +212,15 @@ class EventAdmin(admin.ModelAdmin):
 admin.site.register(Event, EventAdmin)
 
 
-class DiscountCodeAdmin(admin.ModelAdmin):
-    form = DiscountCodeAdminForm
-    list_display = (
-        "event",
-        "code",
-        "percentage",
-        "absolute",
-    )
-
-
-admin.site.register(DiscountCode, DiscountCodeAdmin)
+# Issue #63: Temporarily unused
+#  class DiscountCodeAdmin(admin.ModelAdmin):
+#      form = DiscountCodeAdminForm
+#      list_display = (
+#          "event",
+#          "code",
+#          "percentage",
+#          "absolute",
+#      )
+#
+#
+#  admin.site.register(DiscountCode, DiscountCodeAdmin)

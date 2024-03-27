@@ -94,24 +94,26 @@ class Membership(models.Model):
         ("HONORARY", "Honorary"),
         ("BUSINESS", "Business"),
     ]
+    DEFAULT_MEMBERSHIP_TYPE = "NORMAL"
+
+    # NOTE: Old membership type definition
+    #  # Membership type:
+    #  MEMBERSHIP_TYPES = (
+    #      ("NORMAL_CREDIT_CARD", "Normal membership - Pay by credit card"),
+    #      ("NORMAL_INVOICE", "Normal membership - Pay by invoice"),
+    #      ("ACADEMIC_CREDIT_CARD", "Academic membership - Pay by credit card"),
+    #      ("ACADEMIC_INVOICE", "Academic membership - Pay by invoice"),
+    #  )
+    #  DEFAULT_MEMBERSHIP_TYPE = "NORMAL_CREDIT_CARD"
+    #  membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
 
     user = models.ForeignKey(User, related_name="memberships", on_delete=models.CASCADE)
-    membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default="NORMAL")
+    membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
     started = models.IntegerField(default=this_year)
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
 
-    paid = models.BooleanField(default=False)
-
-    # Membership type:
-    MEMBERSHIP_TYPES = (
-        ("NORMAL_CREDIT_CARD", "Normal membership - Pay by credit card"),
-        ("NORMAL_INVOICE", "Normal membership - Pay by invoice"),
-        ("ACADEMIC_CREDIT_CARD", "Academic membership - Pay by credit card"),
-        ("ACADEMIC_INVOICE", "Academic membership - Pay by invoice"),
-    )
-    DEFAULT_MEMBERSHIP_TYPE = "NORMAL_CREDIT_CARD"
-    membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
+    #  paid = models.BooleanField(default=False)  # Issue #63: Removed
 
     def is_membership_type_invoice(membership_type: str) -> bool:
         return "INVOICE" in membership_type
@@ -121,7 +123,7 @@ class Membership(models.Model):
 
     @property
     def active(self) -> bool:
-        return self.paid and this_year() <= self.until
+        return this_year() <= self.until  # Issue #63: Don't use `paid` -- it has been removed
 
     @classmethod
     def is_member(cls, user: User) -> bool:
@@ -142,6 +144,7 @@ class Event(models.Model):
         default=0,
         help_text="Maximum number of participants to this event (0 = no limit)",
     )
+    # XXX: Issue #63: Should we remove this `currency` field (we already have the `currency` field in the `RegistrationOption` model?
     currency = models.TextField(null=True, blank=True)  # Show as an input
 
     payment_deadline_days = models.IntegerField(default=30)
@@ -224,11 +227,13 @@ class RegistrationOption(models.Model):
         ("EUR", "Euro"),
         ("CAD", "Canadian Dollar"),  # AKA Loonie :)
     ]
+    DEFAULT_CURRENCY = SUPPORTED_CURRENCIES[0][0]
 
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     item = models.TextField(null=False, blank=False)  # Show as an input
     price = models.FloatField(default=0, null=False)
-    currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False)
+    # XXX: Issue #63: Should we remove currency field from the Event model, as we already have it here?
+    currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
     def __str__(self):
         items = [
@@ -278,12 +283,17 @@ class Invoice(models.Model):
         ("G-CAD", "Generic - CAD"),
     ]
 
-    PAYMENT_METHODS = [
-        ("STRIPE", "Stripe"),
-        ("INVOICE", "Invoice"),
-        # Not yet implemented
-        ("WISE", "Wise"),
-    ]
+    #  # NOTE: Is it used? The `payment_method` has been removed. Should we return it?
+    #  PAYMENT_METHODS = [
+    #      ("STRIPE", "Stripe"),
+    #      ("INVOICE", "Invoice"),
+    #      # Not yet implemented
+    #      ("WISE", "Wise"),
+    #  ]
+
+    #  # TODO: To return it?
+    #  DEFAULT_PAYMENT_METHOD = "STRIPE"
+    #  payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
 
     # Same as the actual invoice number, which normally has the form
     # {two-digit-year}{zero-padded four digit number starting from 1}
@@ -297,26 +307,29 @@ class Invoice(models.Model):
     template = models.TextField(choices=INVOICE_TEMPLATES)
 
 
-REGISTRATION_STATUS = [
-    # For schools
-    ("SUBMITTED", "Application submitted"),
-    ("SELECTED", "Applicant selected"),
-    ("WAITLIST", "Applicant wait listed"),
-    ("DECLINED", "Applicant declined"),
-    ("PAYMENT-PENDING", "Registered (payment pending)"),
-    ("REGISTERED", "Registered"),
-    ("WITHDRAWN", "Withdrawn"),
-]
-
-
 class Registration(models.Model):
     """
     Ex `Booking` class in OneEvent
     """
 
+    # TODO: Move to the `Registration` data model as a static field?
+    REGISTRATION_STATUS = [
+        # For schools
+        ("SUBMITTED", "Application submitted"),
+        ("SELECTED", "Applicant selected"),
+        ("WAITLIST", "Applicant wait listed"),
+        ("DECLINED", "Applicant declined"),
+        ("PAYMENT-PENDING", "Registered (payment pending)"),
+        ("REGISTERED", "Registered"),
+        ("WITHDRAWN", "Withdrawn"),
+    ]
+
     invoice = models.ForeignKey(Invoice, related_name="invoices", on_delete=models.CASCADE)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
+
+    active = models.BooleanField(default=True)
+
     # Which kind of registration for the event
     option = models.ForeignKey(RegistrationOption, related_name="options", on_delete=models.CASCADE)
 
@@ -342,6 +355,8 @@ class Registration(models.Model):
         info = ", ".join(filter(None, map(str, items)))
         return info
 
+
+# Issue #63: Temporarily unused
 # class DiscountCode(models.Model):
 #     event = models.ForeignKey(Event, on_delete=models.CASCADE)
 #     code = models.TextField(default=partial(random_code, length=4))  # Show as an input
@@ -349,7 +364,7 @@ class Registration(models.Model):
 #     only_registration = models.BooleanField(default=True)
 #     percentage = models.IntegerField(help_text="Value as a percentage, like 10", blank=True, null=True)
 #     absolute = models.FloatField(help_text="Absolute amount of discount", blank=True, null=True)
-
+#
 #     def __str__(self):
 #         items = [
 #             self.event,
@@ -357,15 +372,15 @@ class Registration(models.Model):
 #         ]
 #         info = ", ".join(filter(None, map(str, items)))
 #         return info
-
-
+#
+#
 # class GroupDiscount(models.Model):
 #     event = models.ForeignKey(Event, on_delete=models.CASCADE)
 #     group = models.ForeignKey(Group, on_delete=models.CASCADE)
 #     only_registration = models.BooleanField(default=True)
 #     percentage = models.IntegerField(help_text="Value as a percentage, like 10", blank=True, null=True)
 #     absolute = models.FloatField(help_text="Absolute amount of discount", blank=True, null=True)
-
+#
 #     def __str__(self):
 #         items = [
 #             self.event,
