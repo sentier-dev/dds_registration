@@ -121,7 +121,6 @@ def membership_proceed(request: HttpRequest):
             return redirect("membership_proceed_invoice")
         # Go to stripe site...
         stripe_link = academic_membership_stripe_payment_link if is_academic else regular_membership_stripe_payment_link
-        stripe_link += '?client_reference_id=TEST'
         return redirect(stripe_link)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
