@@ -56,7 +56,7 @@ def index(request: HttpRequest):
             "user_registrations": user_registrations,
             "context": context,
         }
-        LOG.debug("Render landing", debug_data)
+        # LOG.debug("Render landing", debug_data)
         return render(request, "dds_registration/index.html.django", context)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)

@@ -229,7 +229,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             "extra_invoice_text": extra_invoice_text,
             "checked_option_ids": checked_option_ids,
         }
-        LOG.debug("Object data: %s", debug_data)
+        # LOG.debug("Object data: %s", debug_data)
 
     # If request has posted form data...
     has_post_data = request.method == "POST"
@@ -246,7 +246,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             "extra_invoice_text": extra_invoice_text,
             "checked_option_ids": checked_option_ids,
         }
-        LOG.debug("Post data: %s", debug_data)
+        # LOG.debug("Post data: %s", debug_data)
         # Allow form save
         data_ready = True
 
@@ -309,7 +309,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
                 "payment_method": payment_method,
                 "extra_invoice_text": extra_invoice_text,
             }
-            LOG.debug("Creating a registration: %s", debug_data)
+            # LOG.debug("Creating a registration: %s", debug_data)
             # TODO: Send an e-mail message (if registration has been created)...
             if create_new:
                 send_event_registration_success_message(request, event_code)
@@ -317,7 +317,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             context["redirect"] = "SUCCESS"
             context["registration_created"] = True
             return context
-        LOG.debug("Rendering with context: %s", context)
+        # LOG.debug("Rendering with context: %s", context)
         context["render"] = True
         return context
     except Exception as err:
@@ -442,7 +442,7 @@ def send_event_registration_success_message(request: HttpRequest, event_code: st
     context = get_event_registration_context(request, event_code)
 
     try:
-        LOG.debug("start: %s", context)
+        # LOG.debug("start: %s", context)
         subject = render_to_string(
             template_name=email_subject_template,
             context=context,
@@ -458,7 +458,7 @@ def send_event_registration_success_message(request: HttpRequest, event_code: st
             "subject": subject,
             "body": body,
         }
-        LOG.debug("mail_user: %s", context)
+        # LOG.debug("mail_user: %s", context)
         user.email_user(subject, body, settings.DEFAULT_FROM_EMAIL)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)

@@ -1,5 +1,5 @@
 # @module dds_registration/views/membership.py
-# @changed 2024.03.26, 17:04
+# @changed 2024.03.27, 16:18
 
 import logging
 import traceback
@@ -83,6 +83,8 @@ def membership_start(request: HttpRequest):
         "MEMBERSHIP_TYPES": Membership.MEMBERSHIP_TYPES,
         "membership_type": Membership.DEFAULT_MEMBERSHIP_TYPE,
     }
+    debug_data = context
+    LOG.debug("membership_start: %s", debug_data)
     return render(request, "dds_registration/membership_start.html.django", context)
 
 
@@ -154,7 +156,7 @@ def membership_proceed_test(request: HttpRequest, payment_id: str):
             #  "method": method,
             #  "request": request,
         }
-        LOG.debug("membership_stripe_webhook: %s", debug_data)
+        LOG.debug("membership_proceed_test: %s", debug_data)
         context = {
             "action": "membership_proceed_test",
         }
@@ -242,10 +244,3 @@ def membership_stripe_webhook(request: HttpRequest):
         # Redirect to profile page with error messages (see above)
         #  return redirect("profile")
         raise err
-
-
-#  __all__ = [
-#      membership_start,
-#      membership_proceed,
-#      membership_proceed_success,
-#  ]

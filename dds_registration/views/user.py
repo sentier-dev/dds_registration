@@ -42,9 +42,9 @@ def edit_user_profile(request: HttpRequest):
                 debug_data = {
                     "email_has_changed": email_has_changed,
                 }
-                LOG.debug("Save params: %s", debug_data)
+                # LOG.debug("Save params: %s", debug_data)
                 # TODO: Send email activation request and make the user inactive
-                LOG.debug("Save user data: %s", user_data)
+                # LOG.debug("Save user data: %s", user_data)
                 user_form.save()
                 #  profile_form.save()
                 if email_has_changed:
@@ -52,7 +52,7 @@ def edit_user_profile(request: HttpRequest):
                         "email_has_changed": email_has_changed,
                         "user_form": user_form,
                     }
-                    LOG.debug("Email has changed: %s", debug_data)
+                    # LOG.debug("Email has changed: %s", debug_data)
                     send_re_actvation_email(request, user)
                     user.is_active = False
                     user.save()
