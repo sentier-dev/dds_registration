@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 
 # Default dds parameters
 
-# TODO: To store them in constants or in the settings or configuration?
+# TODO: To store them in constants or in the settings or in the site configuration?
 
 dds_name = "Départ de Sentier"
 dds_address = """
@@ -51,7 +51,7 @@ table_header = (
     "Quantity",
     "Event",
     "Option",
-    "Costs (EUR)",
+    "Costs",
 )
 
 
@@ -63,21 +63,34 @@ def get_event_text(event: Event) -> str:
 
 
 def create_services_table(user: User, event: Event, registration: Registration):
-    table = (table_header,)
-    # options = registration.options.all()
+    # options = registration.options.all()  # Multiple options approach
     option = registration.option
     options = [option]
     event_text = get_event_text(event)
     #  count = 1
     total = 0
 
+    # A naive way to get currency (considering all the options have the same currency)...
+    currency = options[0].currency if len(options) else ""
+
+    table_header_copy = list(table_header)
+    # Add currency to the last (price) column...
+    if currency:
+        table_header_copy[3] += " ({})".format(currency)
+    table = (tuple(table_header_copy),)
+
     def add_option_row(opt: RegistrationOption):
         nonlocal total
+        price_items = [
+            #  opt.currency,
+            opt.price,
+        ]
+        price_str = " ".join(filter(None, map(str, price_items))) if opt.price else ""
         row_data = (
             1,
             event_text,
             opt.item,
-            opt.price if opt.price else "",
+            price_str,
         )
         if opt.price:
             total += opt.price
@@ -159,12 +172,13 @@ def get_event_invoice_context(request: HttpRequest, event_code: str):
     event = context["event"]
     registration = context["registration"]
     invoice = context["invoice"]
+    # TODO: Check if all the parameters have defined?
     try:
         #  profile, created = .get_or_create(user=user)
         table_data = create_services_table(user, event, registration)
         payment_deadline_days = event.payment_deadline_days
         # TInvoicePdfParams data...
-        optional_text = ""  # registration.extra_invoice_text
+        optional_text = invoice.extra_invoice_text  # registration.extra_invoice_text
         client_name = get_full_user_name(user)
         client_address = user.address  # profile.address
         today = date.today()

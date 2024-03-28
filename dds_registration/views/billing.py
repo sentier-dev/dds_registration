@@ -15,15 +15,9 @@ from ..core.helpers.errors import errorToString
 from ..forms import BillingEventForm
 from ..models import Invoice
 
-from .event_registration_cancel import (
-    event_registration_cancel_confirm_form,
-    event_registration_cancel_process_action,
-)
-from .get_invoice_context import get_basic_event_registration_context
-from .helpers import (
-    event_registration_form,
-    get_event_registration_context,
-    show_registration_form_success,
+from .get_invoice_context import (
+    get_basic_event_registration_context,
+    get_event_invoice_context,
 )
 
 LOG = logging.getLogger(__name__)
@@ -81,7 +75,7 @@ def billing_event(request: HttpRequest, event_code: str):
                     "invoice": invoice,
                 }
                 LOG.debug("Get form data: %s", debug_data)
-                new_verb = 'created' if is_new else 'updated'
+                new_verb = "created" if is_new else "updated"
                 messages.success(request, "Invoice has been successfully " + new_verb)
                 invoice.save()
                 # Update registration...
@@ -89,6 +83,12 @@ def billing_event(request: HttpRequest, event_code: str):
                 registration.status = "PAYMENT_PENDING"  # Change the status -- now we're expecting the payment
                 registration.save()
                 # TODO: Redirect to invoice downloading or to payment page?
+                redirect_to = (
+                    "billing_event_success_invoice"
+                    if invoice.payment_method == "INVOICE"
+                    else "billing_event_success_payment"
+                )
+                return redirect(redirect_to, event_code=event_code)
         else:
             form = BillingEventForm(instance=invoice)
         context["form"] = form
@@ -106,6 +106,46 @@ def billing_event(request: HttpRequest, event_code: str):
         }
         LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
         raise Exception(error_text)
+
+
+@login_required
+def billing_event_success_invoice(request: HttpRequest, event_code: str):
+    """
+    Show page with information about successfull invoice creation and a link to
+    download it.
+    """
+    context = get_basic_event_registration_context(request, event_code)
+    template = "dds_registration/billing/billing_event_success_invoice.html.django"
+    return render(request, template, context)
+
+
+@login_required
+def billing_event_invoice_download(request: HttpRequest, event_code: str):
+    """
+    Show page with information about successfull invoice creation and a link to
+    download it.
+    """
+    context = get_event_invoice_context(request, event_code)
+    show_debug = False
+    if show_debug:
+        # DEBUG: Show test page with prepared invoice data
+        template = "dds_registration/billing/billing_event_invoice_download_debug.html.django"
+        return render(request, template, context)
+    pdf = create_invoice_pdf(context)
+    return HttpResponse(bytes(pdf.output()), content_type="application/pdf")
+
+
+@login_required
+def billing_event_success_payment(request: HttpRequest, event_code: str):
+    """
+    Show page with information about successfull payment creation and a link to
+    proceed it.
+    """
+    context = {
+        "page": "billing_event_success_payment",
+    }
+    template = "dds_registration/billing/billing_test.html.django"
+    return render(request, template, context)
 
 
 @login_required
