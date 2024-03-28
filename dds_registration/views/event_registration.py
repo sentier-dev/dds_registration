@@ -89,6 +89,8 @@ def event_registration_edit_success(request: HttpRequest, event_code: str):
 def event_registration_invoice(request: HttpRequest, event_code: str):
     # XXX: OBSOLETE: Moved to `billing`
     """
+    TODO: Move to billing or remove
+
     Check if there is an invoice for this event/registration.
     Create it if not.
     Redirect to or show a download link.
