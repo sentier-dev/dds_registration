@@ -58,7 +58,9 @@ def billing_event(request: HttpRequest, event_code: str):
         # event = context["event"]
         registration = context["registration"]
         invoice = context["invoice"]
+        is_new = False
         if not invoice:
+            is_new = True
             # Create default invoice and initialize default values...
             invoice = Invoice()
             invoice.name = user.get_full_name()
@@ -79,6 +81,8 @@ def billing_event(request: HttpRequest, event_code: str):
                     "invoice": invoice,
                 }
                 LOG.debug("Get form data: %s", debug_data)
+                new_verb = 'created' if is_new else 'updated'
+                messages.success(request, "Invoice has been successfully " + new_verb)
                 invoice.save()
                 # Update registration...
                 registration.invoice = invoice  # Link the invoice
