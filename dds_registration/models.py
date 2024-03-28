@@ -1,3 +1,6 @@
+# @module models.py
+# @changed 2024.03.28, 11:50
+
 import random
 import string
 from datetime import date
@@ -11,7 +14,7 @@ from django.db import models
 from django.db.models import Model, Q
 from django.urls import reverse
 
-from queryable_properties.properties import queryable_property
+# from queryable_properties.properties import queryable_property
 
 from .core.constants.date_time_formats import dateTimeFormat
 from .core.helpers.dates import this_year
@@ -151,6 +154,7 @@ class Event(Model):
     # Issue #63: Removed this `currency` field (we already have the `currency` field in the `RegistrationOption` model).
     #  currency = models.TextField(null=True, blank=True)  # Show as an input
 
+    # XXX: Do we still leave this payment-related stuff here?
     payment_deadline_days = models.IntegerField(default=30)
     payment_details = models.TextField(blank=True, default="")
 
@@ -187,6 +191,7 @@ class Event(Model):
         return bool(active_user_registration)
 
     def __unicode__(self):
+        # XXX: Is it required (due to existed `__str__` method?
         return self.name
 
     def clean(self):
@@ -223,7 +228,7 @@ class Event(Model):
         info = ", ".join(filter(None, map(str, items)))
         return info
 
-    new_registration_full_url.short_description = "New event registration url"
+    new_registration_full_url.short_description = "Event registration url"
 
 
 class RegistrationOption(Model):
@@ -238,7 +243,6 @@ class RegistrationOption(Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     item = models.TextField(null=False, blank=False)  # Show as an input
     price = models.FloatField(default=0, null=False)
-    # XXX: Issue #63: Should we remove currency field from the Event model, as we already have it here?
     currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
     def __str__(self):
@@ -313,6 +317,7 @@ class Invoice(Model):
     template = models.TextField(choices=INVOICE_TEMPLATES)
 
 
+# NOTE: A single reusable QuerySet to check if the registration active
 REGISTRATION_ACTIVE_QUERY = ~Q(status="WITHDRAWN")
 
 
@@ -342,27 +347,28 @@ class Registration(Model):
     # NOTE: See `active` evaluated property below
     #  active = models.BooleanField(default=True)
 
-    @queryable_property
-    def active(self):
-        # TODO: To use one predefined QuerySet to determine 'active' status?
-        return self.status != "WITHDRAWN"  # DECLINED?
-
-    @active.filter
-    @classmethod
-    def active(cls, lookup, value: bool):
-        """
-        Queryable active filter
-        TODO: To check this approach
-        @see https://django-queryable-properties.readthedocs.io/en/stable/filters.html
-        """
-        if lookup != "exact":
-            raise NotImplementedError()
-        return Registration.ACTIVE_QUERY  # ~Q(status="WITHDRAWN")  # DECLINED?
+    #  @queryable_property
+    #  def active(self):
+    #      # TODO: To use one predefined QuerySet to determine 'active' status?
+    #      return self.status != "WITHDRAWN"  # DECLINED?
+    #
+    #  @active.filter
+    #  @classmethod
+    #  def active(cls, lookup, value: bool):
+    #      """
+    #      Queryable active filter
+    #      TODO: To check this approach
+    #      @see https://django-queryable-properties.readthedocs.io/en/stable/filters.html
+    #      """
+    #      if lookup != "exact":
+    #          raise NotImplementedError()
+    #      return Registration.ACTIVE_QUERY  # ~Q(status="WITHDRAWN")  # DECLINED?
 
     # Which kind of registration for the event
     option = models.ForeignKey(RegistrationOption, related_name="options", on_delete=models.CASCADE)
 
     status = models.TextField(choices=REGISTRATION_STATUS)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
