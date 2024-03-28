@@ -22,13 +22,20 @@
 
 {% include "assets/render-messages/render-messages.django" %}
 
-<p>Billing...</p>
+<p>Here comes invoice pdf for the event {{ event.title }}...</p>
 
-<p>page: {{ page }}</p>
-<p>user: {{ user }}</p>
 <p>event: {{ event }}</p>
 <p>registration: {{ registration }}</p>
-<p>invoice: {{ invoice }}</p>
+<p>optional_text: {{ optional_text }}</p>
+<p>client_name: {{ client_name }}</p>
+<p>client_address: {{ client_address }}</p>
+<p>dds_name: {{ dds_name }}</p>
+<p>dds_address: {{ dds_address }}</p>
+<p>invoice_no: {{ invoice_no }}</p>
+<p>invoice_date: {{ invoice_date }}</p>
+<p>payment_terms: {{ payment_terms }}</p>
+<p>payment_details: {{ payment_details }}</p>
+<p>table_data: {{ table_data }}</p>
 
 <div class="common-actions">
   <input class="btn btn-primary" type="submit" value="Ok" />

@@ -85,6 +85,21 @@ urlpatterns = [
         name="billing_event",
     ),
     path(
+        "billing/event/<str:event_code>/success/invoice",
+        billing_views.billing_event_success_invoice,
+        name="billing_event_success_invoice",
+    ),
+    path(
+        "billing/event/<str:event_code>/invoice/download",
+        billing_views.billing_event_invoice_download,
+        name="billing_event_invoice_download",
+    ),
+    path(
+        "billing/event/<str:event_code>/success/payment",
+        billing_views.billing_event_success_payment,
+        name="billing_event_success_payment",
+    ),
+    path(
         "billing/membership",
         billing_views.billing_membership,
         name="billing_membership",

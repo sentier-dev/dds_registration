@@ -87,9 +87,8 @@ def event_registration_edit_success(request: HttpRequest, event_code: str):
 
 @login_required
 def event_registration_invoice(request: HttpRequest, event_code: str):
+    # XXX: OBSOLETE: Moved to `billing`
     """
-    TODO: Move to billing or remove
-
     Check if there is an invoice for this event/registration.
     Create it if not.
     Redirect to or show a download link.
@@ -105,6 +104,7 @@ def event_registration_invoice(request: HttpRequest, event_code: str):
 
 @login_required
 def event_registration_invoice_download(request: HttpRequest, event_code: str):
+    # XXX: OBSOLETE: Moved to `billing`
     # TODO: Generate invoice pdf
     template = "dds_registration/event_registration_invoice_download.html.django"
     context = get_event_invoice_context(request, event_code)
@@ -117,6 +117,7 @@ def event_registration_invoice_download(request: HttpRequest, event_code: str):
 
 @login_required
 def event_registration_payment(request: HttpRequest, event_code: str):
+    # XXX: OBSOLETE: Should be moved to `billing`
     try:
         # TODO: Place payment link/info here
         template = "dds_registration/event_registration_payment.html.django"
