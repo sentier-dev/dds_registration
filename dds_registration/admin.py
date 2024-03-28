@@ -14,6 +14,7 @@ from .models import (
     RegistrationOption,
     User,
     Membership,
+    Invoice,
 )
 
 # Default registrations (without modifications)
@@ -104,7 +105,7 @@ admin.site.register(User, UserAdmin)
 
 
 class MembershipAdmin(admin.ModelAdmin):
-    list_display = (
+    list_display = [
         "user",
         "started",
         "until",
@@ -112,7 +113,7 @@ class MembershipAdmin(admin.ModelAdmin):
         #  "paid",
         "active",
         "membership_type",
-    )
+    ]
 
 
 admin.site.register(Membership, MembershipAdmin)
@@ -132,14 +133,14 @@ class RegistrationAdmin(admin.ModelAdmin):
         #  'options',  # Unsupported lookup 'icontains' for ForeignKey or join on the field not permitted.
     ]
 
-    list_display = (
+    list_display = [
         "user_column",
         "invoice",
         "event",
         "options_column",
         "status",
         "created_at",
-    )
+    ]
 
     def user_column(self, reg):
         user = reg.user
@@ -175,12 +176,12 @@ class RegistrationOptionAdmin(admin.ModelAdmin):
         "item",
         #  'event',  # NOTE: Unsupported lookup 'icontains' for ForeignKey or join on the field not permitted.
     ]
-    list_display = (
+    list_display = [
         "item",
         "event",
         "price",
         "currency",
-    )
+    ]
 
 
 admin.site.register(RegistrationOption, RegistrationOptionAdmin)
@@ -196,7 +197,7 @@ class EventAdmin(admin.ModelAdmin):
         "title",
     ]
     form = EventAdminForm
-    list_display = (
+    list_display = [
         "title",
         "code",
         "max_participants",
@@ -205,21 +206,34 @@ class EventAdmin(admin.ModelAdmin):
         "registration_close",
         "public",
         "new_registration_full_url",
-    )
+    ]
 
 
 admin.site.register(Event, EventAdmin)
 
 
+class InvoiceAdmin(admin.ModelAdmin):
+    list_display = [
+        "invoice_no",
+        "created",
+        "status",
+        "data",
+        "template",
+    ]
+
+
+admin.site.register(Invoice, InvoiceAdmin)
+
+
 # Issue #63: Temporarily unused
 #  class DiscountCodeAdmin(admin.ModelAdmin):
 #      form = DiscountCodeAdminForm
-#      list_display = (
+#      list_display = [
 #          "event",
 #          "code",
 #          "percentage",
 #          "absolute",
-#      )
+#      ]
 #
 #
 #  admin.site.register(DiscountCode, DiscountCodeAdmin)

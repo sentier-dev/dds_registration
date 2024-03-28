@@ -305,9 +305,9 @@ class Invoice(Model):
     #  DEFAULT_PAYMENT_METHOD = "STRIPE"
     #  payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
 
-    # Same as the actual invoice number, which normally has the form
-    # {two-digit-year}{zero-padded four digit number starting from 1}
-    invoice_no = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
+
+    #  invoice_no = models.IntegerField(primary_key=True)
     created = models.DateField(auto_now_add=True)
     status = models.TextField(choices=INVOICE_STATUS)
     # Includes the various item descriptions, prices, and currencies
@@ -315,6 +315,17 @@ class Invoice(Model):
     # The specific form will depend on the template
     data = models.JSONField()
     template = models.TextField(choices=INVOICE_TEMPLATES)
+
+    @property
+    def invoice_no(self):
+        """
+        Same as the actual invoice number, which normally has the form
+        {two-digit-year}{zero-padded four digit number starting from 1}
+        """
+        created = self.created  # date.today()
+        year_str = created.strftime("%y")
+        invoice_no = "#{}{:0>4}".format(year_str, self.id)
+        return invoice_no
 
 
 # NOTE: A single reusable QuerySet to check if the registration active
@@ -333,7 +344,7 @@ class Registration(Model):
         ("SELECTED", "Applicant selected"),
         ("WAITLIST", "Applicant wait listed"),
         ("DECLINED", "Applicant declined"),  # Inactive?
-        ("PAYMENT-PENDING", "Registered (payment pending)"),
+        ("PAYMENT_PENDING", "Registered (payment pending)"),
         ("REGISTERED", "Registered"),
         ("WITHDRAWN", "Withdrawn"),  # = Inactive
     ]
@@ -346,23 +357,6 @@ class Registration(Model):
 
     # NOTE: See `active` evaluated property below
     #  active = models.BooleanField(default=True)
-
-    #  @queryable_property
-    #  def active(self):
-    #      # TODO: To use one predefined QuerySet to determine 'active' status?
-    #      return self.status != "WITHDRAWN"  # DECLINED?
-    #
-    #  @active.filter
-    #  @classmethod
-    #  def active(cls, lookup, value: bool):
-    #      """
-    #      Queryable active filter
-    #      TODO: To check this approach
-    #      @see https://django-queryable-properties.readthedocs.io/en/stable/filters.html
-    #      """
-    #      if lookup != "exact":
-    #          raise NotImplementedError()
-    #      return Registration.ACTIVE_QUERY  # ~Q(status="WITHDRAWN")  # DECLINED?
 
     # Which kind of registration for the event
     option = models.ForeignKey(RegistrationOption, related_name="options", on_delete=models.CASCADE)
