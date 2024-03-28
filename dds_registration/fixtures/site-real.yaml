@@ -1,0 +1,7 @@
+# @changed 2024.03.28, 15:18
+
+- model: sites.site
+  pk: 1
+  fields:
+    domain: "events.d-d.sch"
+    name: "Départ de Sentier Events and Membership Portal"

@@ -1,0 +1,15 @@
+# @changed 2024.03.28, 15:18
+
+- model: dds_registration.event
+  pk: 1
+  fields:
+    id: 1
+    code: "first"
+    title: "The first event"
+    description: "First event description"
+    public: 1
+    registration_open: "2024-03-25"
+    registration_close: "2024-04-20"
+    max_participants: 5
+    payment_deadline_days: 30
+    payment_details: ""
