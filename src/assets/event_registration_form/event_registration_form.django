@@ -1,9 +1,12 @@
 {# ex: set ft=htmldjango : #}
 <!--
   @module event_registration_form.django
-  @changed 2024.03.19, 01:42
+  @changed 2024.03.28, 12:14
 -->
 
+{# TODO: Show questions, Issue #35 #}
+
+{# Issue #63: payment_method is unused }
 {% if PAYMENT_METHODS %}
   <fieldset id="payment_method" class="mb3 form-group">
     <legend class="mb-3 primary-color">Payment method</legend>
@@ -27,7 +30,7 @@
   </fieldset>
 {% endif %}
 
-<!-- Manual options (basic and add-ons) list (as checkboxes) -->
+<!-- Manual options list (as a radiogroup) -->
 {% if reg_options %}
   {% if reg_options_basic %}
     <fieldset id="options_basic" class="mb3 form-group">
@@ -54,7 +57,7 @@
     </fieldset>
   {% endif %}
   {% comment %}
-    {# Issue #63: Only one list (of basic) options is used #}
+    {# Issue #63: Only one list (of basic) options is used, add-ons is unused #}
     {% if reg_options_addons %}
       <fieldset id="options_addons" class="mb3 form-group">
         <legend class="mb-3 primary-color">Add-ons</legend>

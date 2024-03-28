@@ -198,7 +198,7 @@ def event_registration_cancel_process_action(
         return redirect("profile")
     # Else (on success) make a registration record inactive and go to profile page with a message...
     registration: Registration = context["registration"]
-    registration.active = False
+    registration.status = "WITHDRAWN"
     registration.save()
     # Send an email message?
     send_event_registration_cancelled_message(request, context)

@@ -131,6 +131,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
     event = None
     reg = None
     reg_options = None
+    # Issue #62: Preserve old logic for multiple options; Now only one option could be selected
     checked_option_ids = []  # Will be got from post request, see below
     #  payment_method = Registration.DEFAULT_PAYMENT_METHOD
     extra_invoice_text = ""
@@ -227,6 +228,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
         #  options = reg.options
         option = reg.option
         options = [option]
+        # Issue #62: Preserve old logic for multiple options
         #  checked_option_ids = list(map(lambda item: item.id, options.all()))
         checked_option_ids = list(map(lambda item: item.id, options))
         debug_data = {
@@ -395,6 +397,7 @@ def show_registration_form_success(request: HttpRequest, event_code: str, templa
 
 
 def calculate_total_registration_price(registration: Registration) -> int:
+    # Issue #62: Preserve old logic for multiple options
     # options = registration.options.all()
     option = registration.option
     options = [option]

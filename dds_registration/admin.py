@@ -134,12 +134,10 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     list_display = (
         "user_column",
-        #  "invoice_name",
+        "invoice",
         "event",
-        #  "payment_method",
         "options_column",
-        #  "active",
-        #  "paid",
+        "status",
         "created_at",
     )
 
@@ -164,8 +162,8 @@ class RegistrationAdmin(admin.ModelAdmin):
         return ", ".join([p.item for p in [reg.option]])
         #  return ", ".join([p.item for p in reg.options.all()])
 
-    options_column.short_description = "Options"
-    options_column.admin_order_field = "options"
+    options_column.short_description = "Option"
+    options_column.admin_order_field = "option"
 
 
 admin.site.register(Registration, RegistrationAdmin)
@@ -179,9 +177,9 @@ class RegistrationOptionAdmin(admin.ModelAdmin):
     ]
     list_display = (
         "item",
-        "price",
-        #  "add_on",
         "event",
+        "price",
+        "currency",
     )
 
 
