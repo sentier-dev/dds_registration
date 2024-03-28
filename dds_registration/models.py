@@ -359,8 +359,8 @@ class Invoice(Model):
     def __str__(self):
         items = [
             self.invoice_no,
-            self.status,
-            self.template,
+            self.get_status_display(),
+            self.get_template_display(),
             self.created.strftime(dateFormat) if self.created else None,
         ]
         info = ", ".join(filter(None, map(str, items)))
@@ -412,7 +412,7 @@ class Registration(Model):
     def __str__(self):
         items = [
             self.user.full_name_with_email,
-            self.status,
+            self.get_status_display(),
             self.created_at.strftime(dateFormat) if self.created_at else None,
         ]
         info = ", ".join(filter(None, map(str, items)))
