@@ -41,8 +41,9 @@ def random_string(length: int = 32) -> str:
     return "".join(random.sample(possibles, length))
 
 
-DEV = env("DEV") or env("DEBUG") or env("LOCAL")
-LOCAL = DEBUG = DEV
+# Preprocess scss source files wwith django filters
+USE_DJANGO_PREPROCESSORS = DEV = env("DEV")
+DEBUG = LOCAL = env("DEBUG") or env("LOCAL")
 
 SECRET_KEY = env("SECRET_KEY")
 REGISTRATION_SALT = env("REGISTRATION_SALT")
@@ -62,8 +63,6 @@ for key, label in SECRETS:
             error_text = f"Error: Environment configuration variable {label} missing"
             raise Exception(error_text)
 
-# Preprocess scss source files wwith django filters
-USE_DJANGO_PREPROCESSORS = DEV
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # Static files (CSS, JavaScript, Images)
