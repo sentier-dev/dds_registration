@@ -34,7 +34,7 @@
 {% if reg_options %}
   {% if reg_options_basic %}
     <fieldset id="options_basic" class="mb3 form-group">
-      <legend class="mb-3 primary-color">Options</legend>
+      <legend class="mb-3 primary-color">Registration options for this event</legend>
       {% for option in reg_options_basic %}
         <div class="mb-2 form-check">
           <input
