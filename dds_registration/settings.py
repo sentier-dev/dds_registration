@@ -119,8 +119,12 @@ COMPRESS_PRECOMPILERS = (
 )
 
 # These settings already exist in `default_settings.py` Should we remove those?
-ALLOWED_HOSTS = ["events.d-d-s.ch"]
-CSRF_TRUSTED_ORIGINS = ["https://events.d-d-s.ch"]
+ALLOWED_HOSTS = [
+    "events.d-d-s.ch",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://events.d-d-s.ch",
+]
 
 if LOCAL:
     # Allow work with local server in local dev mode
@@ -343,6 +347,7 @@ PASS_VARIABLES = {
     "DEV": DEV,  # Dev server mode (from the environment)
     "LOCAL": LOCAL,  # Local dev server mode (from the environment)
     "USE_DJANGO_PREPROCESSORS": USE_DJANGO_PREPROCESSORS,
+    "STRIPE_PUBLISHABLE_KEY": STRIPE_PUBLISHABLE_KEY,
     # NOTE: Site url and name could be taken from site data via `get_current_site`
     "SITE_NAME": SITE_NAME,
     "SITE_TITLE": SITE_TITLE,

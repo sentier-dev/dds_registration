@@ -1,5 +1,5 @@
 # @module dds_registration/views/billing.py
-# @changed 2024.03.28, 18:41
+# @changed 2024.03.29, 18:16
 
 import logging
 import traceback
@@ -8,6 +8,15 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.urls import reverse
+from django.contrib.sites.shortcuts import get_current_site
+
+import stripe
+
+from django.conf import settings
+from django.http import HttpRequest, HttpResponse
 
 from ..core.helpers.create_invoice_pdf import create_invoice_pdf
 from ..core.helpers.errors import errorToString
@@ -20,12 +29,21 @@ from .get_invoice_context import (
     get_event_invoice_context,
 )
 
+
+stripe.api_key = settings.STRIPE_SECRET_KEY  # 'sk_...'
+
+
 LOG = logging.getLogger(__name__)
+
+
+# Basic billing form...
 
 
 @login_required
 def billing_event(request: HttpRequest, event_code: str):
     """
+    Basic form to create invoice and/or payment.
+
     Show the form to select payment options:
     - RegistrationOption (from available ones for this event)
     - `payment_method`: Payment method (either Credit Card or Invoice)
@@ -85,9 +103,9 @@ def billing_event(request: HttpRequest, event_code: str):
                 registration.save()
                 # TODO: Redirect to invoice downloading or to payment page?
                 redirect_to = (
-                    "billing_event_success_invoice"
+                    "billing_event_proceed_invoice"
                     if invoice.payment_method == "INVOICE"
-                    else "billing_event_success_payment"
+                    else "billing_event_stripe_payment_proceed"
                     # TODO: Add other payment method redirects here (eg, for WISE)
                 )
                 return redirect(redirect_to, event_code=event_code)
@@ -98,7 +116,7 @@ def billing_event(request: HttpRequest, event_code: str):
         return render(request, template, context)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
-        error_text = 'Cannot process Billing for the event "{}": {}'.format(event_code, sError)
+        error_text = 'Cannot process billing for the event "{}": {}'.format(event_code, sError)
         messages.error(request, error_text)
         sTraceback = str(traceback.format_exc())
         debug_data = {
@@ -106,18 +124,21 @@ def billing_event(request: HttpRequest, event_code: str):
             "err": err,
             "traceback": sTraceback,
         }
-        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
         raise Exception(error_text)
 
 
+# Invoice pdf...
+
+
 @login_required
-def billing_event_success_invoice(request: HttpRequest, event_code: str):
+def billing_event_proceed_invoice(request: HttpRequest, event_code: str):
     """
     Show page with information about successfull invoice creation and a link to
     download it.
     """
     context = get_basic_event_registration_context(request, event_code)
-    template = "dds_registration/billing/billing_event_success_invoice.html.django"
+    template = "dds_registration/billing/billing_event_proceed_invoice.html.django"
     return render(request, template, context)
 
 
@@ -137,9 +158,70 @@ def billing_event_invoice_download(request: HttpRequest, event_code: str):
     return HttpResponse(bytes(pdf.output()), content_type="application/pdf")
 
 
-@login_required
-def billing_event_success_payment(request: HttpRequest, event_code: str):
+# Stripe payment...
+
+
+@csrf_exempt
+def billing_event_payment_stripe_create_checkout_session(request: HttpRequest, event_code: str):
     """
+    Create stripe session.
+
+    TODO: Add params for currency and amout
+    """
+    try:
+        return_args = {
+            "event_code": event_code,
+            "session_id": "{CHECKOUT_SESSION_ID}",  # To substitute by stripe
+        }
+        # route billing_event_stripe_payment_success:
+        # "billing/event/<str:event_code>/payment/stripe/success/<str:session_id>"
+        # Example from stripe docs:
+        # return_url="https://example.com/checkout/return?session_id={CHECKOUT_SESSION_ID}",
+        #  return_url_path = reverse("billing_event_stripe_payment_success", kwargs=return_args)
+        return_url_path = "/billing/event/" + event_code + "/payment/stripe/success/{CHECKOUT_SESSION_ID}"
+        scheme = "https" if request.is_secure() else "http"
+        site = get_current_site(request)
+        return_url = scheme + "://" + site.domain + return_url_path
+        session = stripe.checkout.Session.create(
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": "Test",
+                        },
+                        "unit_amount": 100,  # NOTE: The price is in cents
+                    },
+                    "quantity": 1,
+                }
+            ],
+            mode="payment",
+            ui_mode="embedded",
+            return_url=return_url,
+        )
+        result = {
+            "clientSecret": session.client_secret,
+        }
+        return JsonResponse(result)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = 'Cannot start checkout session for the event "{}": {}'.format(event_code, sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "event_code": event_code,
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise Exception(error_text)
+
+
+@login_required
+def billing_event_stripe_payment_proceed(request: HttpRequest, event_code: str):
+    """
+    Proceed stripe payment.
+
     Show page with information about successfull payment creation and a link to
     proceed it.
     """
@@ -159,9 +241,42 @@ def billing_event_success_payment(request: HttpRequest, event_code: str):
     # TODO: Make a payment to stripe
     # @see https://testdriven.io/blog/django-stripe-tutorial/
     # DEBUG
-    context["page"] = "billing_event_success_payment"
+    template = "dds_registration/billing/billing_event_stripe_payment_proceed.html.django"
+    return render(request, template, context)
+
+
+@login_required
+def billing_event_stripe_payment_success(request: HttpRequest, event_code: str, session_id: str):
+    """
+    Proceed stripe payment.
+
+    Show page with information about successfull payment creation and a link to
+    proceed it.
+    """
+    context = get_event_invoice_context(request, event_code)
+    event = context["event"]
+    registration = context["registration"]
+    total_price = context["total_price"]
+    currency = context["currency"]
+    debug_data = {
+        "event_code": event_code,
+        "session_id": session_id,
+        "event": event,
+        "registration": registration,
+        "total_price": total_price,
+        "currency": currency,
+        "context": context,
+    }
+    LOG.debug("Start stripe payment: %s", debug_data)
+    # TODO: Make a payment to stripe
+    # @see https://testdriven.io/blog/django-stripe-tutorial/
+    # DEBUG
+    context["page"] = "billing_event_stripe_payment_success"
     template = "dds_registration/billing/billing_test.html.django"
     return render(request, template, context)
+
+
+# Membership (TODO)...
 
 
 @login_required

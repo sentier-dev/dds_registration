@@ -86,9 +86,9 @@ urlpatterns = [
     ),
     path(
         # Invoice created: link to download a pdf
-        "billing/event/<str:event_code>/success/invoice",
-        billing_views.billing_event_success_invoice,
-        name="billing_event_success_invoice",
+        "billing/event/<str:event_code>/invoice/proceed",
+        billing_views.billing_event_proceed_invoice,
+        name="billing_event_proceed_invoice",
     ),
     path(
         # Invoice pdf generate and download
@@ -97,10 +97,22 @@ urlpatterns = [
         name="billing_event_invoice_download",
     ),
     path(
-        # Go to proceed stripe payment
-        "billing/event/<str:event_code>/success/payment",
-        billing_views.billing_event_success_payment,
-        name="billing_event_success_payment",
+        # Create stripe session (TODO: Add params for currency and amout)
+        "billing/event/<str:event_code>/payment/stripe/create_checkout_session",
+        billing_views.billing_event_payment_stripe_create_checkout_session,
+        name="billing_event_payment_stripe_create_checkout_session",
+    ),
+    path(
+        # Proceed stripe payment
+        "billing/event/<str:event_code>/payment/stripe/proceed",
+        billing_views.billing_event_stripe_payment_proceed,
+        name="billing_event_stripe_payment_proceed",
+    ),
+    path(
+        # Stripe payment success
+        "billing/event/<str:event_code>/payment/stripe/success/<str:session_id>",
+        billing_views.billing_event_stripe_payment_success,
+        name="billing_event_stripe_payment_success",
     ),
     path(
         "billing/membership",

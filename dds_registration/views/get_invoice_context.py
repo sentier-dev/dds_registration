@@ -132,7 +132,7 @@ def get_basic_event_registration_context(request: HttpRequest, event_code: str):
         "event_code": event_code,
         "user": user,
         "site": get_current_site(request),
-        "shceme": scheme,
+        "scheme": scheme,
     }
     event: Event | None = None
     registration: Registration | None = None
