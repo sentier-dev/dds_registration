@@ -79,8 +79,10 @@ def membership_start(request: HttpRequest):
         if checked.response:
             return checked.response
     # Display a membership options form...
+    RESERVED = ("BOARD", "HONORARY")
+
     context = {
-        "MEMBERSHIP_TYPES": Membership.MEMBERSHIP_TYPES,
+        "MEMBERSHIP_TYPES": [(x, y) for x, y in Membership.MEMBERSHIP_TYPES if x not in RESERVED],
         "membership_type": Membership.DEFAULT_MEMBERSHIP_TYPE,
     }
     debug_data = context
