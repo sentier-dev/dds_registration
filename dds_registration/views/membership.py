@@ -79,9 +79,10 @@ def membership_start(request: HttpRequest):
         if checked.response:
             return checked.response
     # Display a membership options form...
-    RESERVED = ("BOARD", "HONORARY")
+    RESERVED = ("BOARD", "HONORARY")  # TODO: Probably it'd better to move this logic to the model?
 
     context = {
+        # "MEMBERSHIP_TYPES": Membership.MEMBERSHIP_TYPES,
         "MEMBERSHIP_TYPES": [(x, y) for x, y in Membership.MEMBERSHIP_TYPES if x not in RESERVED],
         "membership_type": Membership.DEFAULT_MEMBERSHIP_TYPE,
     }
@@ -158,15 +159,6 @@ def membership_proceed_test(request: HttpRequest, payment_id: str):
             #  "request": request,
         }
         LOG.debug("membership_proceed_test: %s", debug_data)
-        context = {
-            "action": "membership_proceed_test",
-        }
-        return render(request, "dds_registration/membership_test.html.django", context)
-    except Exception as err:
-        sError = errorToString(err, show_stacktrace=False)
-        sTraceback = str(traceback.format_exc())
-        error_text = "Error on membership_test: {}".format(sError)
-        messages.error(request, error_text)
         context = {
             "action": "membership_proceed_test",
         }
