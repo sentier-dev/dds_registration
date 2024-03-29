@@ -1,0 +1,1 @@
+{"version":3,"sources":["src/assets/test/test.ts"],"names":[],"mappings":"AAAA,CAAC,UAAU,MAAM;IACf,OAAO,CAAC,GAAG,CAAC,MAAM,EAAE,MAAM,CAAC,CAAC;AAC9B,CAAC,CAAC,CAAC,MAAM,CAAC,CAAC","file":"scripts.js","sourcesContent":["(function (window) {\n  console.log('Test', window);\n})(window);\n"]}
