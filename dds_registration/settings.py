@@ -23,13 +23,13 @@ SITE_ID = 1
 env = environ.Env(
     # @see local `.dev` file and example in `.dev.SAMPLE`
     # @see https://django-environ.readthedocs.io
-    DEV=(bool, False),  # Dev server mode
     DEBUG=(bool, False),  # Django debug mode
-    LOCAL=(bool, False),  # Local dev server mode
     SECRET_KEY=(str, ""),
     SENDGRID_API_KEY=(str, ""),
     REGISTRATION_SALT=(str, ""),
     DEFAULT_FROM_EMAIL=(str, "events@d-d-s.ch"),
+    STRIPE_PUBLISHABLE_KEY=(str, ""),
+    STRIPE_SECRET_KEY=(str, ""),
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
@@ -40,19 +40,27 @@ def random_string(length: int = 32) -> str:
     possibles = string.ascii_letters + string.digits
     return "".join(random.sample(possibles, length))
 
+# Dev-time flags
+DEBUG = env("DEBUG")
+DEV = DEBUG
+LOCAL = DEBUG
 
-# Preprocess scss source files wwith django filters
-USE_DJANGO_PREPROCESSORS = DEV = env("DEV")
-DEBUG = LOCAL = env("DEBUG") or env("LOCAL")
+# Preprocess scss source files with django filters
+USE_DJANGO_PREPROCESSORS = False  # LOCAL
 
+# Secrets
 SECRET_KEY = env("SECRET_KEY")
 REGISTRATION_SALT = env("REGISTRATION_SALT")
 SENDGRID_API_KEY = env("SENDGRID_API_KEY")
+STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY")
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 
 SECRETS = [
     (SECRET_KEY, "SECRET_KEY"),
     (REGISTRATION_SALT, "REGISTRATION_SALT"),
     (SENDGRID_API_KEY, "SENDGRID_API_KEY"),
+    (STRIPE_PUBLISHABLE_KEY, "STRIPE_PUBLISHABLE_KEY"),
+    (STRIPE_SECRET_KEY, "STRIPE_SECRET_KEY"),
 ]
 
 for key, label in SECRETS:
