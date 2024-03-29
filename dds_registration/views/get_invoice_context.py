@@ -23,7 +23,6 @@ from ..models import (
 )
 from .helpers import (
     calculate_total_registration_price,
-    get_full_user_name,
 )
 
 LOG = logging.getLogger(__name__)
@@ -62,7 +61,16 @@ def get_event_text(event: Event) -> str:
     return text
 
 
-def create_services_table(user: User, event: Event, registration: Registration):
+def get_registration_payment_currency(registration: Registration):
+    """
+    A naive way to get currency (considering all the options have the same currency)...
+    """
+    # options = registration.options.all()  # Multiple options approach
+    option = registration.option
+    return option.currency
+
+
+def create_event_services_table(user: User, event: Event, registration: Registration):
     # options = registration.options.all()  # Multiple options approach
     option = registration.option
     options = [option]
@@ -71,7 +79,7 @@ def create_services_table(user: User, event: Event, registration: Registration):
     total = 0
 
     # A naive way to get currency (considering all the options have the same currency)...
-    currency = options[0].currency if len(options) else ""
+    currency = get_registration_payment_currency(registration)
 
     table_header_copy = list(table_header)
     # Add currency to the last (price) column...
@@ -158,15 +166,6 @@ def get_basic_event_registration_context(request: HttpRequest, event_code: str):
 
 
 def get_event_invoice_context(request: HttpRequest, event_code: str):
-    #  scheme = "https" if request.is_secure() else "http"
-    #  context = {
-    #      "event_code": event_code,
-    #      "user": user,
-    #      "site": get_current_site(request),
-    #      "scheme": scheme,
-    #  }
-    #  event: Event | None = None
-    #  registration: Registration | None = None
     user: User = request.user
     context = get_basic_event_registration_context(request, event_code)
     event = context["event"]
@@ -175,7 +174,7 @@ def get_event_invoice_context(request: HttpRequest, event_code: str):
     # TODO: Check if all the parameters have defined?
     try:
         #  profile, created = .get_or_create(user=user)
-        table_data = create_services_table(user, event, registration)
+        table_data = create_event_services_table(user, event, registration)
         payment_deadline_days = event.payment_deadline_days
         # TInvoicePdfParams data...
         optional_text = invoice.extra_invoice_text
@@ -211,8 +210,8 @@ def get_event_invoice_context(request: HttpRequest, event_code: str):
         }
         LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
         raise Exception(error_text)
-
     context["event"] = event
     context["registration"] = registration
     context["total_price"] = calculate_total_registration_price(registration)
+    context["currency"] = get_registration_payment_currency(registration)
     return context
