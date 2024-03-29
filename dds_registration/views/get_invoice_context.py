@@ -178,9 +178,9 @@ def get_event_invoice_context(request: HttpRequest, event_code: str):
         table_data = create_services_table(user, event, registration)
         payment_deadline_days = event.payment_deadline_days
         # TInvoicePdfParams data...
-        optional_text = invoice.extra_invoice_text  # registration.extra_invoice_text
-        client_name = get_full_user_name(user)
-        client_address = user.address  # profile.address
+        optional_text = invoice.extra_invoice_text
+        client_name = invoice.name
+        client_address = invoice.address
         today = date.today()
         # NOTE: Probably the year in the invoice id should rely on the registration date, not on the invoice creatiion one?
         # year_str = today.strftime("%y")

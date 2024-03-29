@@ -323,6 +323,7 @@ class Invoice(Model):
 
     id = models.AutoField(primary_key=True)
 
+    # User name and address, initialized by user's ones, by default
     name = models.TextField(blank=False, default="")
     address = models.TextField(blank=False, default="")
 
