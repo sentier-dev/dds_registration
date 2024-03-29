@@ -8,14 +8,14 @@
 
 {% load crispy_forms_tags %}
 
-{% block title %}Billing for event — {{ block.super }}{% endblock title %}
+{% block title %}Billing for the event registration — {{ block.super }}{% endblock title %}
 
 {% block content %}
 {{ block.super }}
 
 <fieldset>
   <legend>
-    <h1 class="page-title primary-color">Billing for event</h1>
+    <h1 class="page-title primary-color">Billing for the event registration</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>

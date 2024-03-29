@@ -77,6 +77,7 @@ def billing_event(request: HttpRequest, event_code: str):
                 LOG.debug("Get form data: %s", debug_data)
                 new_verb = "created" if is_new else "updated"
                 messages.success(request, "Invoice has been successfully " + new_verb)
+                # TODO: What if changing an existing invoice and the `payment_method` parameter has changed?
                 invoice.save()
                 # Update registration...
                 registration.invoice = invoice  # Link the invoice
@@ -96,7 +97,7 @@ def billing_event(request: HttpRequest, event_code: str):
         return render(request, template, context)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
-        error_text = 'Cannot process billing for event "{}": {}'.format(event_code, sError)
+        error_text = 'Cannot process Billing for the event "{}": {}'.format(event_code, sError)
         messages.error(request, error_text)
         sTraceback = str(traceback.format_exc())
         debug_data = {
