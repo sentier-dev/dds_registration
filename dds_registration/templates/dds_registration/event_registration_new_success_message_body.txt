@@ -2,24 +2,21 @@
 You already created a registration for event {{ event.title }}.
 
 
-Now you should pay for your option:
-
-{% comment %} {% for option in registration.options.all %}- {{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %} {% endcomment %}
+Your selected option:
+{% comment %}
+{# Multiple options approach #}
+{% for option in registration.options.all %}- {{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}
+{% endcomment %}
 {% with option=registration.option %}- {{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}
 {% comment %} {% empty %}(No options were set) {% endcomment %}
-{% endwith %}
+{% endwith -%}{% comment %}
 
-{% comment %} Total amount due: {% if option.currency %}{{ option.currency }} {% endif %}{{ total_price }} {% endcomment %}
+Total amount due: {% if option.currency %}{{ option.currency }} {% endif %}{{ total_price }}
 
+{% endcomment %}
+Billing:
 
-Payment:
-
-{{ scheme }}://{{site.domain}}{% url 'event_registration_payment' event_code=event.code %}
-
-
-Download invoice:
-
-{{ scheme }}://{{site.domain}}{% url 'event_registration_invoice' event_code=event.code %}
+{{ scheme }}://{{site.domain}}{% url 'billing_event' event_code=event.code %}
 
 
 Sincerely, {{ site.name }} Management
