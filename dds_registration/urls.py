@@ -85,16 +85,19 @@ urlpatterns = [
         name="billing_event",
     ),
     path(
+        # Invoice created: link to download a pdf
         "billing/event/<str:event_code>/success/invoice",
         billing_views.billing_event_success_invoice,
         name="billing_event_success_invoice",
     ),
     path(
+        # Invoice pdf generate and download
         "billing/event/<str:event_code>/invoice/download",
         billing_views.billing_event_invoice_download,
         name="billing_event_invoice_download",
     ),
     path(
+        # Go to proceed stripe payment
         "billing/event/<str:event_code>/success/payment",
         billing_views.billing_event_success_payment,
         name="billing_event_success_payment",

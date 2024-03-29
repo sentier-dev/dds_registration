@@ -88,6 +88,7 @@ def billing_event(request: HttpRequest, event_code: str):
                     "billing_event_success_invoice"
                     if invoice.payment_method == "INVOICE"
                     else "billing_event_success_payment"
+                    # TODO: Add other payment method redirects here (eg, for WISE)
                 )
                 return redirect(redirect_to, event_code=event_code)
         else:
@@ -142,9 +143,23 @@ def billing_event_success_payment(request: HttpRequest, event_code: str):
     Show page with information about successfull payment creation and a link to
     proceed it.
     """
-    context = {
-        "page": "billing_event_success_payment",
+    context = get_event_invoice_context(request, event_code)
+    event = context["event"]
+    registration = context["registration"]
+    total_price = context["total_price"]
+    currency = context["currency"]
+    debug_data = {
+        "event": event,
+        "registration": registration,
+        "total_price": total_price,
+        "currency": currency,
+        "context": context,
     }
+    LOG.debug("Start stripe payment: %s", debug_data)
+    # TODO: Make a payment to stripe
+    # @see https://testdriven.io/blog/django-stripe-tutorial/
+    # DEBUG
+    context["page"] = "billing_event_success_payment"
     template = "dds_registration/billing/billing_test.html.django"
     return render(request, template, context)
 

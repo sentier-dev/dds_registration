@@ -89,7 +89,6 @@ const updateAllTasks = [
   'compileScripts',
 ].filter(Boolean);
 gulp.task('updateAll', gulp.parallel.apply(gulp, updateAllTasks));
-// gulp.task('recreateAll', gulp.series(['cleanGenerated', 'updateAll']));
 
 const watchAllTasks = [
   // Watch all tasks...

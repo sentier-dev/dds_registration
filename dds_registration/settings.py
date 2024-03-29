@@ -40,6 +40,7 @@ def random_string(length: int = 32) -> str:
     possibles = string.ascii_letters + string.digits
     return "".join(random.sample(possibles, length))
 
+
 # Dev-time flags
 DEBUG = env("DEBUG")
 DEV = DEBUG
