@@ -4,8 +4,8 @@ import environ
 import os
 import posixpath
 import re
-import sys
-
+import string
+import random
 
 # Working folder
 
@@ -35,21 +35,32 @@ env = environ.Env(
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 environ.Env.read_env(os.path.join(BASE_DIR, ".env.local"))
 
-DEV = env("DEV")
-DEBUG = env("DEBUG")
-LOCAL = env("LOCAL")
+
+def random_string(length: int = 32) -> str:
+    possibles = string.ascii_letters + string.digits
+    return "".join(random.sample(possibles, length))
+
+
+DEV = env("DEV") or env("DEBUG") or env("LOCAL")
+LOCAL = DEBUG = DEV
 
 SECRET_KEY = env("SECRET_KEY")
 REGISTRATION_SALT = env("REGISTRATION_SALT")
 SENDGRID_API_KEY = env("SENDGRID_API_KEY")
 
-if not SECRET_KEY or not REGISTRATION_SALT or not SENDGRID_API_KEY:
-    error_text = "Error: Environment configuration variables are required (check for your local `.env*` files, refer to `.env.SAMPLE`)."
-    raise Exception(error_text)
+SECRETS = [
+    (SECRET_KEY, "SECRET_KEY"),
+    (REGISTRATION_SALT, "REGISTRATION_SALT"),
+    (SENDGRID_API_KEY, "SENDGRID_API_KEY"),
+]
 
-if not SECRET_KEY or not REGISTRATION_SALT or not SENDGRID_API_KEY:
-    error_text = "Error: Environment configuration variables are required (check for your local `.env` file, refer to `.env.SAMPLE`)."
-    raise Exception(error_text)
+for key, label in SECRETS:
+    if not key:
+        if DEV and key in (SECRET_KEY, REGISTRATION_SALT):
+            key = random_string()
+        else:
+            error_text = f"Error: Environment configuration variable {label} missing"
+            raise Exception(error_text)
 
 # Preprocess scss source files wwith django filters
 USE_DJANGO_PREPROCESSORS = DEV
