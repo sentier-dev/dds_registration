@@ -1,22 +1,30 @@
 {# ex: set ft=htmldjango : #}
+Hi {{ user.get_full_name }}!
+
+Thanks for registering for {{ event.title }}.
+
+You have chosen to pay by bank transfer. The payment option you have chosen: {% with option=registration.option %}{{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}{% endwith %}.
+
+Your invoice is attached, but can also be download anytime at {{ scheme }}://{{site.domain}}{% url 'billing_event_invoice_download' event_code=event.code %}.
+
+If you need to change your payment method (e.g. pay by credit card), you can do that at {{ scheme }}://{{site.domain}}{% url 'billing_event' event_code=event.code %}.
+
+Please note that payment must be made with {{ event.payment_deadline_days }} days.
+
+If you have questions or comments, you can reach us at {{ settings.DEFAULT_FROM_EMAIL }}.
+{% comment %}
+{# Old content: #}
+
 You already created a registration for event {{ event.title }}.
 
 
 Your selected option:
-{% comment %}
 {# XXX: Multiple options approach #}
 {% for option in registration.options.all %}- {{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}
-{% endcomment %}
 {% with option=registration.option %}- {{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}
-{% comment %} {% empty %}(No options were set) {% endcomment %}
-{% endwith -%}{% comment %}
+{% endwith -%}
 
 Total amount due: {% if option.currency %}{{ option.currency }} {% endif %}{{ total_price }}
 
 {% endcomment %}
-Billing:
-
-{{ scheme }}://{{site.domain}}{% url 'billing_event' event_code=event.code %}
-
-
 Sincerely, {{ site.name }} Management

@@ -28,6 +28,7 @@
 <p><span class="item-label">Event:</span> {{ event.title }}</p>
 {% if registration %}
 <p><span class="item-label">Registration:</span> {{ registration }}</p>
+<p><span class="item-label">Option:</span> {{ registration.option }}</p>
 {% endif %}
 {% if invoice %}
 <p><span class="item-label">Invoice:</span> {{ invoice }}</p>

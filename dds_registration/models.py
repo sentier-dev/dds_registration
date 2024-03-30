@@ -267,9 +267,14 @@ class RegistrationOption(Model):
     currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
     def __str__(self):
+        price_items = [
+            self.currency,
+            self.price,
+        ]
+        price = " ".join(filter(None, map(str, price_items))) if self.price else ""
         items = [
             self.item,
-            "({})".format(self.price) if self.price else None,
+            "({})".format(price) if price else None,
         ]
         info = " ".join(filter(None, map(str, items)))
         return info
