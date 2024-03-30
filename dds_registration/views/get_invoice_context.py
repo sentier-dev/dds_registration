@@ -65,13 +65,13 @@ def get_registration_payment_currency(registration: Registration):
     """
     A naive way to get currency (considering all the options have the same currency)...
     """
-    # options = registration.options.all()  # Multiple options approach
+    # options = registration.options.all()  # XXX: Multiple options approach
     option = registration.option
     return option.currency
 
 
 def create_event_services_table(user: User, event: Event, registration: Registration):
-    # options = registration.options.all()  # Multiple options approach
+    # options = registration.options.all()  # XXX: Multiple options approach
     option = registration.option
     options = [option]
     event_text = get_event_text(event)

@@ -140,7 +140,7 @@ class Membership(Model):
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
 
-    #  paid = models.BooleanField(default=False)  # Issue #63: Removed
+    #  paid = models.BooleanField(default=False)  # Issue #63: Moved to `Invoice.status`
 
     def is_membership_type_invoice(membership_type: str) -> bool:
         return "INVOICE" in membership_type
@@ -150,7 +150,7 @@ class Membership(Model):
 
     @property
     def active(self) -> bool:
-        return this_year() <= self.until  # Issue #63: Don't use `paid` -- it has been removed
+        return this_year() <= self.until
 
     @classmethod
     def is_member(cls, user: User) -> bool:
@@ -344,6 +344,9 @@ class Invoice(Model):
     extra_invoice_text = models.TextField(blank=True, default="")
 
     # TODO: reg
+
+    def is_paid(self):
+        return self.status == "PAID"
 
     @property
     def invoice_no(self):
