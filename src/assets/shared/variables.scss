@@ -1,8 +1,3 @@
-/**
- * @module variables.scss
- * @changed 2024.03.08, 12:00
- */
-
 @use "sass:map";
 @use 'sass:math';
 @use 'sass:color';
@@ -19,13 +14,14 @@ $defaultFontFamily: "Roboto", "Helvetica", "Arial", sans-serif;
 
 // Breakpoints:...
 
-// @see static/bootstrap-5.3.2-src/scss/_variables.scss
-// xs: 0
-// sm: 576px
-// md: 768px
-// lg: 992px
-// xl: 1200px
-// xxl: 1400px
+/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
+ * - xs: 0
+ * - sm: 576px
+ * - md: 768px
+ * - lg: 992px
+ * - xl: 1200px
+ * - xxl: 1400px
+ */
 
 $screenXsMin: map-get($grid-breakpoints, 'xs'); // 0
 $screenSmMin: map-get($grid-breakpoints, 'sm'); // 576px

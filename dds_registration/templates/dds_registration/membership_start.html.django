@@ -8,23 +8,27 @@
 
 {% load crispy_forms_tags %}
 
-{% block title %}Start an membership — {{ block.super }}{% endblock title %}
+{% block title %}Start a membership — {{ block.super }}{% endblock title %}
 
 {% block content %}
 {{ block.super }}
 
 <fieldset>
   <legend>
-    <h1 class="page-title primary-color">Start an membership</h1>
+    <h1 class="page-title primary-color">Start a membership</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
 
 {% include "assets/render-messages/render-messages.django" %}
 
-<p>Membership info...</p>
+<p>Membership introduction text...</p>
 
-<form class="data-form" method="GET" action="{% url "membership_proceed" %}">
+{% include "assets/membership-choose-list/membership-choose-list.django" %}
+
+{% comment %}
+<p>Old way: a form with radiogroup</p>
+<form class="data-form" method="get" action="{% url "membership_proceed" %}">
   {% csrf_token %}
 
   <fieldset id="membership_type" class="mb3 form-group">
@@ -54,5 +58,6 @@
   </fieldset>
 
 </form>
+{% endcomment %}
 
 {% endblock content %}

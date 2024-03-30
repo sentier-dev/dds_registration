@@ -1,0 +1,25 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module membership-choose-list.django
+  @changed 2024.03.30, 17:53
+
+  Expecting parameters:
+
+  - MEMBERSHIP_TYPES from Membership model
+-->
+
+<div class="membership-choose-list">
+  {% for item in MEMBERSHIP_TYPES %}
+    {% with type=item.0 name=item.1 %}
+      <a id="{{ type }}" class="membership-choose-list-item btn btn-primary btn-lg" href="{% url "membership_proceed" membership_type=type %}">
+        <i class="bi
+          {% if type == 'NORMAL' %}bi-1-circle-fill
+          {% elif type == 'BUSINESS' %}bi-2-circle-fill
+          {% elif type == 'ACADEMIC' %}bi-3-circle-fill
+          {% endif %}
+        "></i>
+        {{ name }}
+      </a>
+    {% endwith %}
+  {% endfor %}
+</div>

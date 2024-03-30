@@ -142,6 +142,7 @@ class Membership(Model):
 
     #  paid = models.BooleanField(default=False)  # Issue #63: Moved to `Invoice.status`
 
+    # TODO: Refactor
     def is_membership_type_invoice(membership_type: str) -> bool:
         return "INVOICE" in membership_type
 
