@@ -1,5 +1,5 @@
 # @module dds_registration/views/membership.py
-# @changed 2024.03.27, 16:46
+# @changed 2024.03.30, 18:23
 
 import logging
 import traceback
@@ -75,6 +75,11 @@ def check_if_it_possible_to_become_a_member(request: HttpRequest):
 
 
 def membership_start(request: HttpRequest):
+    user = request.user
+    # Go to the login page with a message if no logged user:
+    if not user or not user.is_authenticated:
+        messages.error(request, "You have to have an account before you can register for membership")
+        return redirect("login")
     with check_for_available_membership(request) as checked:
         if checked.response:
             return checked.response
@@ -92,7 +97,7 @@ def membership_start(request: HttpRequest):
 
 
 @login_required
-def membership_proceed(request: HttpRequest):
+def membership_proceed(request: HttpRequest, membership_type: str):
     try:
         user = request.user
         if not user.is_authenticated:
@@ -102,10 +107,14 @@ def membership_proceed(request: HttpRequest):
             if checked.response:
                 return checked.response
         # Proceed...
-        membership_type = request.GET.get("membership_type")
+        # membership_type = request.GET.get("membership_type")
         if not membership_type:
             messages.error(request, "You have to choose membership type")
             return redirect("membership_start")
+        # TODO:
+        # - Create an invoice
+        # - Change payment method determination (not by membership type?)
+        # - Change final redirect links (all the code below)
         is_invoice = Membership.is_membership_type_invoice(membership_type)
         is_academic = Membership.is_membership_type_academic(membership_type)
         debug_data = {

@@ -126,7 +126,7 @@ urlpatterns = [
         name="membership_start",
     ),
     path(
-        "membership/proceed",
+        "membership/proceed/<str:membership_type>",
         membership_views.membership_proceed,
         name="membership_proceed",
     ),
