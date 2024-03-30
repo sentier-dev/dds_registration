@@ -171,14 +171,14 @@ def billing_event_payment_stripe_create_checkout_session(request: HttpRequest, e
     try:
         return_args = {
             "event_code": event_code,
-            "session_id": "{CHECKOUT_SESSION_ID}",  # To substitute by stripe
+            "session_id": "CHECKOUT_SESSION_ID_PLACEHOLDER",  # "{CHECKOUT_SESSION_ID}",  # To substitute by stripe
         }
         # route billing_event_stripe_payment_success:
         # "billing/event/<str:event_code>/payment/stripe/success/<str:session_id>"
         # Example from stripe docs:
         # return_url="https://example.com/checkout/return?session_id={CHECKOUT_SESSION_ID}",
-        #  return_url_path = reverse("billing_event_stripe_payment_success", kwargs=return_args)
-        return_url_path = "/billing/event/" + event_code + "/payment/stripe/success/{CHECKOUT_SESSION_ID}"
+        return_url_path = reverse("billing_event_stripe_payment_success", kwargs=return_args)
+        return_url_path = return_url_path.replace("CHECKOUT_SESSION_ID_PLACEHOLDER", "{CHECKOUT_SESSION_ID}")
         scheme = "https" if request.is_secure() else "http"
         site = get_current_site(request)
         return_url = scheme + "://" + site.domain + return_url_path
@@ -253,27 +253,59 @@ def billing_event_stripe_payment_success(request: HttpRequest, event_code: str, 
     Show page with information about successfull payment creation and a link to
     proceed it.
     """
-    context = get_event_invoice_context(request, event_code)
-    event = context["event"]
-    registration = context["registration"]
-    total_price = context["total_price"]
-    currency = context["currency"]
-    debug_data = {
-        "event_code": event_code,
-        "session_id": session_id,
-        "event": event,
-        "registration": registration,
-        "total_price": total_price,
-        "currency": currency,
-        "context": context,
-    }
-    LOG.debug("Start stripe payment: %s", debug_data)
-    # TODO: Make a payment to stripe
-    # @see https://testdriven.io/blog/django-stripe-tutorial/
-    # DEBUG
-    context["page"] = "billing_event_stripe_payment_success"
-    template = "dds_registration/billing/billing_test.html.django"
-    return render(request, template, context)
+    try:
+        context = get_event_invoice_context(request, event_code)
+        event = context["event"]
+        registration = context["registration"]
+        total_price = context["total_price"]
+        currency = context["currency"]
+        invoice = context["invoice"]
+        # Try to fetch stripe data...
+        session = stripe.checkout.Session.retrieve(session_id)
+        session_payment_status = session.get("payment_status")
+        session_status = session.get("status")
+        payment_success = session_payment_status == "paid" and session_status == "complete"
+        # DEBUG...
+        debug_data = {
+            "payment_success": payment_success,
+            "session": session,
+            "session_payment_status": session_payment_status,
+            "session_status": session_status,
+            "event_code": event_code,
+            "session_id": session_id,
+            "event": event,
+            "registration": registration,
+            "invoice": invoice,
+            "total_price": total_price,
+            "currency": currency,
+            "context": context,
+        }
+        LOG.debug("Start stripe payment: %s", debug_data)
+        if not payment_success:
+            messages.error(request, "Your payment was unsuccessfull")
+            return redirect("billing_event", event_code=event_code)
+        messages.success(request, "Your payment successfully proceed")
+        # Update invoice status
+        invoice.status = "PAID"
+        # TODO: To save some payment details to invoice?
+        invoice.save()
+        # TODO:
+        # Send email message?
+        # Smth else?
+        template = "dds_registration/billing/billing_event_stripe_payment_success.html.django"
+        return render(request, template, context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = 'Cannot start checkout session for the event "{}": {}'.format(event_code, sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "event_code": event_code,
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise Exception(error_text)
 
 
 # Membership (TODO)...

@@ -214,6 +214,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     # TODO: Show related objects: registration, membership etc?
     readonly_fields = [
         "invoice_no",
+        "created",
         "registrations_column",
     ]
     list_display = [
