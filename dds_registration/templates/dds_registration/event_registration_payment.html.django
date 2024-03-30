@@ -43,7 +43,7 @@
 <p>Total amount due: <strong>{% if option.currency %}{{ option.currency }}{% endif %} {{ total_price }}</strong></p>
 {% endcomment %}
 
-<form method="get" action="{% url 'event_registration_invoice' event_code=event.code %}">
+<form method="get" action="{% url "billing_event_invoice_download" event_code=event.code %}">
   {% csrf_token %}
 
   <p>Explanation text for invoice download option</p>

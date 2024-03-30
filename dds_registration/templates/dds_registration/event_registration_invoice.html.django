@@ -37,5 +37,4 @@
 <p>payment_details: {{ payment_details }}</p>
 <p>table_data: {{ table_data }}</p>
 
-
 {% endblock content %}

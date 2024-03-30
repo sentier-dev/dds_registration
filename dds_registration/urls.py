@@ -61,18 +61,18 @@ urlpatterns = [
         event_registration_views.event_registration_edit_success,
         name="event_registration_edit_success",
     ),
-    path(
-        # Download invoice page (delete or move to billing?)
-        "event/<str:event_code>/registration/invoice",
-        event_registration_views.event_registration_invoice,
-        name="event_registration_invoice",
-    ),
-    path(
-        # Download invoice pdf (delete or move to billing?)
-        "event/<str:event_code>/registration/invoice/download",
-        event_registration_views.event_registration_invoice_download,
-        name="event_registration_invoice_download",
-    ),
+    # path(
+    #     # Download invoice page (delete or move to billing?)
+    #     "event/<str:event_code>/registration/invoice",
+    #     event_registration_views.event_registration_invoice,
+    #     name="event_registration_invoice",
+    # ),
+    #  path(
+    #      # Download invoice pdf (delete or move to billing?)
+    #      "event/<str:event_code>/registration/invoice/download",
+    #      event_registration_views.event_registration_invoice_download,
+    #      name="event_registration_invoice_download",
+    #  ),
     path(
         "event/<str:event_code>/registration/payment",
         event_registration_views.event_registration_payment,
