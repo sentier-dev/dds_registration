@@ -20,6 +20,7 @@ from ..models import (
     RegistrationOption,
     User,
     Invoice,
+    Membership,
 )
 from .helpers import (
     calculate_total_registration_price,
@@ -118,22 +119,28 @@ def create_event_services_table(user: User, event: Event, registration: Registra
     return table
 
 
-def get_basic_event_registration_context(request: HttpRequest, event_code: str):
-    """
-    Check if there already is an invoice for this event/registration.
-    Create it if it doesn't already exist.
-    """
+def get_basic_site_context(request: HttpRequest):
     user: User = request.user
     # Check for non-anonymous user...
     if not user or not user.id:
         raise Exception("Required registered user")
     scheme = "https" if request.is_secure() else "http"
     context = {
-        "event_code": event_code,
         "user": user,
         "site": get_current_site(request),
         "scheme": scheme,
     }
+    return context
+
+
+def get_basic_event_registration_context(request: HttpRequest, event_code: str):
+    """
+    Check if there already is an invoice for this event/registration.
+    Create it if it doesn't already exist.
+    """
+    context = get_basic_site_context(request)
+    context["event_code"] = event_code
+    user: User = context["user"]
     event: Event | None = None
     registration: Registration | None = None
     invoice: Invoice | None = None
@@ -141,11 +148,9 @@ def get_basic_event_registration_context(request: HttpRequest, event_code: str):
     try:
         event = Event.objects.get(code=event_code)
         registrations = event.registrations.filter(REGISTRATION_ACTIVE_QUERY, user=user)
-        if not len(registrations):
+        if not len(registrations) or not registrations[0]:
             raise Exception("Not found active registration for the event '{}'".format(event.title))
         registration = registrations[0]
-        if not registration:
-            raise Exception("Not found active registration")
         invoice = registration.invoice
         context["event"] = event
         context["registration"] = registration
@@ -206,7 +211,7 @@ def get_event_invoice_context(request: HttpRequest, event_code: str):
         context["table_data"] = table_data
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
-        error_text = 'Cannot create  event invoice context for event "{}": {}'.format(event_code, sError)
+        error_text = 'Cannot create event registration invoice context for event "{}": {}'.format(event_code, sError)
         messages.error(request, error_text)
         sTraceback = str(traceback.format_exc())
         debug_data = {
@@ -216,8 +221,140 @@ def get_event_invoice_context(request: HttpRequest, event_code: str):
         }
         LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
         raise Exception(error_text)
-    context["event"] = event
-    context["registration"] = registration
     context["total_price"] = calculate_total_registration_price(registration)
     context["currency"] = get_registration_payment_currency(registration)
+    return context
+
+
+def create_membership_services_table(user: User, membership_type: str):
+    # options = registration.options.all()  # XXX: Multiple options approach
+    item = membership_type  # TODO: get membership text,
+    items = [item]
+    item_text = "Membership {}".format(membership_type)
+    item_price = 55  # TODO: Get real price
+    #  count = 1
+    total = 0
+
+    # A naive way to get currency (considering all the options have the same currency)...
+    currency = Membership.currency
+
+    table_header_copy = list(table_header)
+    # Add currency to the last (price) column...
+    if currency:
+        table_header_copy[3] += " ({})".format(currency)
+    table = (tuple(table_header_copy),)
+
+    def add_item_row(item):
+        nonlocal total
+        price_items = [
+            #  currency,
+            item_price,
+        ]
+        price_str = " ".join(filter(None, map(str, price_items))) if item_price else ""
+        row_data = (
+            1,
+            item_text,
+            item,
+            price_str,
+        )
+        if item_price:
+            total += item_price
+        #  count += 1
+        return row_data
+
+    rows_basic = tuple(map(add_item_row, items))
+    total_row = (
+        "",
+        "__Total__",
+        "",
+        "__{}__".format(total),
+    )
+    table = (*table, *rows_basic, total_row)
+    return table
+
+
+def get_basic_membership_registration_context(request: HttpRequest, membership_type: str):
+    """
+    Check if there already is an invoice for this event/registration.
+    Create it if it doesn't already exist.
+    """
+    context = get_basic_site_context(request)
+    context["membership_type"] = (membership_type,)
+    user: User = context["user"]
+    event: Event | None = None
+    membership: Membership | None = None
+    try:
+        memberships = Membership.objects.filter(user=user)
+        if not len(memberships) or not memberships[0]:
+            raise Exception("Not found active membership")
+        membership = memberships[0]
+        invoice = membership.invoice
+        context["membership"] = membership
+        context["invoice"] = invoice
+        return context
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = "Cannot create basic membership invoice context: {}".format(sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "membership_type": membership_type,
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
+        raise Exception(error_text)
+
+
+def get_membership_invoice_context(request: HttpRequest, membership_type: str):
+    context = get_basic_membership_registration_context(request, membership_type)
+    user: User = context["user"]
+    membership: Membership = context["membership"]
+    if not membership:
+        raise Exception("No membership found")
+    invoice = context["invoice"]
+    if not invoice:
+        raise Exception("No invoice found for the membership")
+    # TODO: Check if all the parameters have defined?
+    try:
+        #  profile, created = .get_or_create(user=user)
+        table_data = create_membership_services_table(user, membership_type)
+        payment_deadline_days = 7  # event.payment_deadline_days
+        # TInvoicePdfParams data...
+        optional_text = ""  # invoice.extra_invoice_text
+        client_name = user.get_full_name()
+        client_address = user.address
+        today = date.today()
+        # NOTE: Probably the year in the invoice id should rely on the registration date, not on the invoice creatiion one?
+        # year_str = today.strftime("%y")
+        invoice_date = today.strftime(dateFormat)
+        invoice_no = invoice.invoice_no if invoice else "Unknown"
+        payment_terms = "Within **{} business days** of invoice issuance".format(payment_deadline_days)
+        payment_details = ""  # event.payment_details if event.payment_details else default_payment_details
+        currency = Membership.currency  # Constant value for all the memebships
+        # TInvoicePdfParams data...
+        context["optional_text"] = optional_text
+        context["client_name"] = client_name
+        context["client_address"] = client_address
+        context["dds_name"] = dds_name
+        context["dds_address"] = dds_address
+        context["invoice_no"] = invoice_no
+        context["invoice_date"] = invoice_date
+        context["payment_terms"] = payment_terms
+        context["payment_details"] = payment_details
+        context["table_data"] = table_data
+        context["currency"] = currency
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = "Cannot create membership invoice context: {}".format(sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "membership_type": membership_type,
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
+        raise Exception(error_text)
+    #  context["total_price"] = calculate_total_registration_price(registration)
     return context

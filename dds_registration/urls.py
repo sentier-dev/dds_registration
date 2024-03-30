@@ -115,11 +115,18 @@ urlpatterns = [
         name="billing_event_stripe_payment_success",
     ),
     path(
+        # ???
         "billing/membership",
         billing_views.billing_membership,
         name="billing_membership",
     ),
-    # Membership...
+    path(
+        # Proceed membership payment (TODO: Update form in `membership-choose-list.django`
+        "billing/membership/<str:membership_type>/payment/<str:payment_method>/proceed",
+        billing_views.billing_event_stripe_payment_proceed,
+        name="billing_membership_stripe_payment_proceed",
+    ),
+    # Membership (TODO: Some routes will be moved to `billing`)...
     path(
         "membership/start",
         membership_views.membership_start,

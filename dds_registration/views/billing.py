@@ -27,6 +27,7 @@ from ..models import Invoice
 from .get_invoice_context import (
     get_basic_event_registration_context,
     get_event_invoice_context,
+    get_membership_invoice_context,
 )
 
 
@@ -220,10 +221,7 @@ def billing_event_payment_stripe_create_checkout_session(request: HttpRequest, e
 @login_required
 def billing_event_stripe_payment_proceed(request: HttpRequest, event_code: str):
     """
-    Proceed stripe payment.
-
-    Show page with information about successfull payment creation and a link to
-    proceed it.
+    Proceed stripe payment for event registration.
     """
     context = get_event_invoice_context(request, event_code)
     event = context["event"]
@@ -312,8 +310,48 @@ def billing_event_stripe_payment_success(request: HttpRequest, event_code: str, 
 
 
 @login_required
+def billing_membership_proceed(request: HttpRequest):
+    """
+    ??? -- Is it used?
+
+    The first thing users need to do is select if this is an academic,
+    business, or normal membership (see `Membership.membership_type`).
+    """
+    context = {}
+    template = "dds_registration/billing/billing_test.html.django"
+    return render(request, template, context)
+
+
+@login_required
+def billing_membership_stripe_payment_proceed(request: HttpRequest, membership_type: str, payment_method: str):
+    """
+    Proceed stripe payment for a membership.
+    """
+    context = get_membership_invoice_context(request, membership_type)
+    event = context["event"]
+    registration = context["registration"]
+    total_price = context["total_price"]
+    currency = context["currency"]
+    debug_data = {
+        "event": event,
+        "registration": registration,
+        "total_price": total_price,
+        "currency": currency,
+        "context": context,
+    }
+    LOG.debug("Start stripe payment: %s", debug_data)
+    # TODO: Make a payment to stripe
+    # @see https://testdriven.io/blog/django-stripe-tutorial/
+    # DEBUG
+    template = "dds_registration/billing/billing_event_stripe_payment_proceed.html.django"
+    return render(request, template, context)
+
+
+@login_required
 def billing_membership(request: HttpRequest):
     """
+    ???
+
     The first thing users need to do is select if this is an academic,
     business, or normal membership (see `Membership.membership_type`).
     """

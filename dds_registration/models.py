@@ -28,6 +28,16 @@ alphabet = string.ascii_lowercase + string.digits
 random_code_length = 8
 
 
+# Probably, will be used in a few places: RegistrationOption, Membership?
+SITE_SUPPORTED_CURRENCIES = [
+    ("USD", "US Dollar"),
+    ("CHF", "Swiss Franc"),
+    ("EUR", "Euro"),
+    ("CAD", "Canadian Dollar"),  # AKA Loonie :)
+]
+SITE_DEFAULT_CURRENCY = SITE_SUPPORTED_CURRENCIES[0][0]
+
+
 def random_code(length=random_code_length):
     return "".join(random.choices(alphabet, k=length))
 
@@ -113,6 +123,86 @@ class User(AbstractUser):
         self._original_username = self.username
 
 
+class Invoice(Model):
+    # Docs recommend putting these on the class:
+    # https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.Field.choices
+    INVOICE_STATUS = [
+        # Can add other possibilities later
+        ("CREATED", "Created"),
+        ("ISSUED", "Issued"),
+        ("PAID", "Paid"),
+        ("REFUNDED", "Refunded"),
+    ]
+    DEFAULT_INVOICE_STATUS = INVOICE_STATUS[0][0]
+
+    INVOICE_TEMPLATES = [
+        # Different templates for specific bank accounts and layouts
+        ("M-CHF", "Membership - Swiss Francs"),
+        ("M-EUR", "Membership - Euros"),
+        ("G-USD", "Generic - USD"),
+        ("G-CHF", "Generic - CHF"),
+        ("G-EUR", "Generic - EUR"),
+        ("G-CAD", "Generic - CAD"),
+    ]
+    DEFAULT_INVOICE_TEMPLATE = "G-USD"  # INVOICE_TEMPLATES[0][0]
+
+    PAYMENT_METHODS = [
+        ("STRIPE", "Stripe"),
+        ("INVOICE", "Invoice"),
+        #  ("WISE", "Wise"),  # Not yet implemented
+    ]
+    DEFAULT_PAYMENT_METHOD = PAYMENT_METHODS[0][0]  # "STRIPE"
+
+    id = models.AutoField(primary_key=True)
+
+    # User name and address, initialized by user's ones, by default
+    name = models.TextField(blank=False, default="")
+    address = models.TextField(blank=False, default="")
+
+    #  invoice_no = models.IntegerField(primary_key=True)
+
+    payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
+
+    created = models.DateField(auto_now_add=True)
+    status = models.TextField(choices=INVOICE_STATUS, default=DEFAULT_INVOICE_STATUS)
+
+    # Includes the various item descriptions, prices, and currencies
+    # and any other necessary info
+    data = models.JSONField(null=True, blank=True, help_text="JSON object ({...})")  # default=dict
+
+    # The specific form will depend on the template
+    template = models.TextField(choices=INVOICE_TEMPLATES, default=DEFAULT_INVOICE_TEMPLATE)
+
+    extra_invoice_text = models.TextField(blank=True, default="")
+
+    # TODO: reg
+
+    def is_paid(self):
+        return self.status == "PAID"
+
+    @property
+    def invoice_no(self):
+        """
+        Same as the actual invoice number, which normally has the form
+        {two-digit-year}{zero-padded four digit number starting from 1}
+        """
+        if not self.created or not self.id:
+            return "NOT-CREATED-YET"
+        year_str = self.created.strftime("%y")
+        invoice_no = "#{}{:0>4}".format(year_str, self.id)
+        return invoice_no
+
+    def __str__(self):
+        items = [
+            self.invoice_no,
+            self.get_status_display(),
+            self.get_template_display(),
+            self.created.strftime(dateFormat) if self.created else None,
+        ]
+        info = ", ".join(filter(None, map(str, items)))
+        return info
+
+
 class Membership(Model):
     MEMBERSHIP_TYPES = [
         ("NORMAL", "Normal"),
@@ -135,12 +225,24 @@ class Membership(Model):
     #  membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
 
     user = models.ForeignKey(User, related_name="memberships", on_delete=models.CASCADE)
+
     membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
+
     started = models.IntegerField(default=this_year)
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
 
+    #  # NOTE: Using own currency for the membership (as for registration options)?
+    #  SUPPORTED_CURRENCIES = SITE_SUPPORTED_CURRENCIES
+    #  DEFAULT_CURRENCY = SITE_DEFAULT_CURRENCY
+    #  currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
+
+    # Constant currency
+    currency = "EUR"
+
     #  paid = models.BooleanField(default=False)  # Issue #63: Moved to `Invoice.status`
+
+    invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.SET_NULL, null=True)
 
     # TODO: Refactor
     def is_membership_type_invoice(membership_type: str) -> bool:
@@ -253,17 +355,12 @@ class Event(Model):
 
 
 class RegistrationOption(Model):
-    SUPPORTED_CURRENCIES = [
-        ("USD", "US Dollar"),
-        ("CHF", "Swiss Franc"),
-        ("EUR", "Euro"),
-        ("CAD", "Canadian Dollar"),  # AKA Loonie :)
-    ]
-    DEFAULT_CURRENCY = SUPPORTED_CURRENCIES[0][0]
-
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     item = models.TextField(null=False, blank=False)  # Show as an input
     price = models.FloatField(default=0, null=False)
+
+    SUPPORTED_CURRENCIES = SITE_SUPPORTED_CURRENCIES
+    DEFAULT_CURRENCY = SITE_DEFAULT_CURRENCY
     currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
     def __str__(self):
@@ -292,86 +389,6 @@ class Message(Model):
             self.event,
             self.created_at.strftime(dateFormat) if self.created_at else None,
             "emailed" if self.emailed else None,
-        ]
-        info = ", ".join(filter(None, map(str, items)))
-        return info
-
-
-class Invoice(Model):
-    # Docs recommend putting these on the class:
-    # https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.Field.choices
-    INVOICE_STATUS = [
-        # Can add other possibilities later
-        ("CREATED", "Created"),
-        ("ISSUED", "Issued"),
-        ("PAID", "Paid"),
-        ("REFUNDED", "Refunded"),
-    ]
-    DEFAULT_INVOICE_STATUS = INVOICE_STATUS[0][0]
-
-    INVOICE_TEMPLATES = [
-        # Different templates for specific bank accounts and layouts
-        ("M-CHF", "Membership - Swiss Francs"),
-        ("M-EUR", "Membership - Euros"),
-        ("G-USD", "Generic - USD"),
-        ("G-CHF", "Generic - CHF"),
-        ("G-EUR", "Generic - EUR"),
-        ("G-CAD", "Generic - CAD"),
-    ]
-    DEFAULT_INVOICE_TEMPLATE = "G-USD"  # INVOICE_TEMPLATES[0][0]
-
-    PAYMENT_METHODS = [
-        ("STRIPE", "Stripe"),
-        ("INVOICE", "Invoice"),
-        #  ("WISE", "Wise"),  # Not yet implemented
-    ]
-    DEFAULT_PAYMENT_METHOD = PAYMENT_METHODS[0][0]  # "STRIPE"
-
-    id = models.AutoField(primary_key=True)
-
-    # User name and address, initialized by user's ones, by default
-    name = models.TextField(blank=False, default="")
-    address = models.TextField(blank=False, default="")
-
-    #  invoice_no = models.IntegerField(primary_key=True)
-
-    payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
-
-    created = models.DateField(auto_now_add=True)
-    status = models.TextField(choices=INVOICE_STATUS, default=DEFAULT_INVOICE_STATUS)
-
-    # Includes the various item descriptions, prices, and currencies
-    # and any other necessary info
-    data = models.JSONField(null=True, blank=True, help_text="JSON object ({...})")  # default=dict
-
-    # The specific form will depend on the template
-    template = models.TextField(choices=INVOICE_TEMPLATES, default=DEFAULT_INVOICE_TEMPLATE)
-
-    extra_invoice_text = models.TextField(blank=True, default="")
-
-    # TODO: reg
-
-    def is_paid(self):
-        return self.status == "PAID"
-
-    @property
-    def invoice_no(self):
-        """
-        Same as the actual invoice number, which normally has the form
-        {two-digit-year}{zero-padded four digit number starting from 1}
-        """
-        if not self.created or not self.id:
-            return "NOT-CREATED-YET"
-        year_str = self.created.strftime("%y")
-        invoice_no = "#{}{:0>4}".format(year_str, self.id)
-        return invoice_no
-
-    def __str__(self):
-        items = [
-            self.invoice_no,
-            self.get_status_display(),
-            self.get_template_display(),
-            self.created.strftime(dateFormat) if self.created else None,
         ]
         info = ", ".join(filter(None, map(str, items)))
         return info

@@ -24,7 +24,7 @@ from ..core.constants.stripe_payments import (
 
 #  from .get_event_invoice_context import get_event_invoice_context
 
-from ..models import Membership
+from ..models import Membership, Invoice
 
 
 LOG = logging.getLogger(__name__)
@@ -98,6 +98,7 @@ def membership_start(request: HttpRequest):
 
 @login_required
 def membership_proceed(request: HttpRequest, membership_type: str):
+    # TODO: Select peyment by invoice or by stripe (etc)? After membership type selection? Select on the same screen?
     try:
         user = request.user
         if not user.is_authenticated:
@@ -111,23 +112,45 @@ def membership_proceed(request: HttpRequest, membership_type: str):
         if not membership_type:
             messages.error(request, "You have to choose membership type")
             return redirect("membership_start")
-        # TODO:
-        # - Create an invoice
-        # - Change payment method determination (not by membership type?)
-        # - Change final redirect links (all the code below)
-        is_invoice = Membership.is_membership_type_invoice(membership_type)
-        is_academic = Membership.is_membership_type_academic(membership_type)
-        debug_data = {
-            "is_invoice": is_invoice,
-            "is_academic": is_academic,
-            "membership_type": membership_type,
-            "request": request,
-        }
-        LOG.debug("membership_proceed: %s", debug_data)
-        membership = Membership()
+        # Find/create an membership...
+        membership: Membership = None
+        is_new_membership = False
+        try:
+            membership = Membership.objects.get(user=user)
+        except Membership.DoesNotExist:
+            membership = Membership()
+            is_new_membership = True
+        # Update membership data...
         membership.membership_type = membership_type
         membership.user = user
         membership.save()
+        # Find/create an invoice...
+        invoice: Invoice = None
+        is_new_invoice = False
+        try:
+            invoice = Invoice.objects.get(user=user)
+        except Invoice.DoesNotExist:
+            invoice = Invoice()
+            is_new_invoice = True
+            if is_new_invoice:
+                membership.invoice = invoice
+        # TODO:
+        # - Change payment method determination (not by membership type?)
+        # - Change final redirect links (all the code below)
+        #  is_invoice = Membership.is_membership_type_invoice(membership_type)
+        #  is_academic = Membership.is_membership_type_academic(membership_type)
+        debug_data = {
+            #  "is_invoice": is_invoice,
+            #  "is_academic": is_academic,
+            "membership_type": membership_type,
+            "membership": membership,
+            "invoice": invoice,
+            "request": request,
+        }
+        # TODO:
+        # - Find existing membership if exist for this user or create new
+        # - Find or create invoice for this membership
+        LOG.debug("membership_proceed: %s", debug_data)
         # Invoice option: show invoice result...
         if is_invoice:
             return redirect("membership_proceed_invoice")
