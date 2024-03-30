@@ -85,34 +85,34 @@ def event_registration_edit_success(request: HttpRequest, event_code: str):
     )
 
 
-@login_required
-def event_registration_invoice(request: HttpRequest, event_code: str):
-    # XXX: OBSOLETE: Moved to `billing`
-    """
-    Check if there is an invoice for this event/registration.
-    Create it if not.
-    Redirect to or show a download link.
-    """
-    # TODO: Generate invoice pdf
-    template = "dds_registration/event_registration_invoice.html.django"
-    context = get_event_invoice_context(request, event_code)
-    context_redirect = context.get("redirect")
-    if context_redirect:
-        return context_redirect
-    return render(request, template, context)
+# @login_required
+# def event_registration_invoice(request: HttpRequest, event_code: str):
+#     # XXX: OBSOLETE: Moved to `billing`
+#     """
+#     Check if there is an invoice for this event/registration.
+#     Create it if not.
+#     Redirect to or show a download link.
+#     """
+#     # TODO: Generate invoice pdf
+#     template = "dds_registration/event_registration_invoice.html.django"
+#     context = get_event_invoice_context(request, event_code)
+#     context_redirect = context.get("redirect")
+#     if context_redirect:
+#         return context_redirect
+#     return render(request, template, context)
 
 
-@login_required
-def event_registration_invoice_download(request: HttpRequest, event_code: str):
-    # XXX: OBSOLETE: Moved to `billing`
-    # TODO: Generate invoice pdf
-    template = "dds_registration/event_registration_invoice_download.html.django"
-    context = get_event_invoice_context(request, event_code)
-    show_debug = False
-    if show_debug:
-        return render(request, template, context)
-    pdf = create_invoice_pdf(context)
-    return HttpResponse(bytes(pdf.output()), content_type="application/pdf")
+# @login_required
+# def event_registration_invoice_download(request: HttpRequest, event_code: str):
+#     # XXX: OBSOLETE: Moved to `billing`
+#     # TODO: Generate invoice pdf
+#     template = "dds_registration/event_registration_invoice_download.html.django"
+#     context = get_event_invoice_context(request, event_code)
+#     show_debug = False
+#     if show_debug:
+#         return render(request, template, context)
+#     pdf = create_invoice_pdf(context)
+#     return HttpResponse(bytes(pdf.output()), content_type="application/pdf")
 
 
 @login_required
