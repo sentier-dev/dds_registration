@@ -348,6 +348,7 @@ PASS_VARIABLES = {
     "LOCAL": LOCAL,  # Local dev server mode (from the environment)
     "USE_DJANGO_PREPROCESSORS": USE_DJANGO_PREPROCESSORS,
     "STRIPE_PUBLISHABLE_KEY": STRIPE_PUBLISHABLE_KEY,
+    "DEFAULT_FROM_EMAIL": DEFAULT_FROM_EMAIL,
     # NOTE: Site url and name could be taken from site data via `get_current_site`
     "SITE_NAME": SITE_NAME,
     "SITE_TITLE": SITE_TITLE,

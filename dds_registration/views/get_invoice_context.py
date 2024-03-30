@@ -169,8 +169,14 @@ def get_event_invoice_context(request: HttpRequest, event_code: str):
     user: User = request.user
     context = get_basic_event_registration_context(request, event_code)
     event = context["event"]
+    if not event:
+        raise Exception("No event found for the event code '{}'".format(event_code))
     registration = context["registration"]
+    if not registration:
+        raise Exception("No registration found for the event '{}' ({})".format(event.title, event_code))
     invoice = context["invoice"]
+    if not invoice:
+        raise Exception("No invoice found for the event '{}' ({})".format(event.title, event_code))
     # TODO: Check if all the parameters have defined?
     try:
         #  profile, created = .get_or_create(user=user)

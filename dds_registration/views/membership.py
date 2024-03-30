@@ -9,7 +9,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpRequest, HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.shortcuts import redirect, render
 
 from ..core.helpers.errors import errorToString

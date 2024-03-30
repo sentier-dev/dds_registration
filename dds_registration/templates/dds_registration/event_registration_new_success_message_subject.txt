@@ -1,3 +1,3 @@
 {# ex: set ft=htmldjango : #}
 
-Already created a registration for the event {{ event.title }}
+[DdS]: You have registered for {{ event.title }}

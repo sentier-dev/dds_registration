@@ -434,7 +434,6 @@ def get_event_registration_context(request: HttpRequest, event_code: str):
     try:
         event = Event.objects.get(code=event_code)
         registration = event.registrations.get(REGISTRATION_ACTIVE_QUERY, user=user, event=event)
-        # registration = event.registrations.get(user=user, event=event, active=True)
         if not registration:
             raise Exception("Not found active registrations")
         context["event"] = event

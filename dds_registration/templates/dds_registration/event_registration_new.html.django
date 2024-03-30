@@ -8,14 +8,14 @@
 
 {% load crispy_forms_tags %}
 
-{% block title %}Register for a new event — {{ block.super }}{% endblock title %}
+{% block title %}Register for the event — {{ block.super }}{% endblock title %}
 
 {% block content %}
 {{ block.super }}
 
 <fieldset>
   <legend>
-    <h1 class="page-title primary-color">Register for a new event</h1>
+    <h1 class="page-title primary-color">Register for the event</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
