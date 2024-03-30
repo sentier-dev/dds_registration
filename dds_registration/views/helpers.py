@@ -18,7 +18,14 @@ from django.template.loader import render_to_string
 
 from ..core.helpers.errors import errorToString
 
-from ..models import REGISTRATION_ACTIVE_QUERY, Event, Registration, RegistrationOption, User
+from ..models import (
+    REGISTRATION_ACTIVE_QUERY,
+    Event,
+    Registration,
+    RegistrationOption,
+    Invoice,
+    User,
+)
 
 # For django_registration related stuff, see:
 # .venv/Lib/site-packages/django_registration/backends/activation/views.py
@@ -101,7 +108,6 @@ def get_events_list(request: HttpRequest, events: list[Event]):
                 registration = event.registrations.get(REGISTRATION_ACTIVE_QUERY, user=request.user)
                 # registration = event.registrations.get(user=request.user, active=True)
                 event_info["registration"] = registration
-                result.append(event_info)
             except Registration.DoesNotExist:
                 pass
             except Exception as err:
@@ -114,6 +120,11 @@ def get_events_list(request: HttpRequest, events: list[Event]):
                     "traceback": sTraceback,
                 }
                 LOG.error("Caught error %s (re-raising): %s", sError, debug_data)
+            # Look for a possible invoice by the user
+            if registration:
+                invoice = registration.invoice
+                event_info["invoice"] = invoice
+            result.append(event_info)
     return result
 
 
