@@ -11,6 +11,13 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpRequest
 
 from ..core.constants.date_time_formats import dateFormat
+from ..core.constants.payments import (
+    payment_details_by_currency,
+    site_default_currency,
+    payment_recipient_name,
+    payment_recipient_address,
+    default_payment_details,
+)
 from ..core.helpers.errors import errorToString
 
 from ..models import (
@@ -31,20 +38,6 @@ LOG = logging.getLogger(__name__)
 # Default dds parameters
 
 # TODO: To store them in constants or in the settings or in the site configuration?
-
-dds_name = "Départ de Sentier"
-dds_address = """
-Dorfsteig 8
-5223 Riniken
-Switzerland
-VAT CHE-329.638.515
-"""
-default_payment_details = """
-Account Holder: Départ de Sentier, Dorfsteig 8, 5223 Riniken AG, Switzerland
-Bank: Wise, Avenue Louise 54, Room S52, 1050 Brussels, Belgium
-IBAN: BE31 9673 6729 9455
-SWIFT-BIC: TRWIBEB1XXX
-"""
 
 table_header = (
     # Header...
@@ -71,16 +64,13 @@ def get_registration_payment_currency(registration: Registration):
     return option.currency
 
 
-def create_event_services_table(user: User, event: Event, registration: Registration):
+def create_event_services_table(user: User, event: Event, registration: Registration, currency: str):
     # options = registration.options.all()  # XXX: Multiple options approach
     option = registration.option
     options = [option]
     event_text = get_event_text(event)
     #  count = 1
     total = 0
-
-    # A naive way to get currency (considering all the options have the same currency)...
-    currency = get_registration_payment_currency(registration)
 
     table_header_copy = list(table_header)
     # Add currency to the last (price) column...
@@ -173,19 +163,19 @@ def get_basic_event_registration_context(request: HttpRequest, event_code: str):
 def get_event_invoice_context(request: HttpRequest, event_code: str):
     user: User = request.user
     context = get_basic_event_registration_context(request, event_code)
-    event = context["event"]
+    event: Event = context["event"]
     if not event:
         raise Exception("No event found for the event code '{}'".format(event_code))
-    registration = context["registration"]
+    registration: Registration = context["registration"]
     if not registration:
         raise Exception("No registration found for the event '{}' ({})".format(event.title, event_code))
-    invoice = context["invoice"]
+    invoice: Invoice = context["invoice"]
     if not invoice:
         raise Exception("No invoice found for the event '{}' ({})".format(event.title, event_code))
     # TODO: Check if all the parameters have defined?
     try:
-        #  profile, created = .get_or_create(user=user)
-        table_data = create_event_services_table(user, event, registration)
+        currency = invoice.currency
+        table_data = create_event_services_table(user, event, registration, currency)
         payment_deadline_days = event.payment_deadline_days
         # TInvoicePdfParams data...
         optional_text = invoice.extra_invoice_text
@@ -197,13 +187,17 @@ def get_event_invoice_context(request: HttpRequest, event_code: str):
         invoice_date = today.strftime(dateFormat)
         invoice_no = invoice.invoice_no if invoice else "Unknown"
         payment_terms = "Within **{} business days** of invoice issuance".format(payment_deadline_days)
-        payment_details = event.payment_details if event.payment_details else default_payment_details
+        payment_details = payment_details_by_currency[
+            currency
+        ]  # event.payment_details if event.payment_details else default_payment_details
         # TInvoicePdfParams data...
+        context["total_price"] = calculate_total_registration_price(registration)
+        context["currency"] = currency
         context["optional_text"] = optional_text
         context["client_name"] = client_name
         context["client_address"] = client_address
-        context["dds_name"] = dds_name
-        context["dds_address"] = dds_address
+        context["dds_name"] = payment_recipient_name
+        context["dds_address"] = payment_recipient_address
         context["invoice_no"] = invoice_no
         context["invoice_date"] = invoice_date
         context["payment_terms"] = payment_terms
@@ -221,12 +215,10 @@ def get_event_invoice_context(request: HttpRequest, event_code: str):
         }
         LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
         raise Exception(error_text)
-    context["total_price"] = calculate_total_registration_price(registration)
-    context["currency"] = get_registration_payment_currency(registration)
     return context
 
 
-def create_membership_services_table(user: User, membership_type: str):
+def create_membership_services_table(user: User, membership_type: str, currency: str):
     # options = registration.options.all()  # XXX: Multiple options approach
     item = membership_type  # TODO: get membership text,
     items = [item]
@@ -234,9 +226,6 @@ def create_membership_services_table(user: User, membership_type: str):
     item_price = 55  # TODO: Get real price
     #  count = 1
     total = 0
-
-    # A naive way to get currency (considering all the options have the same currency)...
-    currency = Membership.currency
 
     table_header_copy = list(table_header)
     # Add currency to the last (price) column...
@@ -312,13 +301,13 @@ def get_membership_invoice_context(request: HttpRequest, membership_type: str):
     membership: Membership = context["membership"]
     if not membership:
         raise Exception("No membership found")
-    invoice = context["invoice"]
+    invoice: Invoice = context["invoice"]
     if not invoice:
         raise Exception("No invoice found for the membership")
     # TODO: Check if all the parameters have defined?
     try:
-        #  profile, created = .get_or_create(user=user)
-        table_data = create_membership_services_table(user, membership_type)
+        currency = invoice.currency if invoice else site_default_currency
+        table_data = create_membership_services_table(user, membership_type, currency)
         payment_deadline_days = 7  # event.payment_deadline_days
         # TInvoicePdfParams data...
         optional_text = ""  # invoice.extra_invoice_text
@@ -330,14 +319,13 @@ def get_membership_invoice_context(request: HttpRequest, membership_type: str):
         invoice_date = today.strftime(dateFormat)
         invoice_no = invoice.invoice_no if invoice else "Unknown"
         payment_terms = "Within **{} business days** of invoice issuance".format(payment_deadline_days)
-        payment_details = ""  # event.payment_details if event.payment_details else default_payment_details
-        currency = Membership.currency  # Constant value for all the memebships
+        payment_details = payment_details_by_currency[currency]
         # TInvoicePdfParams data...
         context["optional_text"] = optional_text
         context["client_name"] = client_name
         context["client_address"] = client_address
-        context["dds_name"] = dds_name
-        context["dds_address"] = dds_address
+        context["dds_name"] = payment_recipient_name
+        context["dds_address"] = payment_recipient_address
         context["invoice_no"] = invoice_no
         context["invoice_date"] = invoice_date
         context["payment_terms"] = payment_terms

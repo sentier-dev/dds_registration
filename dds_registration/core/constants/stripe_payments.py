@@ -1,6 +1,8 @@
 from django.conf import settings
 
 
+# TODO: To remove (in favor of using new payment stripe intent payment system; after the migration on this method is completed)
+
 # Stripe link for academic membership
 academic_membership_stripe_payment_link = "https://buy.stripe.com/aEU5nr3Al3oVe9a4gg"
 

@@ -25,7 +25,7 @@ class BillingEventForm(ModelForm):
             "name",
             "address",
             "payment_method",
-            "template",
+            "currency",
             "extra_invoice_text",
         ]
         widgets = {

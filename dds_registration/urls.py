@@ -3,8 +3,9 @@
 
 from django.conf import settings
 from django.contrib import admin
-from django.urls import include, path
 from django.views.decorators.cache import cache_page
+from django.urls import include, path
+from django.urls import path, register_converter
 
 from . import views
 from .views import membership as membership_views
@@ -14,8 +15,11 @@ from .views import registration as registration_views
 
 from .forms import DdsRegistrationForm
 
+from .converters.FloatUrlParameterConverter import FloatUrlParameterConverter
+
 cache_timeout = 0 if settings.DEV or settings.DEBUG else 15 * 60  # in seconds: {min}*60
 
+register_converter(FloatUrlParameterConverter, "float")
 
 urlpatterns = [
     path(
@@ -97,8 +101,8 @@ urlpatterns = [
         name="billing_event_invoice_download",
     ),
     path(
-        # Create stripe session (TODO: Add params for currency and amout)
-        "billing/event/<str:event_code>/payment/stripe/create_checkout_session",
+        # Create stripe session (Link with event code, currency and amount)
+        "billing/event/<str:event_code>/payment/stripe/create_checkout_session/<str:currency>/<float:amount>",
         billing_views.billing_event_payment_stripe_create_checkout_session,
         name="billing_event_payment_stripe_create_checkout_session",
     ),

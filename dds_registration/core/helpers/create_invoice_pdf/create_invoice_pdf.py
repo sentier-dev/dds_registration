@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 class TInvoicePdfParams(TypedDict):
+    #  currency: str;
     optional_text: str
     client_name: str
     client_address: str
@@ -47,6 +48,7 @@ font_size = 12
 
 def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
     # Get params...
+    #  currency = params["currency"]
     optional_text = params["optional_text"]
     client_name = params["client_name"]
     client_address = params["client_address"]

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from dds_registration.core.helpers.create_invoice_pdf import create_invoice_pdf, TInvoicePdfParams
+from dds_registration.core.constants.payments import payment_details_by_currency
 
 # External parameters
 
@@ -23,13 +24,8 @@ VAT CHE-329.638.515
 invoice_no = "#2324"
 invoice_date = "May 4, 2023"
 payment_terms = "Within **30 business days** of invoice issuance"
-#  payment_details_title = '**Payment details:**'
-payment_details = """
-Account Holder: Départ de Sentier, Dorfsteig 8, 5223 Riniken AG, Switzerland
-Bank: Wise, Avenue Louise 54, Room S52, 1050 Brussels, Belgium
-IBAN: BE31 9673 6729 9455
-SWIFT-BIC: TRWIBEB1XXX
-"""
+currency = "CAD"
+payment_details = payment_details_by_currency[currency]
 
 
 def test_create_invoice_pdf():
@@ -39,7 +35,7 @@ def test_create_invoice_pdf():
             "Quantity",
             "Event",
             "Option",
-            "Costs (EUR)",
+            "Costs ({})".format(currency),
         ),
         (
             1,
@@ -58,6 +54,7 @@ def test_create_invoice_pdf():
     # Test...
 
     invoice_pdf_params: TInvoicePdfParams = {
+        #  "currency": currency,
         "optional_text": optional_text,
         "client_name": client_name,
         "client_address": client_address,

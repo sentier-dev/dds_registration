@@ -98,7 +98,7 @@ def membership_start(request: HttpRequest):
 
 @login_required
 def membership_proceed(request: HttpRequest, membership_type: str):
-    # TODO: Select peyment by invoice or by stripe (etc)? After membership type selection? Select on the same screen?
+    # TODO: Select payment method: by invoice or by stripe (by wise, etc)? After membership type selection? Select on the same screen?
     try:
         user = request.user
         if not user.is_authenticated:

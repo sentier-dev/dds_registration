@@ -51,9 +51,6 @@ class IsRegularUserFilter(SimpleListFilter):
 class UserAdmin(BaseUserAdmin):
     form = UserAdminForm
 
-    #  # UNUSED: Address has integrated into the base user model
-    #  inlines = (ProfileInline,)
-
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         ("Personal info", {"fields": ("first_name", "last_name", "address")}),
@@ -68,17 +65,12 @@ class UserAdmin(BaseUserAdmin):
         "is_regular_user",
     ]
     list_filter = [IsRegularUserFilter]
-    #  exclude = ['email']
-    #  readonly_fields = ['email']
 
     def is_regular_user(self, user):
         return not user.is_staff and not user.is_superuser
 
     is_regular_user.short_description = "Regular user"
     is_regular_user.boolean = True
-
-    def get_address(self):
-        return self.profile.address
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -143,7 +135,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         "user_column",
         "invoice",
         "event",
-        "options_column",
+        "option",
         "status",
         "created_at",
     ]
@@ -155,13 +147,6 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     user_column.short_description = "User"
     user_column.admin_order_field = "user"
-
-    def options_column(self, reg):
-        return ", ".join([p.item for p in [reg.option]])
-        #  return ", ".join([p.item for p in reg.options.all()])
-
-    options_column.short_description = "Option"
-    options_column.admin_order_field = "option"
 
 
 admin.site.register(Registration, RegistrationAdmin)
@@ -216,21 +201,34 @@ class InvoiceAdmin(admin.ModelAdmin):
         "invoice_no",
         "created",
         "registrations_column",
+        "memberships_column",
     ]
     list_display = [
         "invoice_no",
         "status",
-        #  "data",
-        "template",
+        "currency_id",
         "registrations_column",
+        "memberships_column",
         "created",
     ]
+
+    def currency_id(self, invoice):
+        return invoice.currency
+
+    currency_id.short_description = "Currency"
+    currency_id.admin_order_field = "currency"
 
     def registrations_column(self, invoice):
         registrations = invoice.registrations.all()
         return "; ".join(filter(None, map(str, registrations)))
 
     registrations_column.short_description = "Registrations"
+
+    def memberships_column(self, invoice):
+        memberships = invoice.memberships.all()
+        return "; ".join(filter(None, map(str, memberships)))
+
+    memberships_column.short_description = "Memberships"
 
 
 admin.site.register(Invoice, InvoiceAdmin)

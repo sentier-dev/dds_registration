@@ -163,13 +163,18 @@ def billing_event_invoice_download(request: HttpRequest, event_code: str):
 
 
 @csrf_exempt
-def billing_event_payment_stripe_create_checkout_session(request: HttpRequest, event_code: str):
+def billing_event_payment_stripe_create_checkout_session(
+    request: HttpRequest, event_code: str, currency: str, amount: float
+):
     """
     Create stripe session.
 
     TODO: Add params for currency and amout
     """
     try:
+        product_data = {
+            "name": settings.STRIPE_PAYMENT_PRODUCT_NAME,
+        }
         return_args = {
             "event_code": event_code,
             "session_id": "CHECKOUT_SESSION_ID_PLACEHOLDER",  # "{CHECKOUT_SESSION_ID}",  # To substitute by stripe
@@ -187,11 +192,10 @@ def billing_event_payment_stripe_create_checkout_session(request: HttpRequest, e
             line_items=[
                 {
                     "price_data": {
-                        "currency": "usd",
-                        "product_data": {
-                            "name": "Test",
-                        },
-                        "unit_amount": 100,  # NOTE: The price is in cents
+                        "currency": currency,
+                        "product_data": product_data,
+                        # NOTE: The amount value is an integer, and (sic!) in cents (must be multiplied by 100)
+                        "unit_amount": round(amount * 100),
                     },
                     "quantity": 1,
                 }
@@ -251,13 +255,13 @@ def billing_event_stripe_payment_success(request: HttpRequest, event_code: str, 
     Show page with information about successfull payment creation and a link to
     proceed it.
     """
+    context = get_event_invoice_context(request, event_code)
+    event = context["event"]
+    registration = context["registration"]
+    total_price = context["total_price"]
+    currency = context["currency"]
+    invoice = context["invoice"]
     try:
-        context = get_event_invoice_context(request, event_code)
-        event = context["event"]
-        registration = context["registration"]
-        total_price = context["total_price"]
-        currency = context["currency"]
-        invoice = context["invoice"]
         # Try to fetch stripe data...
         session = stripe.checkout.Session.retrieve(session_id)
         session_payment_status = session.get("payment_status")
@@ -342,8 +346,8 @@ def billing_membership_stripe_payment_proceed(request: HttpRequest, membership_t
     LOG.debug("Start stripe payment: %s", debug_data)
     # TODO: Make a payment to stripe
     # @see https://testdriven.io/blog/django-stripe-tutorial/
-    # DEBUG
-    template = "dds_registration/billing/billing_event_stripe_payment_proceed.html.django"
+    # TODO: Create a view
+    template = "dds_registration/billing/billing_membership_stripe_payment_proceed.html.django"
     return render(request, template, context)
 
 

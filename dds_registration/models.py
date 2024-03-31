@@ -14,11 +14,9 @@ from django.db import models
 from django.db.models import Model, Q
 from django.urls import reverse
 
-# from queryable_properties.properties import queryable_property
+from dds_registration.core.constants.payments import site_default_currency, site_supported_currencies
 
 from .core.constants.date_time_formats import (
-    #  dateTimeFormat,
-    #  onlyDateFormat,
     dateFormat,
 )
 from .core.helpers.dates import this_year
@@ -28,14 +26,8 @@ alphabet = string.ascii_lowercase + string.digits
 random_code_length = 8
 
 
-# Probably, will be used in a few places: RegistrationOption, Membership?
-SITE_SUPPORTED_CURRENCIES = [
-    ("USD", "US Dollar"),
-    ("CHF", "Swiss Franc"),
-    ("EUR", "Euro"),
-    ("CAD", "Canadian Dollar"),  # AKA Loonie :)
-]
-SITE_DEFAULT_CURRENCY = SITE_SUPPORTED_CURRENCIES[0][0]
+# NOTE: A single reusable QuerySet to check if the registration active
+REGISTRATION_ACTIVE_QUERY = ~Q(status="WITHDRAWN")
 
 
 def random_code(length=random_code_length):
@@ -135,17 +127,6 @@ class Invoice(Model):
     ]
     DEFAULT_INVOICE_STATUS = INVOICE_STATUS[0][0]
 
-    INVOICE_TEMPLATES = [
-        # Different templates for specific bank accounts and layouts
-        ("M-CHF", "Membership - Swiss Francs"),
-        ("M-EUR", "Membership - Euros"),
-        ("G-USD", "Generic - USD"),
-        ("G-CHF", "Generic - CHF"),
-        ("G-EUR", "Generic - EUR"),
-        ("G-CAD", "Generic - CAD"),
-    ]
-    DEFAULT_INVOICE_TEMPLATE = "G-USD"  # INVOICE_TEMPLATES[0][0]
-
     PAYMENT_METHODS = [
         ("STRIPE", "Stripe"),
         ("INVOICE", "Invoice"),
@@ -159,8 +140,6 @@ class Invoice(Model):
     name = models.TextField(blank=False, default="")
     address = models.TextField(blank=False, default="")
 
-    #  invoice_no = models.IntegerField(primary_key=True)
-
     payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
 
     created = models.DateField(auto_now_add=True)
@@ -170,8 +149,10 @@ class Invoice(Model):
     # and any other necessary info
     data = models.JSONField(null=True, blank=True, help_text="JSON object ({...})")  # default=dict
 
-    # The specific form will depend on the template
-    template = models.TextField(choices=INVOICE_TEMPLATES, default=DEFAULT_INVOICE_TEMPLATE)
+    SUPPORTED_CURRENCIES = site_supported_currencies
+    DEFAULT_CURRENCY = site_default_currency
+    currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
+    # @see `payment_details_by_currency`
 
     extra_invoice_text = models.TextField(blank=True, default="")
 
@@ -195,8 +176,8 @@ class Invoice(Model):
     def __str__(self):
         items = [
             self.invoice_no,
+            self.currency,
             self.get_status_display(),
-            self.get_template_display(),
             self.created.strftime(dateFormat) if self.created else None,
         ]
         info = ", ".join(filter(None, map(str, items)))
@@ -232,19 +213,14 @@ class Membership(Model):
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
 
-    #  # NOTE: Using own currency for the membership (as for registration options)?
-    #  SUPPORTED_CURRENCIES = SITE_SUPPORTED_CURRENCIES
-    #  DEFAULT_CURRENCY = SITE_DEFAULT_CURRENCY
-    #  currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
-
-    # Constant currency
-    currency = "EUR"
-
-    #  paid = models.BooleanField(default=False)  # Issue #63: Moved to `Invoice.status`
+    # NOTE: Using own currency for the membership (as for registration options)?
+    SUPPORTED_CURRENCIES = site_supported_currencies
+    DEFAULT_CURRENCY = site_default_currency
+    currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
     invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.SET_NULL, null=True)
 
-    # TODO: Refactor
+    # TODO: Refactor (Remove?)
     def is_membership_type_invoice(membership_type: str) -> bool:
         return "INVOICE" in membership_type
 
@@ -277,7 +253,7 @@ class Event(Model):
     # Issue #63: Removed this `currency` field (we already have the `currency` field in the `RegistrationOption` model).
     #  currency = models.TextField(null=True, blank=True)  # Show as an input
 
-    # XXX: Do we still leave this payment-related stuff here?
+    # XXX: Do we still leave this payment-related stuff here? (Should it rather be in the invoice model?)
     payment_deadline_days = models.IntegerField(default=30)
     payment_details = models.TextField(blank=True, default="")
 
@@ -291,7 +267,6 @@ class Event(Model):
         Return the active registrations
         """
         return self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY)
-        # return self.registrations.all().filter(active=True)
 
     def get_active_user_registration(self, user: User | None):
         """
@@ -301,7 +276,6 @@ class Event(Model):
         if not user or not user.id:
             return []
         active_user_registrations = self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY, user=user)
-        #  active_user_registrations = self.registrations.all().filter(active=True, user=user)
         if len(active_user_registrations):
             return active_user_registrations[0]
         return None
@@ -344,12 +318,7 @@ class Event(Model):
             self.title,
             "({})".format(self.code) if self.code else None,
         ]
-        items = [
-            " ".join(filter(None, map(str, name_items))),
-            # self.created_at.strftime(dateTimeFormat) if self.created_at else None,
-        ]
-        info = ", ".join(filter(None, map(str, items)))
-        return info
+        return " ".join(filter(None, map(str, name_items)))
 
     new_registration_full_url.short_description = "Event registration url"
 
@@ -359,8 +328,8 @@ class RegistrationOption(Model):
     item = models.TextField(null=False, blank=False)  # Show as an input
     price = models.FloatField(default=0, null=False)
 
-    SUPPORTED_CURRENCIES = SITE_SUPPORTED_CURRENCIES
-    DEFAULT_CURRENCY = SITE_DEFAULT_CURRENCY
+    SUPPORTED_CURRENCIES = site_supported_currencies
+    DEFAULT_CURRENCY = site_default_currency
     currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
     def __str__(self):
@@ -394,16 +363,7 @@ class Message(Model):
         return info
 
 
-# NOTE: A single reusable QuerySet to check if the registration active
-REGISTRATION_ACTIVE_QUERY = ~Q(status="WITHDRAWN")
-
-
 class Registration(Model):
-    """
-    Ex `Booking` class in OneEvent
-    """
-
-    # TODO: Move to the `Registration` data model as a static field?
     REGISTRATION_STATUS = [
         # For schools
         ("SUBMITTED", "Application submitted"),
@@ -439,6 +399,7 @@ class Registration(Model):
     def __str__(self):
         items = [
             self.user.full_name_with_email,
+            self.option,
             self.get_status_display(),
             self.created_at.strftime(dateFormat) if self.created_at else None,
         ]
