@@ -83,6 +83,55 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
         };
 })();
+(function () {
+    window.billing_membership_payment_stripe_create_checkout_session =
+        function billing_membership_payment_stripe_create_checkout_session(params) {
+            var STRIPE_PUBLISHABLE_KEY = params.STRIPE_PUBLISHABLE_KEY, create_checkout_session_url = params.create_checkout_session_url;
+            console.log('[billing_membership_payment_stripe_create_checkout_session]', {
+                STRIPE_PUBLISHABLE_KEY: STRIPE_PUBLISHABLE_KEY,
+                create_checkout_session_url: create_checkout_session_url
+            });
+            // Initialize Stripe.js
+            var stripe = window.Stripe(STRIPE_PUBLISHABLE_KEY);
+            initialize();
+            // Fetch Checkout Session and retrieve the client secret
+            function initialize() {
+                return __awaiter(this, void 0, void 0, function () {
+                    var fetchClientSecret, checkout;
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                fetchClientSecret = function () { return __awaiter(_this, void 0, void 0, function () {
+                                    var response, clientSecret;
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0: return [4 /*yield*/, fetch(create_checkout_session_url, {
+                                                    method: 'POST'
+                                                })];
+                                            case 1:
+                                                response = _a.sent();
+                                                return [4 /*yield*/, response.json()];
+                                            case 2:
+                                                clientSecret = (_a.sent()).clientSecret;
+                                                return [2 /*return*/, clientSecret];
+                                        }
+                                    });
+                                }); };
+                                return [4 /*yield*/, stripe.initEmbeddedCheckout({
+                                        fetchClientSecret: fetchClientSecret
+                                    })];
+                            case 1:
+                                checkout = _a.sent();
+                                // Mount Checkout
+                                checkout.mount('#checkout');
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            }
+        };
+})();
 (function (window) {
     // console.log('Test', window);
 })(window);

@@ -82,7 +82,7 @@ urlpatterns = [
         event_registration_views.event_registration_payment,
         name="event_registration_payment",
     ),
-    # Billing...
+    # Billing for events...
     path(
         "billing/event/<str:event_code>",
         billing_views.billing_event,
@@ -118,17 +118,13 @@ urlpatterns = [
         billing_views.billing_event_stripe_payment_success,
         name="billing_event_stripe_payment_success",
     ),
+    # Billing for memberships...
     path(
         "billing/membership/<str:membership_type>",
         billing_views.billing_membership,
         name="billing_membership",
     ),
-    path(
-        # Proceed membership payment by stripe
-        "billing/membership/payment/stripe/proceed",
-        billing_views.billing_event_stripe_payment_proceed,
-        name="billing_membership_stripe_payment_proceed",
-    ),
+    # Invoice...
     path(
         # Proceed membership payment by invoice
         "billing/membership/payment/invoice/proceed",
@@ -140,6 +136,25 @@ urlpatterns = [
         "billing/membership/invoice/download",
         billing_views.billing_membership_invoice_download,
         name="billing_membership_invoice_download",
+    ),
+    # Stripe...
+    path(
+        # Proceed membership payment by stripe
+        "billing/membership/payment/stripe/proceed",
+        billing_views.billing_membership_stripe_payment_proceed,
+        name="billing_membership_stripe_payment_proceed",
+    ),
+    path(
+        # Create stripe session (Link with membership type, currency and amount)
+        "billing/membership/<str:membership_type>/payment/stripe/create_checkout_session/<str:currency>/<float:amount>",
+        billing_views.billing_membership_payment_stripe_create_checkout_session,
+        name="billing_membership_payment_stripe_create_checkout_session",
+    ),
+    path(
+        # Stripe payment success
+        "billing/membership/<str:membership_type>/payment/stripe/success/<str:session_id>",
+        billing_views.billing_membership_stripe_payment_success,
+        name="billing_membership_stripe_payment_success",
     ),
     # Membership (TODO: Some routes will be moved to `billing`)...
     path(

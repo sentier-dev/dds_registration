@@ -1,13 +1,13 @@
 (function(){
 
-  window.billing_event_payment_stripe_create_checkout_session =
-  function billing_event_payment_stripe_create_checkout_session(params: TCreateCheckoutSessionParams) {
+  window.billing_membership_payment_stripe_create_checkout_session =
+  function billing_membership_payment_stripe_create_checkout_session(params: TCreateCheckoutSessionParams) {
     const {
       STRIPE_PUBLISHABLE_KEY,
       create_checkout_session_url,
     } = params;
 
-    console.log('[billing_event_payment_stripe_create_checkout_session]', {
+    console.log('[billing_membership_payment_stripe_create_checkout_session]', {
       STRIPE_PUBLISHABLE_KEY,
       create_checkout_session_url,
     });

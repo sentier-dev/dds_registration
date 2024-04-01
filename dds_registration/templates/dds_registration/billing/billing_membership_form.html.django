@@ -28,7 +28,7 @@
 {% if membership %}
 <p><span class="item-label">Membership:</span> {{ membership }}</p>
 {% endif %}
-{% if invoice %}
+{% if invoice and invoice.id %}
 <p><span class="item-label">Invoice:</span> {{ invoice }}</p>
 {% endif %}
 

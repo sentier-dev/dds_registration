@@ -321,6 +321,8 @@ def get_membership_invoice_context(request: HttpRequest):
         payment_terms = "Within **{} business days** of invoice issuance".format(default_payment_deadline_days)
         payment_details = payment_details_by_currency[currency]
         # TInvoicePdfParams data...
+        context["total_price"] = get_membership_cost(membership)
+        context["currency"] = currency
         context["optional_text"] = optional_text
         context["client_name"] = client_name
         context["client_address"] = client_address
@@ -331,7 +333,6 @@ def get_membership_invoice_context(request: HttpRequest):
         context["payment_terms"] = payment_terms
         context["payment_details"] = payment_details
         context["table_data"] = table_data
-        context["currency"] = currency
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         error_text = "Cannot create membership invoice context: {}".format(sError)
@@ -343,5 +344,4 @@ def get_membership_invoice_context(request: HttpRequest):
         }
         LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
         raise Exception(error_text)
-    #  context["total_price"] = calculate_total_registration_price(registration)
     return context

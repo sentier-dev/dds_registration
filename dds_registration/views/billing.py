@@ -166,7 +166,20 @@ def billing_event_invoice_download(request: HttpRequest, event_code: str):
     return HttpResponse(bytes(pdf.output()), content_type="application/pdf")
 
 
-# Stripe payment...
+# Stripe payment for event...
+
+
+def create_stripe_return_url(request: HttpRequest, route: str, return_args: dict) -> str:
+    # route billing_membership_stripe_payment_success:
+    # "billing/membership/<str:membership_type>/payment/stripe/success/<str:session_id>"
+    # Example from stripe docs:
+    # return_url="https://example.com/checkout/return?session_id={CHECKOUT_SESSION_ID}",
+    return_url_path = reverse(route, kwargs=return_args)
+    return_url_path = return_url_path.replace("CHECKOUT_SESSION_ID_PLACEHOLDER", "{CHECKOUT_SESSION_ID}")
+    scheme = "https" if request.is_secure() else "http"
+    site = get_current_site(request)
+    return_url = scheme + "://" + site.domain + return_url_path
+    return return_url
 
 
 @csrf_exempt
@@ -175,26 +188,18 @@ def billing_event_payment_stripe_create_checkout_session(
 ):
     """
     Create stripe session.
-
-    TODO: Add params for currency and amout
+    Called from js code on checkout page.
     """
     try:
         product_data = {
+            # TODO: Set product name by event registration type?
             "name": settings.STRIPE_PAYMENT_PRODUCT_NAME,
         }
         return_args = {
             "event_code": event_code,
             "session_id": "CHECKOUT_SESSION_ID_PLACEHOLDER",  # "{CHECKOUT_SESSION_ID}",  # To substitute by stripe
         }
-        # route billing_event_stripe_payment_success:
-        # "billing/event/<str:event_code>/payment/stripe/success/<str:session_id>"
-        # Example from stripe docs:
-        # return_url="https://example.com/checkout/return?session_id={CHECKOUT_SESSION_ID}",
-        return_url_path = reverse("billing_event_stripe_payment_success", kwargs=return_args)
-        return_url_path = return_url_path.replace("CHECKOUT_SESSION_ID_PLACEHOLDER", "{CHECKOUT_SESSION_ID}")
-        scheme = "https" if request.is_secure() else "http"
-        site = get_current_site(request)
-        return_url = scheme + "://" + site.domain + return_url_path
+        return_url = create_stripe_return_url(request, "billing_event_stripe_payment_success", return_args)
         session = stripe.checkout.Session.create(
             line_items=[
                 {
@@ -247,9 +252,7 @@ def billing_event_stripe_payment_proceed(request: HttpRequest, event_code: str):
         "context": context,
     }
     LOG.debug("Start stripe payment: %s", debug_data)
-    # TODO: Make a payment to stripe
-    # @see https://testdriven.io/blog/django-stripe-tutorial/
-    # DEBUG
+    # Make a payment to stripe
     template = "dds_registration/billing/billing_event_stripe_payment_proceed.html.django"
     return render(request, template, context)
 
@@ -317,14 +320,13 @@ def billing_event_stripe_payment_success(request: HttpRequest, event_code: str, 
         raise Exception(error_text)
 
 
-# Membership (TODO)...
+# Membership...
 
 
 @login_required
 def billing_membership(request: HttpRequest, membership_type: str):
     """
     Basic form to create invoice and/or payment for membership.
-    @see `billing_event`
     """
     try:
         user = request.user
@@ -375,13 +377,11 @@ def billing_membership(request: HttpRequest, membership_type: str):
                 membership.invoice = invoice  # Link the invoice
                 #  membership.status = "PAYMENT_PENDING"  # Change the status -- now we're expecting the payment
                 membership.save()
-                #  # Send an e-mail message (if membership has been created/updated)...
-                #  send_membership_membership_success_message(request, membership_type)
                 # Redirect to invoice downloading or to payment page?
                 if invoice.payment_method == "INVOICE":
-                    return redirect("billing_membership_invoice_payment_proceed")  # , membership_type=membership_type)
+                    return redirect("billing_membership_invoice_payment_proceed")
                 else:
-                    return redirect("billing_membership_stripe_payment_proceed")  # , membership_type=membership_type)
+                    return redirect("billing_membership_stripe_payment_proceed")
         else:
             form = BillingMembershipForm(instance=invoice)
         context = {
@@ -405,17 +405,7 @@ def billing_membership(request: HttpRequest, membership_type: str):
         raise Exception(error_text)
 
 
-@login_required
-def billing_membership_proceed(request: HttpRequest):
-    """
-    ??? -- Is it used?
-
-    The first thing users need to do is select if this is an academic,
-    business, or normal membership (see `Membership.membership_type`).
-    """
-    context = {}
-    template = "dds_registration/billing/billing_test.html.django"
-    return render(request, template, context)
+# Invoice payment for the membership...
 
 
 @login_required
@@ -437,8 +427,8 @@ def billing_membership_invoice_payment_proceed(request: HttpRequest):
     if not invoice:
         raise Exception("Invoice does not exist")
     try:
-        total_price = context["total_price"]
-        currency = invoice.context
+        #  total_price = context["total_price"]
+        currency = invoice.currency
         context = {
             "membership": membership,
             "invoice": invoice,
@@ -462,79 +452,6 @@ def billing_membership_invoice_payment_proceed(request: HttpRequest):
         }
         LOG.error("%s (re-raising): %s", error_text, debug_data)
         raise Exception(error_text)
-
-
-@login_required
-def billing_membership_stripe_payment_proceed(request: HttpRequest):
-    """
-    Proceed stripe payment for a membership.
-    """
-    user = request.user
-    if not user.is_authenticated:
-        return redirect("index")
-    # Find membership and invoice...
-    membership: Membership = None
-    invoice: Invoice = None
-    try:
-        membership = Membership.objects.get(user=user)
-    except Membership.DoesNotExist:
-        raise Exception("Membership does not exist")
-    invoice = membership.invoice
-    if not invoice:
-        raise Exception("Invoice does not exist")
-    context = {
-        "membership": membership,
-        "invoice": invoice,
-    }
-    try:
-        #  context = get_membership_invoice_context(request, membership_type)
-        #  event = context["event"]
-        #  registration = context["registration"]
-        #  total_price = context["total_price"]
-        #  currency = context["currency"]
-        debug_data = {
-            #  "event": event,
-            #  "registration": registration,
-            #  "total_price": total_price,
-            #  "currency": currency,
-            "membership": membership,
-            "invoice": invoice,
-            "context": context,
-        }
-        LOG.debug("Start invoice payment: %s", debug_data)
-        # TODO: Create a view
-        template = "dds_registration/billing/billing_membership_invoice_payment_proceed.html.django"
-        return render(request, template, context)
-    except Exception as err:
-        sError = errorToString(err, show_stacktrace=False)
-        error_text = "Cannot create invoice page for the membership: {}".format(sError)
-        messages.error(request, error_text)
-        sTraceback = str(traceback.format_exc())
-        debug_data = {
-            "err": err,
-            "traceback": sTraceback,
-        }
-        LOG.error("%s (re-raising): %s", error_text, debug_data)
-        raise Exception(error_text)
-
-    #####
-
-    context = get_membership_invoice_context(request, membership_type)
-    event = context["event"]
-    registration = context["registration"]
-    total_price = context["total_price"]
-    currency = context["currency"]
-    debug_data = {
-        "event": event,
-        "registration": registration,
-        "total_price": total_price,
-        "currency": currency,
-        "context": context,
-    }
-    LOG.debug("Start stripe payment: %s", debug_data)
-    # TODO: Create a view
-    template = "dds_registration/billing/billing_membership_stripe_payment_proceed.html.django"
-    return render(request, template, context)
 
 
 @login_required
@@ -566,17 +483,158 @@ def billing_membership_invoice_download(request: HttpRequest):
         raise Exception(error_text)
 
 
-# @login_required
-# def billing_membership(request: HttpRequest):
-#     """
-#     ???
-
-#     The first thing users need to do is select if this is an academic,
-#     business, or normal membership (see `Membership.membership_type`).
-#     """
-#     context = {}
-#     template = "dds_registration/billing/billing_test.html.django"
-#     return render(request, template, context)
+# Stripe payment for membership...
 
 
-__all__ = []
+@csrf_exempt
+def billing_membership_payment_stripe_create_checkout_session(
+    request: HttpRequest, membership_type: str, currency: str, amount: float
+):
+    """
+    Create stripe session for the membership.
+    Called from js code on checkout page.
+    """
+    try:
+        product_data = {
+            # TODO: Get product name by membership type (or future membership option)
+            "name": settings.STRIPE_PAYMENT_PRODUCT_NAME,
+        }
+        return_args = {
+            "membership_type": membership_type,
+            "session_id": "CHECKOUT_SESSION_ID_PLACEHOLDER",  # "{CHECKOUT_SESSION_ID}",  # To substitute by stripe
+        }
+        return_url = create_stripe_return_url(request, "billing_membership_stripe_payment_success", return_args)
+        session = stripe.checkout.Session.create(
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": currency,
+                        "product_data": product_data,
+                        # NOTE: The amount value is an integer, and (sic!) in cents (must be multiplied by 100)
+                        "unit_amount": round(amount * 100),
+                    },
+                    "quantity": 1,
+                }
+            ],
+            mode="payment",
+            ui_mode="embedded",
+            return_url=return_url,
+        )
+        result = {
+            "clientSecret": session.client_secret,
+        }
+        return JsonResponse(result)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = "Cannot start checkout session for the membership: {}".format(sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise Exception(error_text)
+
+
+@login_required
+def billing_membership_stripe_payment_success(request: HttpRequest, membership_type: str, session_id: str):
+    """
+    Proceed stripe payment.
+
+    Show page with information about successfull payment creation and a link to
+    proceed it.
+    """
+    context = get_membership_invoice_context(request)
+    membership = context["membership"]
+    total_price = context["total_price"]
+    currency = context["currency"]
+    invoice = context["invoice"]
+    try:
+        # Try to fetch stripe data...
+        session = stripe.checkout.Session.retrieve(session_id)
+        session_payment_status = session.get("payment_status")
+        session_status = session.get("status")
+        payment_success = session_payment_status == "paid" and session_status == "complete"
+        # DEBUG...
+        debug_data = {
+            "payment_success": payment_success,
+            "session": session,
+            "session_payment_status": session_payment_status,
+            "session_status": session_status,
+            "membership_type": membership.membership_type,
+            "session_id": session_id,
+            "membership": membership,
+            "invoice": invoice,
+            "total_price": total_price,
+            "currency": currency,
+            "context": context,
+        }
+        LOG.debug("Start stripe payment: %s", debug_data)
+        if not payment_success:
+            messages.error(request, "Your payment was unsuccessfull")
+            return redirect("billing_membership", membership_type=membership.membership_type)
+        messages.success(request, "Your payment successfully proceed")
+        # Update invoice status
+        invoice.status = "PAID"
+        # TODO: To save some payment details to invoice?
+        invoice.save()
+        # TODO:
+        # Send email message?
+        # Smth else?
+        template = "dds_registration/billing/billing_membership_stripe_payment_success.html.django"
+        return render(request, template, context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = "Cannot start checkout session for the membership: {}".format(sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise Exception(error_text)
+
+
+@login_required
+def billing_membership_stripe_payment_proceed(request: HttpRequest):
+    """
+    Proceed stripe payment for a membership: show embedded stripe form.
+    """
+    user = request.user
+    if not user.is_authenticated:
+        return redirect("index")
+    # Find membership and invoice...
+    membership: Membership = None
+    #  invoice: Invoice = None
+    try:
+        membership = Membership.objects.get(user=user)
+    except Membership.DoesNotExist:
+        raise Exception("Membership does not exist")
+    membership_type = membership.membership_type
+    try:
+        context = get_membership_invoice_context(request)
+        total_price = context["total_price"]
+        currency = context["currency"]
+        debug_data = {
+            "membership": membership,
+            "total_price": total_price,
+            "currency": currency,
+            "context": context,
+        }
+        LOG.debug("Start stripe payment: %s", debug_data)
+        # TODO: Create a view
+        template = "dds_registration/billing/billing_membership_stripe_payment_proceed.html.django"
+        return render(request, template, context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = "Cannot create invoice page for the membership: {}".format(sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise Exception(error_text)
