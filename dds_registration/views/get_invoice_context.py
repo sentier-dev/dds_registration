@@ -15,12 +15,9 @@ from dds_registration.views.membership import get_membership_cost
 from ..core.constants.date_time_formats import dateFormat
 from ..core.constants.payments import (
     payment_details_by_currency,
-    site_default_currency,
     payment_recipient_name,
     payment_recipient_address,
-    default_payment_details,
     default_payment_deadline_days,
-    membership_cost_by_type,
 )
 from ..core.helpers.errors import errorToString
 
@@ -33,7 +30,7 @@ from ..models import (
     Invoice,
     Membership,
 )
-from .helpers import (
+from .helpers.events import (
     calculate_total_registration_price,
 )
 

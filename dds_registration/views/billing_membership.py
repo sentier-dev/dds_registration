@@ -6,35 +6,16 @@ import traceback
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 from django.shortcuts import redirect, render
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.urls import reverse
-from django.contrib.sites.shortcuts import get_current_site
 
-import stripe
 
-from django.conf import settings
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 
-from ..core.helpers.create_invoice_pdf import create_invoice_pdf
 from ..core.helpers.errors import errorToString
 
-from ..forms import BillingEventForm, BillingMembershipForm
+from ..forms import BillingMembershipForm
 from ..models import Invoice, Membership
-
-from .helpers import send_event_registration_success_message
-
-from .get_invoice_context import (
-    get_basic_event_registration_context,
-    get_event_invoice_context,
-    get_basic_membership_registration_context,
-    get_membership_invoice_context,
-)
-
-
-#  stripe.api_key = settings.STRIPE_SECRET_KEY  # 'sk_...'
 
 
 LOG = logging.getLogger(__name__)

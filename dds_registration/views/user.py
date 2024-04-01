@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 from ..core.helpers.errors import errorToString
 
 from ..forms import UpdateUserForm
-from .helpers import send_re_actvation_email
+from .helpers.events import send_re_actvation_email
 
 LOG = logging.getLogger(__name__)
 

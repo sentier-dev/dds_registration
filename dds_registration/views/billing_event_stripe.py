@@ -6,54 +6,30 @@ import traceback
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from django.urls import reverse
-from django.contrib.sites.shortcuts import get_current_site
 
 import stripe
 
 from django.conf import settings
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 
-from ..core.helpers.create_invoice_pdf import create_invoice_pdf
+from .helpers.create_stripe_return_url import create_stripe_return_url
+
 from ..core.helpers.errors import errorToString
 
-from ..forms import BillingEventForm, BillingMembershipForm
-from ..models import Invoice, Membership
-
-from .helpers import send_event_registration_success_message
 
 from .get_invoice_context import (
-    get_basic_event_registration_context,
     get_event_invoice_context,
-    get_basic_membership_registration_context,
-    get_membership_invoice_context,
 )
-
-
-#  stripe.api_key = settings.STRIPE_SECRET_KEY  # 'sk_...'
 
 
 LOG = logging.getLogger(__name__)
 
 
 # Stripe payment for event...
-
-
-def create_stripe_return_url(request: HttpRequest, route: str, return_args: dict) -> str:
-    # route billing_membership_stripe_payment_success:
-    # "billing/membership/<str:membership_type>/payment/stripe/success/<str:session_id>"
-    # Example from stripe docs:
-    # return_url="https://example.com/checkout/return?session_id={CHECKOUT_SESSION_ID}",
-    return_url_path = reverse(route, kwargs=return_args)
-    return_url_path = return_url_path.replace("CHECKOUT_SESSION_ID_PLACEHOLDER", "{CHECKOUT_SESSION_ID}")
-    scheme = "https" if request.is_secure() else "http"
-    site = get_current_site(request)
-    return_url = scheme + "://" + site.domain + return_url_path
-    return return_url
 
 
 @csrf_exempt

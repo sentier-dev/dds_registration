@@ -6,18 +6,16 @@ import traceback
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.http import HttpRequest
+from django.shortcuts import render
 
-from ..core.helpers.create_invoice_pdf import create_invoice_pdf
 from ..core.helpers.errors import errorToString
 
 from .event_registration_cancel import (
     event_registration_cancel_confirm_form,
     event_registration_cancel_process_action,
 )
-from .get_invoice_context import get_event_invoice_context
-from .helpers import (
+from .helpers.events import (
     event_registration_form,
     get_event_registration_context,
     show_registration_form_success,

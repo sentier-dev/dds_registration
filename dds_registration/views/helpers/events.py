@@ -5,7 +5,6 @@ import logging
 import traceback
 from functools import reduce
 
-from django.db.models import Model, Q
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -16,14 +15,13 @@ from django.http import HttpRequest
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 
-from ..core.helpers.errors import errorToString
+from ...core.helpers.errors import errorToString
 
-from ..models import (
+from ...models import (
     REGISTRATION_ACTIVE_QUERY,
     Event,
     Registration,
     RegistrationOption,
-    Invoice,
     User,
 )
 

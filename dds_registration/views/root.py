@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 from ..core.helpers.errors import errorToString
 
 from ..models import REGISTRATION_ACTIVE_QUERY, Event, Registration
-from .helpers import get_events_list
+from .helpers.events import get_events_list
 
 LOG = logging.getLogger(__name__)
 
