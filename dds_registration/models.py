@@ -202,19 +202,6 @@ class Membership(Model):
     def get_available_membership_types():
         return [(x, y) for x, y in Membership.MEMBERSHIP_TYPES if x not in Membership.RESERVED_MEMBERSHIP_TYPES]
 
-    # NOTE: Old membership type definition (TODO: Remove after refactor finishes)
-    #  # Membership type:
-    #  MEMBERSHIP_TYPES = (
-    #      ("NORMAL_CREDIT_CARD", "Normal membership - Pay by credit card"),
-    #      ("NORMAL_INVOICE", "Normal membership - Pay by invoice"),
-    #      ("ACADEMIC_CREDIT_CARD", "Academic membership - Pay by credit card"),
-    #      ("ACADEMIC_INVOICE", "Academic membership - Pay by invoice"),
-    #  )
-    #  DEFAULT_MEMBERSHIP_TYPE = "NORMAL_CREDIT_CARD"
-    #  membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
-
-    # TODO: Add membership status (CREATED, PAID etc) -- see registration.status
-
     user = models.ForeignKey(User, related_name="memberships", on_delete=models.CASCADE)
 
     membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
@@ -222,11 +209,6 @@ class Membership(Model):
     started = models.IntegerField(default=this_year)
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
-
-    #  # NOTE: Using own currency for the membership (as for registration options)?
-    #  SUPPORTED_CURRENCIES = site_supported_currencies
-    #  DEFAULT_CURRENCY = site_default_currency
-    #  currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
     # XXX: To use different delete handler, like `SET_NULL`?
     invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.CASCADE, null=True)

@@ -10,6 +10,8 @@ from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpRequest
 
+from dds_registration.views.membership import get_membership_cost
+
 from ..core.constants.date_time_formats import dateFormat
 from ..core.constants.payments import (
     payment_details_by_currency,
@@ -219,12 +221,14 @@ def get_event_invoice_context(request: HttpRequest, event_code: str):
     return context
 
 
-def create_membership_services_table(user: User, membership_type: str, currency: str):
-    # options = registration.options.all()  # XXX: Multiple options approach
+def create_membership_services_table(user: User, membership: Membership):
+    invoice = membership.invoice
+    currency = invoice.currency  # TODO: Get currency from membership option
+    membership_type = membership.membership_type
     item = membership_type  # TODO: get membership text,
     items = [item]
     item_text = "Membership {}".format(membership_type)
-    item_price = membership_cost_by_type[membership_type]
+    item_price = get_membership_cost(membership)
     #  count = 1
     total = 0
 
@@ -306,7 +310,7 @@ def get_membership_invoice_context(request: HttpRequest):
     # TODO: Check if all the parameters have defined?
     try:
         currency = invoice.currency  # if invoice else site_default_currency
-        table_data = create_membership_services_table(user, membership.membership_type, currency)
+        table_data = create_membership_services_table(user, membership)
         # TInvoicePdfParams data...
         optional_text = ""  # invoice.extra_invoice_text
         client_name = user.get_full_name()

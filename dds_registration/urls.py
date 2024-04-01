@@ -158,18 +158,19 @@ urlpatterns = [
         membership_views.membership_proceed_success,
         name="membership_proceed_success",
     ),
-    path(
-        "membership/proceed/test/<str:payment_id>",
-        membership_views.membership_proceed_test,
-        name="membership_proceed_test",
-    ),
-    # Stripe api
-    path(
-        # TODO: Use more specific url later
-        "webhook",
-        membership_views.membership_stripe_webhook,
-        name="membership_stripe_webhook",
-    ),
+    # # DEBUG
+    # path(
+    #     "membership/proceed/test/<str:payment_id>",
+    #     membership_views.membership_proceed_test,
+    #     name="membership_proceed_test",
+    # ),
+    # # Stripe api (DEBUG)
+    # path(
+    #     # TODO: Use more specific url later
+    #     "webhook",
+    #     membership_views.membership_stripe_webhook,
+    #     name="membership_stripe_webhook",
+    # ),
     # App-provided paths...
     path("admin/", admin.site.urls, name="admin"),
     path(

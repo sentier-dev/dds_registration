@@ -419,9 +419,55 @@ def billing_membership_proceed(request: HttpRequest):
 
 
 @login_required
-def billing_membership_invoice_payment_proceed(request: HttpRequest):  # , membership_type: str, payment_method: str):
+def billing_membership_invoice_payment_proceed(request: HttpRequest):
     """
     Proceed invoice payment for a membership.
+    """
+    user = request.user
+    if not user.is_authenticated:
+        return redirect("index")
+    # Find membership and invoice...
+    membership: Membership = None
+    invoice: Invoice = None
+    try:
+        membership = Membership.objects.get(user=user)
+    except Membership.DoesNotExist:
+        raise Exception("Membership does not exist")
+    invoice = membership.invoice
+    if not invoice:
+        raise Exception("Invoice does not exist")
+    try:
+        total_price = context["total_price"]
+        currency = invoice.context
+        context = {
+            "membership": membership,
+            "invoice": invoice,
+        }
+        debug_data = {
+            "membership": membership,
+            "invoice": invoice,
+            "context": context,
+        }
+        LOG.debug("Start invoice payment: %s", debug_data)
+        template = "dds_registration/billing/billing_membership_invoice_payment_proceed.html.django"
+        return render(request, template, context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = "Cannot create invoice page for the membership: {}".format(sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise Exception(error_text)
+
+
+@login_required
+def billing_membership_stripe_payment_proceed(request: HttpRequest):
+    """
+    Proceed stripe payment for a membership.
     """
     user = request.user
     if not user.is_authenticated:
@@ -471,12 +517,8 @@ def billing_membership_invoice_payment_proceed(request: HttpRequest):  # , membe
         LOG.error("%s (re-raising): %s", error_text, debug_data)
         raise Exception(error_text)
 
+    #####
 
-@login_required
-def billing_membership_stripe_payment_proceed(request: HttpRequest, membership_type: str, payment_method: str):
-    """
-    Proceed stripe payment for a membership.
-    """
     context = get_membership_invoice_context(request, membership_type)
     event = context["event"]
     registration = context["registration"]
