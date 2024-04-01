@@ -24,6 +24,8 @@ from ..core.helpers.errors import errorToString
 from ..forms import BillingEventForm
 from ..models import Invoice
 
+from .helpers import send_event_registration_success_message
+
 from .get_invoice_context import (
     get_basic_event_registration_context,
     get_event_invoice_context,
@@ -88,7 +90,6 @@ def billing_event(request: HttpRequest, event_code: str):
             if form.is_valid():
                 cleaned_data = form.cleaned_data
                 invoice = form.save()
-                #  invoice.registration.set(registration)
                 debug_data = {
                     "cleaned_data": cleaned_data,
                     "invoice": invoice,
@@ -109,6 +110,9 @@ def billing_event(request: HttpRequest, event_code: str):
                     else "billing_event_stripe_payment_proceed"
                     # TODO: Add other payment method redirects here (eg, for WISE)
                 )
+                # Send an e-mail message (if registration has been created/updated)...
+                send_event_registration_success_message(request, event_code)
+
                 return redirect(redirect_to, event_code=event_code)
         else:
             form = BillingEventForm(instance=invoice)
@@ -139,6 +143,11 @@ def billing_event_proceed_invoice(request: HttpRequest, event_code: str):
     download it.
     """
     context = get_basic_event_registration_context(request, event_code)
+    invoice: Invoice = context["invoice"]
+    # Issue #72: If the user paid by credit card, then redirect to their user account page with a flash message "Registration is complete".
+    if invoice.payment_method != "INVOICE":
+        messages.success(request, "Registration is complete")
+        return redirect("profile")
     template = "dds_registration/billing/billing_event_proceed_invoice.html.django"
     return render(request, template, context)
 

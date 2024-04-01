@@ -335,9 +335,11 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
                 #  "extra_invoice_text": extra_invoice_text,
             }
             LOG.debug("Creating a registration: %s", debug_data)
-            if create_new:
-                # Send an e-mail message (if registration has been created)...
-                send_event_registration_success_message(request, event_code)
+            # if create_new:
+            #     # NOTE: Moved to `billing` (`billing_event` method)
+            #     # TODO: This message should be sent after billing (invoice) creation
+            #     # Send an e-mail message (if registration has been created)...
+            #     send_event_registration_success_message(request, event_code)
             # Redirect to the success message page
             context["redirect"] = "SUCCESS"
             context["registration_created"] = True
@@ -430,6 +432,7 @@ def get_event_registration_context(request: HttpRequest, event_code: str):
     }
     event = None
     registration = None
+    invoice = None
     # Try to get event object by code...
     try:
         event = Event.objects.get(code=event_code)
@@ -438,6 +441,8 @@ def get_event_registration_context(request: HttpRequest, event_code: str):
             raise Exception("Not found active registrations")
         context["event"] = event
         context["registration"] = registration
+        context["total_price"] = calculate_total_registration_price(registration)
+        context["invoice"] = registration.invoice
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         error_text = 'Not found event code "{}": {}'.format(event_code, sError)
@@ -450,16 +455,16 @@ def get_event_registration_context(request: HttpRequest, event_code: str):
         }
         LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
         raise Exception(error_text)
-
-    context["event"] = event
-    context["registration"] = registration
-    context["total_price"] = calculate_total_registration_price(registration)
     return context
 
 
 def send_event_registration_success_message(request: HttpRequest, event_code: str):
     """
     Send successful event registration created message to the user
+
+    TODO: Send different messages depending on the `payment_method`?
+
+    TODO: Issue #74: Send invoice pdf (see `create_invoice_pdf`) as atachment for `INVOICE` payment method
     """
 
     email_body_template = "dds_registration/event_registration_new_success_message_body.txt"
@@ -510,7 +515,7 @@ def get_full_user_name(user: User) -> str:
 
 __all__ = [
     get_events_list,
-    get_event_registration_form_context,
+    # get_event_registration_form_context,
     event_registration_form,
     show_registration_form_success,
     get_event_registration_context,

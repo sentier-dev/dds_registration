@@ -176,6 +176,7 @@ class Invoice(Model):
     def __str__(self):
         items = [
             self.invoice_no,
+            self.get_payment_method_display(),
             self.currency,
             self.get_status_display(),
             self.created.strftime(dateFormat) if self.created else None,
@@ -192,7 +193,11 @@ class Membership(Model):
         ("BUSINESS", "Business"),
         ("ACADEMIC", "Academic"),  # NOTE: For 'academic' (discounted) payment type
     ]
+    RESERVED_MEMBERSHIP_TYPES = ("BOARD", "HONORARY")
     DEFAULT_MEMBERSHIP_TYPE = "NORMAL"
+
+    def get_available_membership_types():
+        return [(x, y) for x, y in Membership.MEMBERSHIP_TYPES if x not in Membership.RESERVED_MEMBERSHIP_TYPES]
 
     # NOTE: Old membership type definition (TODO: Remove after refactor finishes)
     #  # Membership type:
@@ -218,7 +223,8 @@ class Membership(Model):
     DEFAULT_CURRENCY = site_default_currency
     currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
-    invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.SET_NULL, null=True)
+    # XXX: To use different delete handler, like `SET_NULL`?
+    invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.CASCADE, null=True)
 
     # TODO: Refactor (Remove?)
     def is_membership_type_invoice(membership_type: str) -> bool:
@@ -375,7 +381,8 @@ class Registration(Model):
         ("WITHDRAWN", "Withdrawn"),  # = Inactive
     ]
 
-    invoice = models.ForeignKey(Invoice, related_name="registrations", on_delete=models.SET_NULL, null=True)
+    # XXX: To use different delete handler, like `SET_NULL`?
+    invoice = models.ForeignKey(Invoice, related_name="registrations", on_delete=models.CASCADE, null=True)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
 

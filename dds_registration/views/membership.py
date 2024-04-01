@@ -75,25 +75,36 @@ def check_if_it_possible_to_become_a_member(request: HttpRequest):
 
 
 def membership_start(request: HttpRequest):
-    user = request.user
-    # Go to the login page with a message if no logged user:
-    if not user or not user.is_authenticated:
-        messages.error(request, "You have to have an account before you can register for membership")
-        return redirect("login")
-    with check_for_available_membership(request) as checked:
-        if checked.response:
-            return checked.response
-    # Display a membership options form...
-    RESERVED = ("BOARD", "HONORARY")  # TODO: Probably it'd better to move this logic to the model?
-
-    context = {
-        # "MEMBERSHIP_TYPES": Membership.MEMBERSHIP_TYPES,
-        "MEMBERSHIP_TYPES": [(x, y) for x, y in Membership.MEMBERSHIP_TYPES if x not in RESERVED],
-        "membership_type": Membership.DEFAULT_MEMBERSHIP_TYPE,
-    }
-    debug_data = context
-    LOG.debug("membership_start: %s", debug_data)
-    return render(request, "dds_registration/membership_start.html.django", context)
+    try:
+        user = request.user
+        # Go to the login page with a message if no logged user:
+        if not user or not user.is_authenticated:
+            messages.error(request, "You have to have an account before you can register for membership")
+            return redirect("login")
+        with check_for_available_membership(request) as checked:
+            if checked.response:
+                return checked.response
+        # Display a membership options form...
+        MEMBERSHIP_TYPES = Membership.get_available_membership_types()
+        context = {
+            "MEMBERSHIP_TYPES": MEMBERSHIP_TYPES,
+            "membership_type": Membership.DEFAULT_MEMBERSHIP_TYPE,
+        }
+        debug_data = context
+        LOG.debug("membership_start: %s", debug_data)
+        return render(request, "dds_registration/membership_start.html.django", context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        sTraceback = str(traceback.format_exc())
+        error_text = "Can not proceed membership: {}".format(sError)
+        messages.error(request, error_text)
+        debug_data = {
+            "err": err,
+            "traceback": sTraceback,
+            "sError": sError,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise err
 
 
 @login_required
