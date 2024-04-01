@@ -26,38 +26,4 @@
 
 {% include "assets/membership-choose-list/membership-choose-list.django" %}
 
-{% comment %}
-<p>Old way: a form with radiogroup</p>
-<form class="data-form" method="get" action="{% url "membership_proceed" %}">
-  {% csrf_token %}
-
-  <fieldset id="membership_type" class="mb3 form-group">
-    <legend class="mb-3 primary-color">Membership type:</legend>
-    {% for item in MEMBERSHIP_TYPES %}
-      {% with id=item.0 name=item.1 %}
-          <div class="mb-2 form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="membership_type"
-              id="membership_type-{{ id }}"
-              value="{{ id }}"
-              {% if id == membership_type %}checked{% endif %}
-            >
-            <label class="form-check-label" for="membership_type-{{ id }}">
-              {{ name }}
-            </label>
-          </div>
-      {% endwith %}
-    {% endfor %}
-  </fieldset>
-
-  <fieldset class="mb3 form-group">
-    <input class="btn btn-primary" type="submit" value="Proceed with the payment" />
-    {% include "assets/back-button/back-button.django" %}
-  </fieldset>
-
-</form>
-{% endcomment %}
-
 {% endblock content %}

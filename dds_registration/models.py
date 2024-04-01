@@ -210,6 +210,8 @@ class Membership(Model):
     #  DEFAULT_MEMBERSHIP_TYPE = "NORMAL_CREDIT_CARD"
     #  membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
 
+    # TODO: Add membership status (CREATED, PAID etc) -- see registration.status
+
     user = models.ForeignKey(User, related_name="memberships", on_delete=models.CASCADE)
 
     membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
@@ -218,20 +220,13 @@ class Membership(Model):
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
 
-    # NOTE: Using own currency for the membership (as for registration options)?
-    SUPPORTED_CURRENCIES = site_supported_currencies
-    DEFAULT_CURRENCY = site_default_currency
-    currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
+    #  # NOTE: Using own currency for the membership (as for registration options)?
+    #  SUPPORTED_CURRENCIES = site_supported_currencies
+    #  DEFAULT_CURRENCY = site_default_currency
+    #  currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
     # XXX: To use different delete handler, like `SET_NULL`?
     invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.CASCADE, null=True)
-
-    # TODO: Refactor (Remove?)
-    def is_membership_type_invoice(membership_type: str) -> bool:
-        return "INVOICE" in membership_type
-
-    def is_membership_type_academic(membership_type: str) -> bool:
-        return "ACADEMIC" in membership_type
 
     @property
     def active(self) -> bool:
@@ -243,6 +238,16 @@ class Membership(Model):
             return cls.get(user=user).active
         except cls.DoesNotExist:
             return False
+
+    def __str__(self):
+        items = [
+            self.user.full_name_with_email,
+            self.get_membership_type_display(),
+            self.started,
+            #  self.created_at.strftime(dateFormat) if self.created_at else None,
+        ]
+        info = ", ".join(filter(None, map(str, items)))
+        return info
 
 
 class Event(Model):

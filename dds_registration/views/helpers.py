@@ -103,11 +103,15 @@ def get_events_list(request: HttpRequest, events: list[Event]):
     for event in events:
         event_info = {"event": event, "registration": None}
         if request.user.is_authenticated:
-            # Look for a possible registration by the user
             try:
+                # Look for a possible registration by the user
                 registration = event.registrations.get(REGISTRATION_ACTIVE_QUERY, user=request.user)
-                # registration = event.registrations.get(user=request.user, active=True)
                 event_info["registration"] = registration
+                # Look for a possible invoice by the user
+                if registration:
+                    invoice = registration.invoice
+                    event_info["invoice"] = invoice
+                result.append(event_info)
             except Registration.DoesNotExist:
                 pass
             except Exception as err:
@@ -120,11 +124,6 @@ def get_events_list(request: HttpRequest, events: list[Event]):
                     "traceback": sTraceback,
                 }
                 LOG.error("Caught error %s (re-raising): %s", sError, debug_data)
-            # Look for a possible invoice by the user
-            if registration:
-                invoice = registration.invoice
-                event_info["invoice"] = invoice
-            result.append(event_info)
     return result
 
 

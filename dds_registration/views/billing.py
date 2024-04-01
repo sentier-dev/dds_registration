@@ -21,14 +21,15 @@ from django.http import HttpRequest, HttpResponse
 from ..core.helpers.create_invoice_pdf import create_invoice_pdf
 from ..core.helpers.errors import errorToString
 
-from ..forms import BillingEventForm
-from ..models import Invoice
+from ..forms import BillingEventForm, BillingMembershipForm
+from ..models import Invoice, Membership
 
 from .helpers import send_event_registration_success_message
 
 from .get_invoice_context import (
     get_basic_event_registration_context,
     get_event_invoice_context,
+    get_basic_membership_registration_context,
     get_membership_invoice_context,
 )
 
@@ -78,6 +79,7 @@ def billing_event(request: HttpRequest, event_code: str):
             is_new = True
             # Create default invoice and initialize default values...
             invoice = Invoice()
+            # TODO: Set currency from registration option
             invoice.name = user.get_full_name()
             invoice.address = user.address
         context_redirect = context.get("redirect")
@@ -97,23 +99,19 @@ def billing_event(request: HttpRequest, event_code: str):
                 LOG.debug("Get form data: %s", debug_data)
                 new_verb = "created" if is_new else "updated"
                 messages.success(request, "Invoice has been successfully " + new_verb)
-                # TODO: What if changing an existing invoice and the `payment_method` parameter has changed?
+                # TODO: What if changing an existing invoice and the `payment_method` parameter has changed? Should we provide for actions in such a case?
                 invoice.save()
                 # Update registration...
                 registration.invoice = invoice  # Link the invoice
                 registration.status = "PAYMENT_PENDING"  # Change the status -- now we're expecting the payment
                 registration.save()
-                # TODO: Redirect to invoice downloading or to payment page?
-                redirect_to = (
-                    "billing_event_proceed_invoice"
-                    if invoice.payment_method == "INVOICE"
-                    else "billing_event_stripe_payment_proceed"
-                    # TODO: Add other payment method redirects here (eg, for WISE)
-                )
                 # Send an e-mail message (if registration has been created/updated)...
                 send_event_registration_success_message(request, event_code)
-
-                return redirect(redirect_to, event_code=event_code)
+                # Redirect to invoice downloading or to payment page?
+                if invoice.payment_method == "INVOICE":
+                    return redirect("billing_event_proceed_invoice", event_code=event_code)
+                else:
+                    return redirect("billing_event_stripe_payment_proceed", event_code=event_code)
         else:
             form = BillingEventForm(instance=invoice)
         context["form"] = form
@@ -323,6 +321,91 @@ def billing_event_stripe_payment_success(request: HttpRequest, event_code: str, 
 
 
 @login_required
+def billing_membership(request: HttpRequest, membership_type: str):
+    """
+    Basic form to create invoice and/or payment for membership.
+    @see `billing_event`
+    """
+    try:
+        user = request.user
+        if not user.is_authenticated:
+            return redirect("index")
+
+        # Fond or create membership immediatelly
+        is_new_membership = False
+        membership: Membership | None = None
+        memberships = Membership.objects.filter(user=user)
+        if len(memberships):
+            membership = memberships[0]
+        if not membership:
+            is_new_membership = True
+            membership = Membership()
+            membership.user = user
+        membership.membership_type = membership_type
+        membership.save()
+
+        # Find or create invoice
+        is_new_invoice = False
+        invoice: Invoice = membership.invoice
+        if not invoice:
+            is_new_invoice = True
+            # Create default invoice and initialize default values...
+            invoice = Invoice()
+            invoice.name = user.get_full_name()
+            invoice.address = user.address
+
+        # If user posted his data...
+        if request.method == "POST":
+            # Create a form instance and populate it with data from the request:
+            form = BillingMembershipForm(request.POST, instance=invoice)
+            # Check whether it's valid:
+            if form.is_valid():
+                cleaned_data = form.cleaned_data
+                invoice = form.save()
+                debug_data = {
+                    "cleaned_data": cleaned_data,
+                    "invoice": invoice,
+                }
+                LOG.debug("Get form data: %s", debug_data)
+                new_verb = "created" if is_new_invoice else "updated"
+                messages.success(request, "Invoice has been successfully " + new_verb)
+                # TODO: What if changing an existing invoice and the `payment_method` parameter has changed? Should we provide for actions in such a case?
+                invoice.save()
+                # Update membership...
+                membership.invoice = invoice  # Link the invoice
+                #  membership.status = "PAYMENT_PENDING"  # Change the status -- now we're expecting the payment
+                membership.save()
+                #  # Send an e-mail message (if membership has been created/updated)...
+                #  send_membership_membership_success_message(request, membership_type)
+                # Redirect to invoice downloading or to payment page?
+                if invoice.payment_method == "INVOICE":
+                    return redirect("billing_membership_proceed_invoice", membership_type=membership_type)
+                else:
+                    return redirect("billing_membership_stripe_payment_proceed", membership_type=membership_type)
+        else:
+            form = BillingMembershipForm(instance=invoice)
+        context = {
+            'membership': membership,
+            'invoice': invoice,
+            'form': form,
+        }
+        template = "dds_registration/billing/billing_membership_form.html.django"
+        return render(request, template, context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = 'Cannot process billing for the membership "{}": {}'.format(membership_type, sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "membership_type": membership_type,
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise Exception(error_text)
+
+
+@login_required
 def billing_membership_proceed(request: HttpRequest):
     """
     ??? -- Is it used?
@@ -360,17 +443,17 @@ def billing_membership_stripe_payment_proceed(request: HttpRequest, membership_t
     return render(request, template, context)
 
 
-@login_required
-def billing_membership(request: HttpRequest):
-    """
-    ???
+# @login_required
+# def billing_membership(request: HttpRequest):
+#     """
+#     ???
 
-    The first thing users need to do is select if this is an academic,
-    business, or normal membership (see `Membership.membership_type`).
-    """
-    context = {}
-    template = "dds_registration/billing/billing_test.html.django"
-    return render(request, template, context)
+#     The first thing users need to do is select if this is an academic,
+#     business, or normal membership (see `Membership.membership_type`).
+#     """
+#     context = {}
+#     template = "dds_registration/billing/billing_test.html.django"
+#     return render(request, template, context)
 
 
 __all__ = []

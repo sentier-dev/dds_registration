@@ -14,7 +14,7 @@
       <a
           id="{{ type }}"
           class="membership-choose-list-item btn btn-primary btn-lg"
-          href="{% url "membership_proceed" membership_type=type %}"
+          href="{% url "billing_membership" membership_type=type %}"
         >
         <i class="bi
           {% if type == 'NORMAL' %}bi-1-circle-fill

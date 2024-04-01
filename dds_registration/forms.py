@@ -17,7 +17,7 @@ textInputWidget = forms.TextInput(attrs={"class": "vLargeTextField"})
 textAreaWidget = forms.Textarea(attrs={"class": "vLargeTextField", "rows": 5})
 
 
-class BillingEventForm(ModelForm):
+class BillingInvoiceForm(ModelForm):
 
     class Meta:
         model = Invoice
@@ -25,7 +25,7 @@ class BillingEventForm(ModelForm):
             "name",
             "address",
             "payment_method",
-            "currency",
+            "currency",  # TODO: Hide currency for `BillingEventForm`: it should come from event registration option
             "extra_invoice_text",
         ]
         widgets = {
@@ -38,6 +38,14 @@ class BillingEventForm(ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["name"].required = True
         self.fields["address"].required = True
+
+
+class BillingEventForm(BillingInvoiceForm):
+    pass
+
+
+class BillingMembershipForm(BillingInvoiceForm):
+    pass
 
 
 class DdsRegistrationForm(BaseRegistrationForm):

@@ -119,8 +119,7 @@ urlpatterns = [
         name="billing_event_stripe_payment_success",
     ),
     path(
-        # ???
-        "billing/membership",
+        "billing/membership/<str:membership_type>",
         billing_views.billing_membership,
         name="billing_membership",
     ),
@@ -136,11 +135,12 @@ urlpatterns = [
         membership_views.membership_start,
         name="membership_start",
     ),
-    path(
-        "membership/proceed/<str:membership_type>",
-        membership_views.membership_proceed,
-        name="membership_proceed",
-    ),
+    # path(
+    #     # UNUSED?
+    #     "membership/proceed/<str:membership_type>",
+    #     membership_views.membership_proceed,
+    #     name="membership_proceed",
+    # ),
     path(
         "membership/proceed/success",
         membership_views.membership_proceed_success,

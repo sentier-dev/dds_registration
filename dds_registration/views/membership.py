@@ -61,17 +61,17 @@ class check_for_available_membership:
         pass
 
 
-def check_if_it_possible_to_become_a_member(request: HttpRequest):
-    user = request.user
-    # Check for the existing membership...
-    if user.is_authenticated:
-        memberships = Membership.objects.filter(user=user)
-        # Has member user(s)?
-        if memberships and len(memberships):
-            messages.success(request, "You're already a member (or waiting for your membership activation)")
-            # TODO: Display the membership data on the profile page?
-            return redirect("profile")
-    return None
+# def check_if_it_possible_to_become_a_member(request: HttpRequest):
+#     user = request.user
+#     # Check for the existing membership...
+#     if user.is_authenticated:
+#         memberships = Membership.objects.filter(user=user)
+#         # Has member user(s)?
+#         if memberships and len(memberships):
+#             messages.success(request, "You're already a member (or waiting for your membership activation)")
+#             # TODO: Display the membership data on the profile page?
+#             return redirect("profile")
+#     return None
 
 
 def membership_start(request: HttpRequest):
@@ -96,7 +96,7 @@ def membership_start(request: HttpRequest):
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())
-        error_text = "Can not proceed membership: {}".format(sError)
+        error_text = "Cannot start membership: {}".format(sError)
         messages.error(request, error_text)
         debug_data = {
             "err": err,
@@ -107,80 +107,151 @@ def membership_start(request: HttpRequest):
         raise err
 
 
-@login_required
-def membership_proceed(request: HttpRequest, membership_type: str):
-    # TODO: Select payment method: by invoice or by stripe (by wise, etc)? After membership type selection? Select on the same screen?
-    try:
-        user = request.user
-        if not user.is_authenticated:
-            messages.error(request, "Authorization is required in order to create a membership")
-            return redirect("index")
-        with check_for_available_membership(request) as checked:
-            if checked.response:
-                return checked.response
-        # Proceed...
-        # membership_type = request.GET.get("membership_type")
-        if not membership_type:
-            messages.error(request, "You have to choose membership type")
-            return redirect("membership_start")
-        # Find/create an membership...
-        membership: Membership = None
-        is_new_membership = False
-        try:
-            membership = Membership.objects.get(user=user)
-        except Membership.DoesNotExist:
-            membership = Membership()
-            is_new_membership = True
-        # Update membership data...
-        membership.membership_type = membership_type
-        membership.user = user
-        membership.save()
-        # Find/create an invoice...
-        invoice: Invoice = None
-        is_new_invoice = False
-        try:
-            invoice = Invoice.objects.get(user=user)
-        except Invoice.DoesNotExist:
-            invoice = Invoice()
-            is_new_invoice = True
-            if is_new_invoice:
-                membership.invoice = invoice
-        # TODO:
-        # - Change payment method determination (not by membership type?)
-        # - Change final redirect links (all the code below)
-        #  is_invoice = Membership.is_membership_type_invoice(membership_type)
-        #  is_academic = Membership.is_membership_type_academic(membership_type)
-        debug_data = {
-            #  "is_invoice": is_invoice,
-            #  "is_academic": is_academic,
-            "membership_type": membership_type,
-            "membership": membership,
-            "invoice": invoice,
-            "request": request,
-        }
-        # TODO:
-        # - Find existing membership if exist for this user or create new
-        # - Find or create invoice for this membership
-        LOG.debug("membership_proceed: %s", debug_data)
-        # Invoice option: show invoice result...
-        if is_invoice:
-            return redirect("membership_proceed_invoice")
-        # Go to stripe site...
-        stripe_link = academic_membership_stripe_payment_link if is_academic else regular_membership_stripe_payment_link
-        return redirect(stripe_link)
-    except Exception as err:
-        sError = errorToString(err, show_stacktrace=False)
-        sTraceback = str(traceback.format_exc())
-        error_text = "Can not proceed membership: {}".format(sError)
-        messages.error(request, error_text)
-        debug_data = {
-            "err": err,
-            "traceback": sTraceback,
-            "sError": sError,
-        }
-        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
-        # Redirect to profile page with error messages (see above)
-        return redirect("profile")
+#  @login_required
+#  def billing_membership_proceed(request: HttpRequest, membership_type: str):
+#      # TODO: Select payment method: by invoice or by stripe (by wise, etc)? After membership type selection? Select on the same screen?
+#      try:
+#          user = request.user
+#          if not user.is_authenticated:
+#              messages.error(request, "Authorization is required in order to create a membership")
+#              return redirect("index")
+#          with check_for_available_membership(request) as checked:
+#              if checked.response:
+#                  return checked.response
+#          # Proceed...
+#          # membership_type = request.GET.get("membership_type")
+#          if not membership_type:
+#              messages.error(request, "You have to choose membership type")
+#              return redirect("membership_start")
+#          # Find existing membership if exist for this user or create new
+#          membership: Membership = None
+#          is_new_membership = False
+#          try:
+#              membership = Membership.objects.get(user=user)
+#          except Membership.DoesNotExist:
+#              membership = Membership()
+#              is_new_membership = True
+#          # Update membership data...
+#          membership.membership_type = membership_type
+#          membership.user = user
+#          #  membership.save()
+#          # Try to find existing invoice...
+#          invoice = membership.invoice
+#          is_new_invoice = False
+#          if not invoice:
+#              # ...Or create new one...
+#              invoice = Invoice()
+#              membership.invoice = invoice
+#              is_new_invoice = True
+#              invoice.save()
+#          membership.save()
+#          is_invoice = invoice.payment_method == 'INVOICE'
+#          # TODO:
+#          # - Change final redirect links (all the code below)
+#          debug_data = {
+#              "membership_type": membership_type,
+#              "membership": membership,
+#              "invoice": invoice,
+#              "request": request,
+#          }
+#          LOG.debug("membership_proceed: %s", debug_data)
+#          # TODO:
+#          # Invoice option: show invoice result...
+#          if is_invoice:
+#              return redirect("membership_proceed_invoice")
+#          # Go to stripe site...
+#          stripe_link = academic_membership_stripe_payment_link if is_academic else regular_membership_stripe_payment_link
+#          return redirect(stripe_link)
+#      except Exception as err:
+#          sError = errorToString(err, show_stacktrace=False)
+#          sTraceback = str(traceback.format_exc())
+#          error_text = "Cannot proceed membership: {}".format(sError)
+#          messages.error(request, error_text)
+#          debug_data = {
+#              "err": err,
+#              "traceback": sTraceback,
+#              "sError": sError,
+#          }
+#          LOG.error("%s (re-raising): %s", error_text, debug_data)
+#          raise err
+#          # # Redirect to profile page in case of non-critical errors?
+#          # return redirect("profile")
+
+
+# @login_required
+# def membership_proceed(request: HttpRequest, membership_type: str):
+#     # TODO: Select payment method: by invoice or by stripe (by wise, etc)? After membership type selection? Select on the same screen?
+#     try:
+#         user = request.user
+#         if not user.is_authenticated:
+#             messages.error(request, "Authorization is required in order to create a membership")
+#             return redirect("index")
+#         with check_for_available_membership(request) as checked:
+#             if checked.response:
+#                 return checked.response
+#         # Proceed...
+#         # membership_type = request.GET.get("membership_type")
+#         if not membership_type:
+#             messages.error(request, "You have to choose membership type")
+#             return redirect("membership_start")
+#         # Find existing membership if exist for this user or create new
+#         membership: Membership = None
+#         is_new_membership = False
+#         try:
+#             membership = Membership.objects.get(user=user)
+#         except Membership.DoesNotExist:
+#             membership = Membership()
+#             is_new_membership = True
+#         # Update membership data...
+#         membership.membership_type = membership_type
+#         membership.user = user
+#         #  membership.save()
+#         # Try to find existing invoice...
+#         invoice = membership.invoice
+#         is_new_invoice = False
+#         if not invoice:
+#             # ...Or create new one...
+#             invoice = Invoice()
+#             membership.invoice = invoice
+#             is_new_invoice = True
+#             invoice.save()
+#         membership.save()
+#         is_invoice = invoice.payment_method == 'INVOICE'
+#         # TODO:
+#         # - Change payment method determination (not by membership type?)
+#         # - Change final redirect links (all the code below)
+#         #  is_invoice = Membership.is_membership_type_invoice(membership_type)
+#         #  is_academic = Membership.is_membership_type_academic(membership_type)
+#         debug_data = {
+#             #  "is_invoice": is_invoice,
+#             #  "is_academic": is_academic,
+#             "membership_type": membership_type,
+#             "membership": membership,
+#             "invoice": invoice,
+#             "request": request,
+#         }
+#         LOG.debug("membership_proceed: %s", debug_data)
+#         # TODO:
+#         # Invoice option: show invoice result...
+#         if is_invoice:
+#             return redirect("membership_proceed_invoice")
+#         # Go to stripe site...
+#         stripe_link = academic_membership_stripe_payment_link if is_academic else regular_membership_stripe_payment_link
+#         return redirect(stripe_link)
+#     except Exception as err:
+#         sError = errorToString(err, show_stacktrace=False)
+#         sTraceback = str(traceback.format_exc())
+#         error_text = "Cannot proceed membership: {}".format(sError)
+#         messages.error(request, error_text)
+#         debug_data = {
+#             "err": err,
+#             "traceback": sTraceback,
+#             "sError": sError,
+#         }
+#         LOG.error("%s (re-raising): %s", error_text, debug_data)
+#         raise err
+#         # # Redirect to profile page in case of non-critical errors?
+#         # return redirect("profile")
 
 
 @login_required
