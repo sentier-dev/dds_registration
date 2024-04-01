@@ -89,10 +89,10 @@ urlpatterns = [
         name="billing_event",
     ),
     path(
-        # Invoice created: link to download a pdf
+        # Invoice created: show information notice and provide a link to download a pdf
         "billing/event/<str:event_code>/invoice/proceed",
-        billing_views.billing_event_proceed_invoice,
-        name="billing_event_proceed_invoice",
+        billing_views.billing_event_invoice_payment_proceed,
+        name="billing_event_invoice_payment_proceed",
     ),
     path(
         # Invoice pdf generate and download
@@ -124,10 +124,22 @@ urlpatterns = [
         name="billing_membership",
     ),
     path(
-        # Proceed membership payment (TODO: Update form in `membership-choose-list.django`
-        "billing/membership/<str:membership_type>/payment/<str:payment_method>/proceed",
+        # Proceed membership payment by stripe
+        "billing/membership/payment/stripe/proceed",
         billing_views.billing_event_stripe_payment_proceed,
         name="billing_membership_stripe_payment_proceed",
+    ),
+    path(
+        # Proceed membership payment by invoice
+        "billing/membership/payment/invoice/proceed",
+        billing_views.billing_membership_invoice_payment_proceed,
+        name="billing_membership_invoice_payment_proceed",
+    ),
+    path(
+        # Invoice pdf generate and download for the membership
+        "billing/membership/invoice/download",
+        billing_views.billing_membership_invoice_download,
+        name="billing_membership_invoice_download",
     ),
     # Membership (TODO: Some routes will be moved to `billing`)...
     path(

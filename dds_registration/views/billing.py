@@ -109,7 +109,7 @@ def billing_event(request: HttpRequest, event_code: str):
                 send_event_registration_success_message(request, event_code)
                 # Redirect to invoice downloading or to payment page?
                 if invoice.payment_method == "INVOICE":
-                    return redirect("billing_event_proceed_invoice", event_code=event_code)
+                    return redirect("billing_event_invoice_payment_proceed", event_code=event_code)
                 else:
                     return redirect("billing_event_stripe_payment_proceed", event_code=event_code)
         else:
@@ -135,7 +135,7 @@ def billing_event(request: HttpRequest, event_code: str):
 
 
 @login_required
-def billing_event_proceed_invoice(request: HttpRequest, event_code: str):
+def billing_event_invoice_payment_proceed(request: HttpRequest, event_code: str):
     """
     Show page with information about successfull invoice creation and a link to
     download it.
@@ -146,7 +146,7 @@ def billing_event_proceed_invoice(request: HttpRequest, event_code: str):
     if invoice.payment_method != "INVOICE":
         messages.success(request, "Registration is complete")
         return redirect("profile")
-    template = "dds_registration/billing/billing_event_proceed_invoice.html.django"
+    template = "dds_registration/billing/billing_event_invoice_payment_proceed.html.django"
     return render(request, template, context)
 
 
@@ -331,7 +331,7 @@ def billing_membership(request: HttpRequest, membership_type: str):
         if not user.is_authenticated:
             return redirect("index")
 
-        # Fond or create membership immediatelly
+        # Find or create membership immediatelly
         is_new_membership = False
         membership: Membership | None = None
         memberships = Membership.objects.filter(user=user)
@@ -379,15 +379,15 @@ def billing_membership(request: HttpRequest, membership_type: str):
                 #  send_membership_membership_success_message(request, membership_type)
                 # Redirect to invoice downloading or to payment page?
                 if invoice.payment_method == "INVOICE":
-                    return redirect("billing_membership_proceed_invoice", membership_type=membership_type)
+                    return redirect("billing_membership_invoice_payment_proceed")  # , membership_type=membership_type)
                 else:
-                    return redirect("billing_membership_stripe_payment_proceed", membership_type=membership_type)
+                    return redirect("billing_membership_stripe_payment_proceed")  # , membership_type=membership_type)
         else:
             form = BillingMembershipForm(instance=invoice)
         context = {
-            'membership': membership,
-            'invoice': invoice,
-            'form': form,
+            "membership": membership,
+            "invoice": invoice,
+            "form": form,
         }
         template = "dds_registration/billing/billing_membership_form.html.django"
         return render(request, template, context)
@@ -419,6 +419,60 @@ def billing_membership_proceed(request: HttpRequest):
 
 
 @login_required
+def billing_membership_invoice_payment_proceed(request: HttpRequest):  # , membership_type: str, payment_method: str):
+    """
+    Proceed invoice payment for a membership.
+    """
+    user = request.user
+    if not user.is_authenticated:
+        return redirect("index")
+    # Find membership and invoice...
+    membership: Membership = None
+    invoice: Invoice = None
+    try:
+        membership = Membership.objects.get(user=user)
+    except Membership.DoesNotExist:
+        raise Exception("Membership does not exist")
+    invoice = membership.invoice
+    if not invoice:
+        raise Exception("Invoice does not exist")
+    context = {
+        "membership": membership,
+        "invoice": invoice,
+    }
+    try:
+        #  context = get_membership_invoice_context(request, membership_type)
+        #  event = context["event"]
+        #  registration = context["registration"]
+        #  total_price = context["total_price"]
+        #  currency = context["currency"]
+        debug_data = {
+            #  "event": event,
+            #  "registration": registration,
+            #  "total_price": total_price,
+            #  "currency": currency,
+            "membership": membership,
+            "invoice": invoice,
+            "context": context,
+        }
+        LOG.debug("Start invoice payment: %s", debug_data)
+        # TODO: Create a view
+        template = "dds_registration/billing/billing_membership_invoice_payment_proceed.html.django"
+        return render(request, template, context)
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = "Cannot create invoice page for the membership: {}".format(sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise Exception(error_text)
+
+
+@login_required
 def billing_membership_stripe_payment_proceed(request: HttpRequest, membership_type: str, payment_method: str):
     """
     Proceed stripe payment for a membership.
@@ -436,11 +490,38 @@ def billing_membership_stripe_payment_proceed(request: HttpRequest, membership_t
         "context": context,
     }
     LOG.debug("Start stripe payment: %s", debug_data)
-    # TODO: Make a payment to stripe
-    # @see https://testdriven.io/blog/django-stripe-tutorial/
     # TODO: Create a view
     template = "dds_registration/billing/billing_membership_stripe_payment_proceed.html.django"
     return render(request, template, context)
+
+
+@login_required
+def billing_membership_invoice_download(request: HttpRequest):
+    """
+    Show page with information about successfull invoice creation and a link to
+    download it.
+    """
+    user = request.user
+    context = get_membership_invoice_context(request)
+    try:
+        show_debug = False
+        if show_debug:
+            # DEBUG: Show test page with prepared invoice data
+            template = "dds_registration/billing/billing_membership_invoice_download_debug.html.django"
+            return render(request, template, context)
+        pdf = create_invoice_pdf(context)
+        return HttpResponse(bytes(pdf.output()), content_type="application/pdf")
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = "Error: {}".format(sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise Exception(error_text)
 
 
 # @login_required

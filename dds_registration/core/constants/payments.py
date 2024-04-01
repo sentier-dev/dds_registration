@@ -6,6 +6,8 @@ site_supported_currencies = [
 ]
 site_default_currency = site_supported_currencies[0][0]
 
+default_payment_deadline_days = 30
+
 # TODO: To store these text options in external text files for easier update?
 
 payment_recipient_name = "Départ de Sentier"
@@ -23,6 +25,14 @@ Bank: Wise, Avenue Louise 54, Room S52, 1050 Brussels, Belgium
 IBAN: BE31 9673 6729 9455
 SWIFT-BIC: TRWIBEB1XXX
 """
+
+membership_cost_by_type = {
+    "NORMAL": 20,
+    "BOARD": 30,
+    "HONORARY": 40,
+    "BUSINESS": 50,
+    "ACADEMIC": 60,
+}
 
 payment_details_by_currency = {
     "USD": """

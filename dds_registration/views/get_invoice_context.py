@@ -17,6 +17,8 @@ from ..core.constants.payments import (
     payment_recipient_name,
     payment_recipient_address,
     default_payment_details,
+    default_payment_deadline_days,
+    membership_cost_by_type,
 )
 from ..core.helpers.errors import errorToString
 
@@ -96,15 +98,14 @@ def create_event_services_table(user: User, event: Event, registration: Registra
         #  count += 1
         return row_data
 
-    rows_basic = tuple(map(add_option_row, options))
-    rows_addon = []  # tuple(map(add_option_row, options.filter(add_on=True)))
+    rows = tuple(map(add_option_row, options))
     total_row = (
         "",
         "__Total__",
         "",
         "__{}__".format(total),
     )
-    table = (*table, *rows_basic, *rows_addon, total_row)
+    table = (*table, *rows, total_row)
     # TODO: addons, total
     return table
 
@@ -223,7 +224,7 @@ def create_membership_services_table(user: User, membership_type: str, currency:
     item = membership_type  # TODO: get membership text,
     items = [item]
     item_text = "Membership {}".format(membership_type)
-    item_price = 55  # TODO: Get real price
+    item_price = membership_cost_by_type[membership_type]
     #  count = 1
     total = 0
 
@@ -251,24 +252,23 @@ def create_membership_services_table(user: User, membership_type: str, currency:
         #  count += 1
         return row_data
 
-    rows_basic = tuple(map(add_item_row, items))
+    rows = tuple(map(add_item_row, items))
     total_row = (
         "",
         "__Total__",
         "",
         "__{}__".format(total),
     )
-    table = (*table, *rows_basic, total_row)
+    table = (*table, *rows, total_row)
     return table
 
 
-def get_basic_membership_registration_context(request: HttpRequest, membership_type: str):
+def get_basic_membership_registration_context(request: HttpRequest):
     """
     Check if there already is an invoice for this event/registration.
     Create it if it doesn't already exist.
     """
     context = get_basic_site_context(request)
-    context["membership_type"] = (membership_type,)
     user: User = context["user"]
     event: Event | None = None
     membership: Membership | None = None
@@ -287,7 +287,6 @@ def get_basic_membership_registration_context(request: HttpRequest, membership_t
         messages.error(request, error_text)
         sTraceback = str(traceback.format_exc())
         debug_data = {
-            "membership_type": membership_type,
             "err": err,
             "traceback": sTraceback,
         }
@@ -295,8 +294,8 @@ def get_basic_membership_registration_context(request: HttpRequest, membership_t
         raise Exception(error_text)
 
 
-def get_membership_invoice_context(request: HttpRequest, membership_type: str):
-    context = get_basic_membership_registration_context(request, membership_type)
+def get_membership_invoice_context(request: HttpRequest):
+    context = get_basic_membership_registration_context(request)
     user: User = context["user"]
     membership: Membership = context["membership"]
     if not membership:
@@ -306,19 +305,16 @@ def get_membership_invoice_context(request: HttpRequest, membership_type: str):
         raise Exception("No invoice found for the membership")
     # TODO: Check if all the parameters have defined?
     try:
-        currency = invoice.currency if invoice else site_default_currency
-        table_data = create_membership_services_table(user, membership_type, currency)
-        payment_deadline_days = 7  # event.payment_deadline_days
+        currency = invoice.currency  # if invoice else site_default_currency
+        table_data = create_membership_services_table(user, membership.membership_type, currency)
         # TInvoicePdfParams data...
         optional_text = ""  # invoice.extra_invoice_text
         client_name = user.get_full_name()
         client_address = user.address
         today = date.today()
-        # NOTE: Probably the year in the invoice id should rely on the registration date, not on the invoice creatiion one?
-        # year_str = today.strftime("%y")
         invoice_date = today.strftime(dateFormat)
-        invoice_no = invoice.invoice_no if invoice else "Unknown"
-        payment_terms = "Within **{} business days** of invoice issuance".format(payment_deadline_days)
+        invoice_no = invoice.invoice_no  # if invoice else "Unknown"
+        payment_terms = "Within **{} business days** of invoice issuance".format(default_payment_deadline_days)
         payment_details = payment_details_by_currency[currency]
         # TInvoicePdfParams data...
         context["optional_text"] = optional_text
@@ -338,7 +334,6 @@ def get_membership_invoice_context(request: HttpRequest, membership_type: str):
         messages.error(request, error_text)
         sTraceback = str(traceback.format_exc())
         debug_data = {
-            "membership_type": membership_type,
             "err": err,
             "traceback": sTraceback,
         }

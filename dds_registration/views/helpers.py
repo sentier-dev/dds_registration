@@ -440,7 +440,7 @@ def get_event_registration_context(request: HttpRequest, event_code: str):
             raise Exception("Not found active registrations")
         context["event"] = event
         context["registration"] = registration
-        context["total_price"] = calculate_total_registration_price(registration)
+        context["total_price"] = calculate_total_registration_price(registration)  # Is it used?
         context["invoice"] = registration.invoice
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)

@@ -1,6 +1,6 @@
 {# ex: set ft=htmldjango : #}
 <!--
-  @module billing_event_proceed_invoice.html.django
+  @module billing_event_invoice_payment_proceed.html.django
   @changed 2024.03.28, 16:47
 -->
 

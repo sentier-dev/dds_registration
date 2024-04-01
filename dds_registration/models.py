@@ -19,6 +19,9 @@ from dds_registration.core.constants.payments import site_default_currency, site
 from .core.constants.date_time_formats import (
     dateFormat,
 )
+from .core.constants.payments import (
+    default_payment_deadline_days,
+)
 from .core.helpers.dates import this_year
 
 
@@ -265,7 +268,7 @@ class Event(Model):
     #  currency = models.TextField(null=True, blank=True)  # Show as an input
 
     # XXX: Do we still leave this payment-related stuff here? (Should it rather be in the invoice model?)
-    payment_deadline_days = models.IntegerField(default=30)
+    payment_deadline_days = models.IntegerField(default=default_payment_deadline_days)
     payment_details = models.TextField(blank=True, default="")
 
     @property
