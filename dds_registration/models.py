@@ -190,11 +190,11 @@ class Invoice(Model):
 
 class Membership(Model):
     MEMBERSHIP_TYPES = [
+        ("ACADEMIC", "Academic"),  # NOTE: For 'academic' (discounted) payment type
         ("NORMAL", "Normal"),
         ("BOARD", "Board member"),
         ("HONORARY", "Honorary"),
         ("BUSINESS", "Business"),
-        ("ACADEMIC", "Academic"),  # NOTE: For 'academic' (discounted) payment type
     ]
     RESERVED_MEMBERSHIP_TYPES = ("BOARD", "HONORARY", "BUSINESS")
     DEFAULT_MEMBERSHIP_TYPE = "NORMAL"
