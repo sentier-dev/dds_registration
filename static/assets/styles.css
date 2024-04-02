@@ -129,6 +129,10 @@ body {
   --bs-btn-disabled-border-color: #486;
 }
 
+.btn-outline-primary.btn-link:active, .btn-outline-primary.btn-link:hover {
+  color: #fff;
+}
+
 .progress, .progress-stacked {
   --bs-progress-bar-bg: #486;
 }

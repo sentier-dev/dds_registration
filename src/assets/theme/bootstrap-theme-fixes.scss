@@ -53,6 +53,14 @@
   // --bs-gradient: none;
 }
 
+// Fix hover styles for combined primary outlined and link buttons
+.btn-outline-primary.btn-link {
+  &:active,
+  &:hover {
+    color: #fff;
+  }
+}
+
 .progress, .progress-stacked {
     // --bs-progress-height: 1rem;
     // --bs-progress-font-size: 0.75rem;
