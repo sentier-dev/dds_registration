@@ -117,7 +117,7 @@ def get_event_registration_cancel_context(request: HttpRequest, event_code: str)
             LOG.info("%s (redirecting): %s", msg_text, debug_data)
             messages.info(request, msg_text)
             # TODO: Already exists redirect?
-            context["redirect"] = "SUCCESS"
+            context["redirect"] = "profile"
             return context
         else:
             registration = regs[0]

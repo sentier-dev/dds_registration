@@ -66,9 +66,11 @@ def billing_event(request: HttpRequest, event_code: str):
             is_new = True
             # Create default invoice and initialize default values...
             invoice = Invoice()
-            # TODO: Set currency from registration option
             invoice.name = user.get_full_name()
             invoice.address = user.address
+        # Set currency from registration option (Issue #86)
+        invoice.currency = registration.option.currency
+        # Check redirects...
         context_redirect = context.get("redirect")
         if context_redirect:
             return context_redirect
