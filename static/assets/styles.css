@@ -129,6 +129,9 @@ body {
   --bs-btn-disabled-border-color: #486;
 }
 
+.btn-outline-primary.btn-link {
+  text-decoration: none;
+}
 .btn-outline-primary.btn-link:active, .btn-outline-primary.btn-link:hover {
   color: #fff;
 }
