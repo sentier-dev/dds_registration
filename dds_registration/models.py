@@ -5,6 +5,7 @@ import random
 import string
 from datetime import date
 from functools import partial
+from io import BytesIO
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, Group
@@ -13,17 +14,27 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Model, Q
 from django.urls import reverse
-
-from dds_registration.core.constants.payments import site_default_currency, site_supported_currencies
-
-from .core.constants.date_time_formats import (
-    dateFormat,
+from fpdf import FPDF
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import (
+    Attachment,
+    Content,
+    Disposition,
+    FileContent,
+    FileName,
+    FileType,
+    Mail,
+    To,
 )
-from .core.constants.payments import (
-    default_payment_deadline_days,
+
+from dds_registration.core.constants.payments import (
+    site_default_currency,
+    site_supported_currencies,
 )
+
+from .core.constants.date_time_formats import dateFormat
+from .core.constants.payments import default_payment_deadline_days
 from .core.helpers.dates import this_year
-
 
 alphabet = string.ascii_lowercase + string.digits
 random_code_length = 8
@@ -120,6 +131,29 @@ class User(AbstractUser):
         super(User, self).__init__(*args, **kwargs)
         self._original_email = self.email
         self._original_username = self.username
+
+    def email_user(
+        self,
+        subject: str,
+        message: str,
+        attachment_content: FPDF | None = None,
+        attachment_name: str | None = None,
+        from_email: str | None = None,
+    ) -> None:
+        sg = SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
+        message = Mail(
+            from_email=settings.DEFAULT_FROM_EMAIL, to_emails=self.email, subject=subject, html_content=message
+        )
+        if attachment_content is None or attachment_name is None:
+            pass
+        else:
+            attachment = Attachment()
+            attachment.file_content = FileContent(base64.b64encode(attachment_content.output()).decode())
+            attachment.file_type = FileType("application/pdf")
+            attachment.file_name = FileName(attachment_name)
+            attachment.disposition = Disposition("attachment")
+            message.attachment = attachment
+        sg.send(message)
 
 
 class Invoice(Model):
