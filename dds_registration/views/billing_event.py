@@ -66,9 +66,11 @@ def billing_event(request: HttpRequest, event_code: str):
             is_new = True
             # Create default invoice and initialize default values...
             invoice = Invoice()
-            # TODO: Set currency from registration option
             invoice.name = user.get_full_name()
             invoice.address = user.address
+        # Set currency from registration option (Issue #86)
+        invoice.currency = registration.option.currency
+        # Check redirects...
         context_redirect = context.get("redirect")
         if context_redirect:
             return context_redirect
@@ -79,11 +81,11 @@ def billing_event(request: HttpRequest, event_code: str):
             if form.is_valid():
                 cleaned_data = form.cleaned_data
                 invoice = form.save()
-                debug_data = {
-                    "cleaned_data": cleaned_data,
-                    "invoice": invoice,
-                }
-                LOG.debug("Get form data: %s", debug_data)
+                #  debug_data = {
+                #      "cleaned_data": cleaned_data,
+                #      "invoice": invoice,
+                #  }
+                #  LOG.debug("Get form data: %s", debug_data)
                 new_verb = "created" if is_new else "updated"
                 messages.success(request, "Invoice has been successfully " + new_verb)
                 # TODO: What if changing an existing invoice and the `payment_method` parameter has changed? Should we provide for actions in such a case?

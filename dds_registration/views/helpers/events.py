@@ -182,7 +182,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
                 LOG.info("%s (redirecting): %s", msg_text, debug_data)
                 messages.info(request, msg_text)
                 # TODO: Already exists redirect?
-                context["redirect"] = "SUCCESS"
+                context["redirect"] = "profile"
                 return context
             else:
                 reg = regs[0]
@@ -501,20 +501,9 @@ def send_event_registration_success_message(request: HttpRequest, event_code: st
         raise err
 
 
-def get_full_user_name(user: User) -> str:
-    if not user:
-        return ""
-    full_name = user.get_full_name()
-    if not full_name:
-        full_name = user.email
-    return full_name
-
-
 __all__ = [
     get_events_list,
-    # get_event_registration_form_context,
     event_registration_form,
     show_registration_form_success,
     get_event_registration_context,
-    get_full_user_name,
 ]
