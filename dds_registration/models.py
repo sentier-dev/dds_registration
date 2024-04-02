@@ -131,11 +131,11 @@ class Invoice(Model):
     DEFAULT_INVOICE_STATUS = INVOICE_STATUS[0][0]
 
     PAYMENT_METHODS = [
-        ("STRIPE", "Stripe"),
-        ("INVOICE", "Invoice"),
+        ("STRIPE", "Credit Card (Stripe)"),
+        ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
-    DEFAULT_PAYMENT_METHOD = PAYMENT_METHODS[0][0]  # "STRIPE"
+    DEFAULT_PAYMENT_METHOD = "INVOICE"
 
     id = models.AutoField(primary_key=True)
 
