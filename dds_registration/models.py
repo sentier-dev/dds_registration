@@ -196,7 +196,7 @@ class Membership(Model):
         ("BUSINESS", "Business"),
         ("ACADEMIC", "Academic"),  # NOTE: For 'academic' (discounted) payment type
     ]
-    RESERVED_MEMBERSHIP_TYPES = ("BOARD", "HONORARY")
+    RESERVED_MEMBERSHIP_TYPES = ("BOARD", "HONORARY", "BUSINESS")
     DEFAULT_MEMBERSHIP_TYPE = "NORMAL"
 
     def get_available_membership_types():
