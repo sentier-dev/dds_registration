@@ -10,9 +10,9 @@
   <div class="container-fluid">
     <div class="navbar-copyright">
       <a class="navbar-brand" href="{% url 'index' %}">
-        <img src="{% static 'images/dds-logo/svg/Green Logo.svg' %}" width="auto" height="32" alt="DdS Logo" />
+        <img src="{% static 'images/dds-logo/svg/Green Logo.svg' %}" width="auto" height="48" alt="DdS Logo" />
       </a>
-      <a class="navbar-brand" href="https://creativecommons.org/licenses/by-sa/4.0/">
+      <a class="copy-text" href="https://creativecommons.org/licenses/by-sa/4.0/">
         <img src="{% static 'images/cc-by-sa.png' %}" width="auto" height="32" alt="DdS Logo" />
       </a>
     </div>
