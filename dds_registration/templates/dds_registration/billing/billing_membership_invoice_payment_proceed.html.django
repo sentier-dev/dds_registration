@@ -8,21 +8,21 @@
 
 {% load crispy_forms_tags %}
 
-{% block title %}Membership complete pending payment — {{ block.super }}{% endblock title %}
+{% block title %}Membership request complete — {{ block.super }}{% endblock title %}
 
 {% block content %}
 {{ block.super }}
 
 <fieldset>
   <legend>
-    <h1 class="page-title primary-color">Membership complete pending payment</h1>
+    <h1 class="page-title primary-color">Membership request complete</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
 
 {% include "assets/render-messages/render-messages.django" %}
 
-<p>The invoice for your membership ({{ membership }}) has been mailed to your user account email address. You can also download it directly:</p>
+<p>Thanks! You have registered for membership, and the invoice for your membership dues has been sent via email. You can also download it below if that is easier. Please note your membership doesn't start until the bank transfer has been received.</p>
 
 {# Place form... #}
 
@@ -30,8 +30,8 @@
   {% csrf_token %}
 
   <div class="common-actions">
-    <a class="btn btn-primary" href="{% url "billing_membership_invoice_download" %}" target="_blank">Download invoice</a>
-    <a class="btn btn-default" href="{% url "profile" %}">Go to the profile</a>
+    <a class="btn btn-primary" href="{% url "profile" %}">View your user profile</a>
+    <a class="btn btn-default" href="{% url "billing_membership_invoice_download" %}" target="_blank">Download invoice</a>
     <a class="btn btn-default" href="{% url "index" %}">Homepage</a>
   </div>
 
