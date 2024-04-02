@@ -15,14 +15,14 @@
 
 <fieldset>
   <legend>
-    <h1 class="page-title primary-color">Start a membership</h1>
+    <h1 class="page-title primary-color">Become a DdS Member!</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
 
 {% include "assets/render-messages/render-messages.django" %}
 
-<p>Membership introduction text...</p>
+<p>Membership in the Départ de Sentier association means you have an equal vote in all decisions, the right to propose agenda items at the General or Extraordinary Assemblies, and can vote on or even run for the board. You can read more about membership or the DdS governing rules in <a href="https://github.com/Depart-de-Sentier/Legal/tree/main/Statutes">our legal statutes</a>, available in English and German. Membership is by calendar year, i.e. from January 1st to December 31st.</p>
 
 {% include "assets/membership-choose-list/membership-choose-list.django" %}
 

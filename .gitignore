@@ -4,6 +4,8 @@ __pycache__/
 *$py.class
 /static/CACHE
 
+.DS_Store
+
 db.sqlite
 
 # C extensions

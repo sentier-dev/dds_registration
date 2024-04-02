@@ -14,7 +14,7 @@
       <a class="navbar-brand" href="{% url 'index' %}">
         <img src="{% static 'images/dds-logo/svg/Beige Logo.svg' %}" width="auto" height="50" alt="DdS Logo" />
         <span class="site-name">
-          {{ site.name }}
+          Départ de Sentier Events and Membership Portal
         </span>
       </a>
 

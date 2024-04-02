@@ -135,11 +135,11 @@ class Invoice(Model):
     DEFAULT_INVOICE_STATUS = INVOICE_STATUS[0][0]
 
     PAYMENT_METHODS = [
-        ("STRIPE", "Stripe"),
-        ("INVOICE", "Invoice"),
+        ("STRIPE", "Credit Card (Stripe)"),
+        ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
-    DEFAULT_PAYMENT_METHOD = PAYMENT_METHODS[0][0]  # "STRIPE"
+    DEFAULT_PAYMENT_METHOD = "INVOICE"
 
     id = models.AutoField(primary_key=True)
 
@@ -194,13 +194,13 @@ class Invoice(Model):
 
 class Membership(Model):
     MEMBERSHIP_TYPES = [
+        ("ACADEMIC", "Academic"),  # NOTE: For 'academic' (discounted) payment type
         ("NORMAL", "Normal"),
         ("BOARD", "Board member"),
         ("HONORARY", "Honorary"),
         ("BUSINESS", "Business"),
-        ("ACADEMIC", "Academic"),  # NOTE: For 'academic' (discounted) payment type
     ]
-    RESERVED_MEMBERSHIP_TYPES = ("BOARD", "HONORARY")
+    RESERVED_MEMBERSHIP_TYPES = ("BOARD", "HONORARY", "BUSINESS")
     DEFAULT_MEMBERSHIP_TYPE = "NORMAL"
 
     def get_available_membership_types():
