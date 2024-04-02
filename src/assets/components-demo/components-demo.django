@@ -9,7 +9,7 @@
 </div>
 <p>
   normal:
-  <button type="button" class="btn btn-default">Default</button>
+  <button type="button" class="btn btn-outline-primary">Default</button>
   <button type="button" class="btn btn-primary">Primary</button>
   <button type="button" class="btn btn-success">Success</button>
   <button type="button" class="btn btn-info">Info</button>
@@ -19,7 +19,7 @@
 </p>
 <p>
   sm:
-  <button type="button" class="btn btn-sm btn-default">Default</button>
+  <button type="button" class="btn btn-sm btn-outline-primary">Default</button>
   <button type="button" class="btn btn-sm btn-primary">Primary</button>
   <button type="button" class="btn btn-sm btn-success">Success</button>
   <button type="button" class="btn btn-sm btn-info">Info</button>
@@ -29,7 +29,7 @@
 </p>
 <p>
   xs:
-  <button type="button" class="btn btn-xs btn-default">Default</button>
+  <button type="button" class="btn btn-xs btn-outline-primary">Default</button>
   <button type="button" class="btn btn-xs btn-primary">Primary</button>
   <button type="button" class="btn btn-xs btn-success">Success</button>
   <button type="button" class="btn btn-xs btn-info">Info</button>
@@ -39,7 +39,7 @@
 </p>
 <p>
   lg:
-  <button type="button" class="btn btn-lg btn-default">Default</button>
+  <button type="button" class="btn btn-lg btn-outline-primary">Default</button>
   <button type="button" class="btn btn-lg btn-primary">Primary</button>
   <button type="button" class="btn btn-lg btn-success">Success</button>
   <button type="button" class="btn btn-lg btn-info">Info</button>

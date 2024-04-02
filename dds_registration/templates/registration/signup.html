@@ -26,7 +26,7 @@
   {% csrf_token %}
   {{ form|crispy }}
   <input class="btn btn-primary" type="submit" value="Sign up" />
-  <a class="btn btn-default" href="{% url 'login' %}">Log in</a>
+  <a class="btn btn-outline-primary" href="{% url 'login' %}">Log in</a>
   <input type="hidden" name="next" value="{{ next }}" />
 </form>
 
