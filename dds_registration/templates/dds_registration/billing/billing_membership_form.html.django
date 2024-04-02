@@ -1,0 +1,48 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module billing_membership_form.html.django
+  @changed 2024.04.01, 16:53
+-->
+
+{% extends "base-regular.html.django" %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Billing for the membership — {{ block.super }}{% endblock title %}
+
+{% block content %}
+{{ block.super }}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Billing for the membership</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+{% include "assets/render-messages/render-messages.django" %}
+
+{# Show event/registration info... #}
+
+<p><span class="item-label">User:</span> {{ user.get_full_name }}</p>
+{% if membership %}
+<p><span class="item-label">Membership:</span> {{ membership }}</p>
+{% endif %}
+{% if invoice and invoice.id %}
+<p><span class="item-label">Invoice:</span> {{ invoice }}</p>
+{% endif %}
+
+{# Place form... #}
+
+<form role="form" method="post">
+  {% csrf_token %}
+  {{ form|crispy }}
+
+  <div class="common-actions">
+    <input class="btn btn-primary" type="submit" value="Save" />
+    {% include "assets/back-button/back-button.django" %}
+  </div>
+
+</form>
+
+{% endblock content %}

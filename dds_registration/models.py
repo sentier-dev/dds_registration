@@ -1,3 +1,6 @@
+# @module models.py
+# @changed 2024.03.28, 19:28
+
 import random
 import string
 from datetime import date
@@ -8,14 +11,26 @@ from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.sites.models import Site  # To access site properties
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Model, Q
 from django.urls import reverse
 
-from .core.constants.date_time_formats import dateTimeFormat
+from dds_registration.core.constants.payments import site_default_currency, site_supported_currencies
+
+from .core.constants.date_time_formats import (
+    dateFormat,
+)
+from .core.constants.payments import (
+    default_payment_deadline_days,
+)
 from .core.helpers.dates import this_year
 
 
 alphabet = string.ascii_lowercase + string.digits
 random_code_length = 8
+
+
+# NOTE: A single reusable QuerySet to check if the registration active
+REGISTRATION_ACTIVE_QUERY = ~Q(status="WITHDRAWN")
 
 
 def random_code(length=random_code_length):
@@ -49,7 +64,7 @@ class User(AbstractUser):
         #  # TODO: Add correct check if email and username are the same?
         #  constraints = [
         #      models.CheckConstraint(
-        #          check=models.Q(email=models.F('username')),
+        #          check=Q(email=models.F('username')),
         #          name='username_is_email',
         #      )
         #  ]
@@ -69,6 +84,22 @@ class User(AbstractUser):
             self._original_username = self.username
             # TODO: To do smth else if email has changed?
 
+    def get_full_name_with_email(self):
+        name = self.get_full_name()
+        email = self.email
+        if not name and email:
+            name = email
+        items = [
+            name,
+            "<{}>".format(email) if email and email != name else "",
+        ]
+        info = "  ".join(filter(None, map(str, items)))
+        return info
+
+    @property
+    def full_name_with_email(self):
+        return self.get_full_name_with_email()
+
     def clean(self):
         # NOTE: This method is called before `save`: it's useless to compare email and here
         #  from django.core.exceptions import ValidationError
@@ -87,19 +118,100 @@ class User(AbstractUser):
         self._original_username = self.username
 
 
-class Membership(models.Model):
+class Invoice(Model):
+    # Docs recommend putting these on the class:
+    # https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.Field.choices
+    INVOICE_STATUS = [
+        # Can add other possibilities later
+        ("CREATED", "Created"),
+        ("ISSUED", "Issued"),
+        ("PAID", "Paid"),
+        ("REFUNDED", "Refunded"),
+    ]
+    DEFAULT_INVOICE_STATUS = INVOICE_STATUS[0][0]
+
+    PAYMENT_METHODS = [
+        ("STRIPE", "Stripe"),
+        ("INVOICE", "Invoice"),
+        #  ("WISE", "Wise"),  # Not yet implemented
+    ]
+    DEFAULT_PAYMENT_METHOD = PAYMENT_METHODS[0][0]  # "STRIPE"
+
+    id = models.AutoField(primary_key=True)
+
+    # User name and address, initialized by user's ones, by default
+    name = models.TextField(blank=False, default="")
+    address = models.TextField(blank=False, default="")
+
+    payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
+
+    created = models.DateField(auto_now_add=True)
+    status = models.TextField(choices=INVOICE_STATUS, default=DEFAULT_INVOICE_STATUS)
+
+    # Includes the various item descriptions, prices, and currencies
+    # and any other necessary info
+    data = models.JSONField(null=True, blank=True, help_text="JSON object ({...})")  # default=dict
+
+    SUPPORTED_CURRENCIES = site_supported_currencies
+    DEFAULT_CURRENCY = site_default_currency
+    currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
+    # @see `payment_details_by_currency`
+
+    extra_invoice_text = models.TextField(blank=True, default="")
+
+    # TODO: reg
+
+    def is_paid(self):
+        return self.status == "PAID"
+
+    @property
+    def invoice_no(self):
+        """
+        Same as the actual invoice number, which normally has the form
+        {two-digit-year}{zero-padded four digit number starting from 1}
+        """
+        if not self.created or not self.id:
+            return "NOT-CREATED-YET"
+        year_str = self.created.strftime("%y")
+        invoice_no = "#{}{:0>4}".format(year_str, self.id)
+        return invoice_no
+
+    def __str__(self):
+        items = [
+            self.invoice_no,
+            self.get_payment_method_display(),
+            self.currency,
+            self.get_status_display(),
+            self.created.strftime(dateFormat) if self.created else None,
+        ]
+        info = ", ".join(filter(None, map(str, items)))
+        return info
+
+
+class Membership(Model):
     MEMBERSHIP_TYPES = [
         ("NORMAL", "Normal"),
         ("BOARD", "Board member"),
         ("HONORARY", "Honorary"),
         ("BUSINESS", "Business"),
+        ("ACADEMIC", "Academic"),  # NOTE: For 'academic' (discounted) payment type
     ]
+    RESERVED_MEMBERSHIP_TYPES = ("BOARD", "HONORARY")
+    DEFAULT_MEMBERSHIP_TYPE = "NORMAL"
+
+    def get_available_membership_types():
+        return [(x, y) for x, y in Membership.MEMBERSHIP_TYPES if x not in Membership.RESERVED_MEMBERSHIP_TYPES]
 
     user = models.ForeignKey(User, related_name="memberships", on_delete=models.CASCADE)
-    membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default="NORMAL")
+
+    membership_type = models.TextField(choices=MEMBERSHIP_TYPES, default=DEFAULT_MEMBERSHIP_TYPE)
+
     started = models.IntegerField(default=this_year)
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
+
+    # XXX: To use different delete handler, like `SET_NULL`?
+    invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.CASCADE, null=True)
 
     @property
     def active(self) -> bool:
@@ -112,8 +224,18 @@ class Membership(models.Model):
         except cls.DoesNotExist:
             return False
 
+    def __str__(self):
+        items = [
+            self.user.full_name_with_email,
+            self.get_membership_type_display(),
+            self.started,
+            #  self.created_at.strftime(dateFormat) if self.created_at else None,
+        ]
+        info = ", ".join(filter(None, map(str, items)))
+        return info
 
-class Event(models.Model):
+
+class Event(Model):
     code = models.TextField(unique=True, default=random_code)  # Show as an input
     title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
     description = models.TextField(blank=True)
@@ -124,9 +246,11 @@ class Event(models.Model):
         default=0,
         help_text="Maximum number of participants to this event (0 = no limit)",
     )
-    currency = models.TextField(null=True, blank=True)  # Show as an input
+    # Issue #63: Removed this `currency` field (we already have the `currency` field in the `RegistrationOption` model).
+    #  currency = models.TextField(null=True, blank=True)  # Show as an input
 
-    payment_deadline_days = models.IntegerField(default=30)
+    # XXX: Do we still leave this payment-related stuff here? (Should it rather be in the invoice model?)
+    payment_deadline_days = models.IntegerField(default=default_payment_deadline_days)
     payment_details = models.TextField(blank=True, default="")
 
     @property
@@ -138,7 +262,7 @@ class Event(models.Model):
         """
         Return the active registrations
         """
-        return self.registrations.all().filter(active=True)
+        return self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY)
 
     def get_active_user_registration(self, user: User | None):
         """
@@ -147,7 +271,7 @@ class Event(models.Model):
         # Return empty list if no user has specified or it's a `lazy user` (not from system)
         if not user or not user.id:
             return []
-        active_user_registrations = self.registrations.all().filter(active=True, user=user)
+        active_user_registrations = self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY, user=user)
         if len(active_user_registrations):
             return active_user_registrations[0]
         return None
@@ -160,6 +284,7 @@ class Event(models.Model):
         return bool(active_user_registration)
 
     def __unicode__(self):
+        # XXX: Is it required (due to existed `__str__` method?
         return self.name
 
     def clean(self):
@@ -189,39 +314,35 @@ class Event(models.Model):
             self.title,
             "({})".format(self.code) if self.code else None,
         ]
-        items = [
-            " ".join(filter(None, map(str, name_items))),
-            # self.created_at.strftime(dateTimeFormat) if self.created_at else None,
-        ]
-        info = ", ".join(filter(None, map(str, items)))
-        return info
+        return " ".join(filter(None, map(str, name_items)))
 
-    new_registration_full_url.short_description = "New event registration url"
+    new_registration_full_url.short_description = "Event registration url"
 
 
-class RegistrationOption(models.Model):
-    SUPPORTED_CURRENCIES = [
-        ("USD", "US Dollar"),
-        ("CHF", "Swiss Franc"),
-        ("EUR", "Euro"),
-        ("CAD", "Canadian Dollar"),  # AKA Loonie :)
-    ]
-
+class RegistrationOption(Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     item = models.TextField(null=False, blank=False)  # Show as an input
     price = models.FloatField(default=0, null=False)
-    currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False)
+
+    SUPPORTED_CURRENCIES = site_supported_currencies
+    DEFAULT_CURRENCY = site_default_currency
+    currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
     def __str__(self):
+        price_items = [
+            self.currency,
+            self.price,
+        ]
+        price = " ".join(filter(None, map(str, price_items))) if self.price else ""
         items = [
             self.item,
-            "({})".format(self.price) if self.price else None,
+            "({})".format(price) if price else None,
         ]
         info = " ".join(filter(None, map(str, items)))
         return info
 
 
-class Message(models.Model):
+class Message(Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     message = models.TextField()
     emailed = models.BooleanField(default=False)
@@ -231,78 +352,35 @@ class Message(models.Model):
     def __str__(self):
         items = [
             self.event,
-            self.created_at.strftime(dateTimeFormat) if self.created_at else None,
+            self.created_at.strftime(dateFormat) if self.created_at else None,
             "emailed" if self.emailed else None,
         ]
         info = ", ".join(filter(None, map(str, items)))
         return info
 
 
-class Invoice(models.Model):
-    # Docs recommend putting these on the class:
-    # https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.Field.choices
-    INVOICE_STATUS = [
-        # Can add other possibilities later
-        ("CREATED", "Created"),
-        ("ISSUED", "Issued"),
-        ("PAID", "Paid"),
-        ("REFUNDED", "Refunded"),
+class Registration(Model):
+    REGISTRATION_STATUS = [
+        # For schools
+        ("SUBMITTED", "Application submitted"),
+        ("SELECTED", "Applicant selected"),
+        ("WAITLIST", "Applicant wait listed"),
+        ("DECLINED", "Applicant declined"),  # Inactive?
+        ("PAYMENT_PENDING", "Registered (payment pending)"),
+        ("REGISTERED", "Registered"),
+        ("WITHDRAWN", "Withdrawn"),  # = Inactive
     ]
 
-    INVOICE_TEMPLATES = [
-        # Different templates for specific bank accounts
-        # and layouts
-        ("M-CHF", "Membership - Swiss Francs"),
-        ("M-EUR", "Membership - Euros"),
-        ("G-USD", "Generic - USD"),
-        ("G-CHF", "Generic - CHF"),
-        ("G-EUR", "Generic - EUR"),
-        ("G-CAD", "Generic - CAD"),
-    ]
-
-    PAYMENT_METHODS = [
-        ("STRIPE", "Stripe"),
-        ("INVOICE", "Invoice"),
-        # Not yet implemented
-        ("WISE", "Wise"),
-    ]
-
-    # Same as the actual invoice number, which normally has the form
-    # {two-digit-year}{zero-padded four digit number starting from 1}
-    invoice_no = models.IntegerField(primary_key=True)
-    created = models.DateField(auto_now_add=True)
-    status = models.TextField(choices=INVOICE_STATUS)
-    # Includes the various item descriptions, prices, and currencies
-    # and any other necessary info
-    # The specific form will depend on the template
-    data = models.JSONField()
-    template = models.TextField(choices=INVOICE_TEMPLATES)
-
-
-REGISTRATION_STATUS = [
-    # For schools
-    ("SUBMITTED", "Application submitted"),
-    ("SELECTED", "Applicant selected"),
-    ("WAITLIST", "Applicant wait listed"),
-    ("DECLINED", "Applicant declined"),
-    ("PAYMENT-PENDING", "Registered (payment pending)"),
-    ("REGISTERED", "Registered"),
-    ("WITHDRAWN", "Withdrawn"),
-]
-
-
-class Registration(models.Model):
-    """
-    Ex `Booking` class in OneEvent
-    """
-
-    invoice = models.ForeignKey(Invoice, related_name="invoices", on_delete=models.CASCADE)
+    # XXX: To use different delete handler, like `SET_NULL`?
+    invoice = models.ForeignKey(Invoice, related_name="registrations", on_delete=models.CASCADE, null=True)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
+
     # Which kind of registration for the event
     option = models.ForeignKey(RegistrationOption, related_name="options", on_delete=models.CASCADE)
 
     status = models.TextField(choices=REGISTRATION_STATUS)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -310,28 +388,31 @@ class Registration(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["event", "user"],
-                condition=models.Q(active=True),
+                condition=REGISTRATION_ACTIVE_QUERY,
                 name="Single registration per verified user account",
             )
         ]
 
     def __str__(self):
         items = [
-            self.user.get_full_name(),
-            self.user.email,
-            self.created_at.strftime(dateTimeFormat) if self.created_at else None,
+            self.user.full_name_with_email,
+            self.option,
+            self.get_status_display(),
+            self.created_at.strftime(dateFormat) if self.created_at else None,
         ]
         info = ", ".join(filter(None, map(str, items)))
         return info
 
-# class DiscountCode(models.Model):
+
+# Issue #63: Temporarily unused
+# class DiscountCode(Model):
 #     event = models.ForeignKey(Event, on_delete=models.CASCADE)
 #     code = models.TextField(default=partial(random_code, length=4))  # Show as an input
 #     # pyright: ignore [reportArgumentType]
 #     only_registration = models.BooleanField(default=True)
 #     percentage = models.IntegerField(help_text="Value as a percentage, like 10", blank=True, null=True)
 #     absolute = models.FloatField(help_text="Absolute amount of discount", blank=True, null=True)
-
+#
 #     def __str__(self):
 #         items = [
 #             self.event,
@@ -339,15 +420,15 @@ class Registration(models.Model):
 #         ]
 #         info = ", ".join(filter(None, map(str, items)))
 #         return info
-
-
-# class GroupDiscount(models.Model):
+#
+#
+# class GroupDiscount(Model):
 #     event = models.ForeignKey(Event, on_delete=models.CASCADE)
 #     group = models.ForeignKey(Group, on_delete=models.CASCADE)
 #     only_registration = models.BooleanField(default=True)
 #     percentage = models.IntegerField(help_text="Value as a percentage, like 10", blank=True, null=True)
 #     absolute = models.FloatField(help_text="Absolute amount of discount", blank=True, null=True)
-
+#
 #     def __str__(self):
 #         items = [
 #             self.event,

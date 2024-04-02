@@ -4,6 +4,7 @@ import sourcemaps from 'gulp-sourcemaps';
 import gulpSass from 'gulp-sass';
 import * as sass from 'sass';
 import gulpAutoprefixer from 'gulp-autoprefixer';
+import gulpTypescript from 'gulp-typescript';
 
 /* // UNUSED: Determine the working (project) path
  * import path from 'path';
@@ -43,29 +44,55 @@ function compileStyles() {
       .pipe(sourcemaps.init())
       .pipe(sassRunner().on('error', sassRunner.logError))
       .pipe(gulpAutoprefixer())
-      // .pipe(gulpConcat('styles.css'))
       .pipe(sourcemaps.write('.'))
       .pipe(gulp.dest(stylesDest))
       // Delayed final tasks...
-      // .on('end', onFinish.bind(null, 'styles'))
+      // .on('end', onFinish.bind(null, 'styles')) // TODO?
   );
 }
 gulp.task('compileStyles', compileStyles);
 gulp.task('compileStylesWatch', () => {
   return gulp
     .watch(stylesSrcAll.concat(stylesSrcEntry), watchOptions, compileStyles)
-    // .on('change', onWatchChange);
+    // .on('change', onWatchChange); // TODO?
+});
+
+// Scripts...
+const scriptsSrcAll = [sourceAssetsPath + '**/*.{js,ts}'];
+const scriptsTargetFile = 'scripts.js';
+const scriptsDest = targetAssetsPath;
+function compileScripts() {
+  return (
+    gulp
+      .src(scriptsSrcAll)
+      .pipe(sourcemaps.init())
+      .pipe(gulpTypescript({
+          noImplicitAny: true,
+          outFile: scriptsTargetFile,
+      }))
+      .pipe(sourcemaps.write('.'))
+      .pipe(gulp.dest(scriptsDest))
+      // Delayed final tasks...
+      // .on('end', onFinish.bind(null, 'scripts')) // TODO?
+  );
+}
+gulp.task('compileScripts', compileScripts);
+gulp.task('compileScriptsWatch', () => {
+  return gulp
+    .watch(scriptsSrcAll, watchOptions, compileScripts)
+    // .on('change', onWatchChange); // TODO?
 });
 
 const updateAllTasks = [
   // Watch all tasks...
   'compileStyles',
+  'compileScripts',
 ].filter(Boolean);
 gulp.task('updateAll', gulp.parallel.apply(gulp, updateAllTasks));
-// gulp.task('recreateAll', gulp.series(['cleanGenerated', 'updateAll']));
 
 const watchAllTasks = [
   // Watch all tasks...
   'compileStylesWatch',
+  'compileScriptsWatch',
 ].filter(Boolean);
 gulp.task('watchAll', gulp.parallel.apply(gulp, watchAllTasks));

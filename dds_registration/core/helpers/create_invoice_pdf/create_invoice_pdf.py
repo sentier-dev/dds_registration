@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
-from fpdf import FPDF
+from fpdf import FPDF, Align
 from typing import TypedDict
 import posixpath
 
@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 class TInvoicePdfParams(TypedDict):
+    #  currency: str;
     optional_text: str
     client_name: str
     client_address: str
@@ -22,12 +23,13 @@ class TInvoicePdfParams(TypedDict):
     invoice_date: str
     payment_terms: str
     payment_details: str
+    # Services table
     table_data: tuple[tuple[str, str, str, str]]
 
 
 # Core constants/options
 
-col_widths = (15, 45, 20, 20)  # Column widths
+col_widths = (15, 45, 20, 20)  # Table column widths
 
 logo_svg_file = "images/pdf-template-logo.svg"
 
@@ -35,7 +37,7 @@ margin_size = 20  # Default margin size
 
 left_column_pos = margin_size  # Position of the left top column
 right_column_pos = 132  # Postion of the right top column
-left_column_width = 100  # Width of the left top column
+left_column_width = 75  # Width of the left top column
 right_column_width = 55  # Width of the right top column
 
 logo_width = 60  # Set logo width
@@ -46,6 +48,7 @@ font_size = 12
 
 def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
     # Get params...
+    #  currency = params["currency"]
     optional_text = params["optional_text"]
     client_name = params["client_name"]
     client_address = params["client_address"]
@@ -90,19 +93,23 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
 
     # Left (client) address column...
     pdf.set_xy(left_column_pos, margin_size + top_offset)
-    pdf.multi_cell(text=client_name, w=left_column_width, new_x="LEFT", new_y="NEXT", h=line_height)
+    pdf.multi_cell(text=client_name, w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height)
 
     pdf.set_y(pdf.get_y() + small_vertical_space)
-    pdf.multi_cell(text=client_address.strip(), w=left_column_width, new_x="LEFT", new_y="NEXT", h=line_height)
+    pdf.multi_cell(
+        text=client_address.strip(), w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
+    )
 
     left_stop_pos = pdf.get_y()
 
     # Right (client) address column...
     pdf.set_xy(right_column_pos, margin_size + top_offset)
-    pdf.multi_cell(text=dds_name, w=right_column_width, new_x="LEFT", new_y="NEXT", h=line_height)
+    pdf.multi_cell(text=dds_name, w=right_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height)
 
     pdf.set_xy(right_column_pos, pdf.get_y() + small_vertical_space)
-    pdf.multi_cell(text=dds_address.strip(), w=right_column_width, new_x="LEFT", new_y="NEXT", h=line_height)
+    pdf.multi_cell(
+        text=dds_address.strip(), w=right_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
+    )
 
     right_stop_pos = pdf.get_y()
 
@@ -111,7 +118,9 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
 
     # Put the title (invoice no), with an extra offset...
     pdf.set_xy(left_column_pos, max_right_top + large_vertical_space)
-    pdf.multi_cell(text="Invoice " + invoice_no, w=left_column_width, new_x="LEFT", new_y="NEXT", h=line_height)
+    pdf.multi_cell(
+        text="Invoice " + invoice_no, w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
+    )
 
     pdf.set_y(pdf.get_y() + vertical_space)
 
@@ -141,7 +150,9 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
 
     if invoice_date:
         pdf.set_y(pdf.get_y() + small_vertical_space)
-        pdf.multi_cell(text="Invoice date: " + invoice_date, w=page_width, new_x="LEFT", new_y="NEXT", h=line_height)
+        pdf.multi_cell(
+            text="Invoice date: " + invoice_date, w=page_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
+        )
 
     if payment_terms:
         pdf.set_y(pdf.get_y() + small_vertical_space)
@@ -149,6 +160,7 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
             text="Payment terms: " + payment_terms,
             markdown=True,
             w=page_width,
+            align=Align.L,
             new_x="LEFT",
             new_y="NEXT",
             h=line_height,
@@ -157,17 +169,35 @@ def create_invoice_pdf(params: TInvoicePdfParams) -> FPDF:
     if payment_details:
         pdf.set_y(pdf.get_y() + small_vertical_space)
         pdf.multi_cell(
-            text="**Payment details:**", markdown=True, w=page_width, new_x="LEFT", new_y="NEXT", h=line_height
+            text="**Payment details:**",
+            markdown=True,
+            w=page_width,
+            align=Align.L,
+            new_x="LEFT",
+            new_y="NEXT",
+            h=line_height,
         )
         pdf.set_y(pdf.get_y() + tiny_vertical_space)
         pdf.multi_cell(
-            text=payment_details.strip(), markdown=True, w=page_width, new_x="LEFT", new_y="NEXT", h=line_height
+            text=payment_details.strip(),
+            markdown=True,
+            w=page_width,
+            align=Align.L,
+            new_x="LEFT",
+            new_y="NEXT",
+            h=line_height,
         )
 
     if optional_text:
         pdf.set_y(pdf.get_y() + large_vertical_space)
         pdf.multi_cell(
-            text="__{}__".format(optional_text), markdown=True, w=page_width, new_x="LEFT", new_y="NEXT", h=line_height
+            text="__{}__".format(optional_text),
+            markdown=True,
+            w=page_width,
+            align=Align.L,
+            new_x="LEFT",
+            new_y="NEXT",
+            h=line_height,
         )
 
     return pdf

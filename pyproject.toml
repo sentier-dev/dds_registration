@@ -1,5 +1,5 @@
 # @module pyproject.toml
-# @changed 2024.03.11, 14:08
+# @changed 2024.03.28, 11:50
 
 [build-system]
 requires = ["setuptools>=68.0"]
@@ -50,6 +50,7 @@ dependencies = [
     "django-registration>=3.4", # @see https://django-registration.readthedocs.io
     "sendgrid>=6.11.0", # @see https://docs.sendgrid.com/for-developers/sending-email/django
     "fpdf2>=2.7.8", # @see https://github.com/py-pdf/fpdf2
+    "stripe>=8.9.0",
 ]
 
 [project.urls]

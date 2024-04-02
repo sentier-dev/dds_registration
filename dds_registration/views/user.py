@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 from ..core.helpers.errors import errorToString
 
 from ..forms import UpdateUserForm
-from .helpers import send_re_actvation_email
+from .helpers.events import send_re_actvation_email
 
 LOG = logging.getLogger(__name__)
 
@@ -28,31 +28,18 @@ def edit_user_profile(request: HttpRequest):
         user = request.user
         if request.method == "POST":
             user_form = UpdateUserForm(request.POST, instance=user)
-            #  # UNUSED: Address has integrated into the base user model
-            #  profile, created = Profile.objects.get_or_create(user=user)
-            #  profile_form = UpdateProfileForm(
-            #      request.POST,
-            #      #  request.FILES,
-            #      instance=profile,
-            #  )
-            if user_form.is_valid():  # and profile_form.is_valid():
-                user_data = user_form.cleaned_data
-                email_has_changed = "email" in user_form.changed_data
-                #  profile_data = profile_form.cleaned_data
-                debug_data = {
-                    "email_has_changed": email_has_changed,
-                }
-                LOG.debug("Save params: %s", debug_data)
-                # TODO: Send email activation request and make the user inactive
-                LOG.debug("Save user data: %s", user_data)
+            if user_form.is_valid():
+                # user_data = user_form.cleaned_data
+                # LOG.debug("Save user data: %s", user_data)
                 user_form.save()
-                #  profile_form.save()
+                # Send email activation request and make the user inactive if emails has changed
+                email_has_changed = "email" in user_form.changed_data
                 if email_has_changed:
                     debug_data = {
                         "email_has_changed": email_has_changed,
                         "user_form": user_form,
                     }
-                    LOG.debug("Email has changed: %s", debug_data)
+                    # LOG.debug("Email has changed: %s", debug_data)
                     send_re_actvation_email(request, user)
                     user.is_active = False
                     user.save()
@@ -67,11 +54,8 @@ def edit_user_profile(request: HttpRequest):
                     return redirect("profile")
         else:
             user_form = UpdateUserForm(instance=user)
-            #  profile, created = Profile.objects.get_or_create(user=user)
-            #  profile_form = UpdateProfileForm(instance=profile)
         context = {
             "user_form": user_form,
-            #  'profile_form': profile_form,
         }
         return render(request, "dds_registration/profile_edit.html.django", context)
     except Exception as err:

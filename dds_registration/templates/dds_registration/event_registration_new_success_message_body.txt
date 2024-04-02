@@ -1,24 +1,34 @@
 {# ex: set ft=htmldjango : #}
+Hi {{ user.get_full_name }}!
+
+Thanks for registering for {{ event.title }}.
+
+{% if invoice.payment_method == "STRIPE" %}You have chosen to pay by credit card.
+
+{% elif invoice.payment_method == "INVOICE" %}You have chosen to pay by bank transfer.
+
+{% endif %}The payment option you have chosen: {% with option=registration.option %}{{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}{% endwith %}.
+
+Your invoice is attached, but can also be download anytime at {{ scheme }}://{{site.domain}}{% url 'billing_event_invoice_download' event_code=event.code %}.
+
+If you need to change your payment method (e.g. pay by {% if invoice.payment_method == "INVOICE" %}credit card{% else %}by bank transfer{% endif %}), you can do that at {{ scheme }}://{{site.domain}}{% url 'billing_event' event_code=event.code %}.
+
+Please note that payment must be made with {{ event.payment_deadline_days }} days.
+
+If you have questions or comments, you can reach us at {{ settings.DEFAULT_FROM_EMAIL }}.
+{% comment %}
+{# Old content: #}
+
 You already created a registration for event {{ event.title }}.
 
 
-Now you should pay for your options:
+Your selected option:
+{# XXX: Multiple options approach #}
+{% for option in registration.options.all %}- {{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}
+{% with option=registration.option %}- {{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}
+{% endwith -%}
 
-{% for option in registration.options.all %}- {{ option.item }}{% if option.price %} ({% if event.currency %}{{ event.currency }} {% endif %}{{ option.price }}){% endif %}
-{% empty %}(No options were set)
-{% endfor -%}
+Total amount due: {% if option.currency %}{{ option.currency }} {% endif %}{{ total_price }}
 
-Total amount due: {% if event.currency %}{{ event.currency }} {% endif %}{{ total_price }}
-
-
-Payment:
-
-{{ scheme }}://{{site.domain}}{% url 'event_registration_payment' event_code=event.code %}
-
-
-Download invoice:
-
-{{ scheme }}://{{site.domain}}{% url 'event_registration_invoice' event_code=event.code %}
-
-
+{% endcomment %}
 Sincerely, {{ site.name }} Management

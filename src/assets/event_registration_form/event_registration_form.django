@@ -1,9 +1,12 @@
 {# ex: set ft=htmldjango : #}
 <!--
   @module event_registration_form.django
-  @changed 2024.03.19, 01:42
+  @changed 2024.03.28, 12:14
 -->
 
+{# TODO: Show questions? -- Issue #35 #}
+
+{# Issue #63: payment_method is unused #}
 {% if PAYMENT_METHODS %}
   <fieldset id="payment_method" class="mb3 form-group">
     <legend class="mb-3 primary-color">Payment method</legend>
@@ -27,11 +30,11 @@
   </fieldset>
 {% endif %}
 
-<!-- Manual options (basic and add-ons) list (as checkboxes) -->
+<!-- Manual options list (as a radiogroup) -->
 {% if reg_options %}
   {% if reg_options_basic %}
     <fieldset id="options_basic" class="mb3 form-group">
-      <legend class="mb-3 primary-color">Options</legend>
+      <legend class="mb-3 primary-color">Registration options for this event</legend>
       {% for option in reg_options_basic %}
         <div class="mb-2 form-check">
           <input
@@ -53,35 +56,41 @@
       {% endfor %}
     </fieldset>
   {% endif %}
-  {% if reg_options_addons %}
-    <fieldset id="options_addons" class="mb3 form-group">
-      <legend class="mb-3 primary-color">Add-ons</legend>
-      {% for option in reg_options_addons %}
-        <div class="mb-2 form-check">
-          <input
-            type="checkbox"
-            class="form-check-input"
-            id="option-{{ option.id }}"
-            name="checked_option_ids"
-            value="{{ option.id }}"
-            {% if option.id|is_in_list:checked_option_ids %}checked{% endif %}
-          >
-          <label class="form-check-label" for="option-{{ option.id }}">
-            {{ option.item }} {% if option.price %}
-              ({{ option.price }})
-            {% endif %}
-          </label>
-        </div>
-      {% endfor %}
-    </fieldset>
-  {% endif %}
+  {% comment %}
+    {# Issue #63: Only one list (of basic) options is used, add-ons is unused #}
+    {% if reg_options_addons %}
+      <fieldset id="options_addons" class="mb3 form-group">
+        <legend class="mb-3 primary-color">Add-ons</legend>
+        {% for option in reg_options_addons %}
+          <div class="mb-2 form-check">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="option-{{ option.id }}"
+              name="checked_option_ids"
+              value="{{ option.id }}"
+              {% if option.id|is_in_list:checked_option_ids %}checked{% endif %}
+            >
+            <label class="form-check-label" for="option-{{ option.id }}">
+              {{ option.item }} {% if option.price %}
+                ({{ option.price }})
+              {% endif %}
+            </label>
+          </div>
+        {% endfor %}
+      </fieldset>
+    {% endif %}
+  {% endcomment %}
 {% endif %}
 
-<!-- Invoice text -->
-<fieldset id="options_basic" class="mb3 form-group">
-  <legend class="primary-color"><label for="@extra_invoice_text" class="form-label">Optional invoice text</label></legend>
-  <div class="mb-3">
-    <textarea class="form-control" id="@extra_invoice_text" name="extra_invoice_text" rows="5">{{ extra_invoice_text }}</textarea>
-  </div>
-</fieldset>
+{% comment %}
+  {# Issue #63: Invoice text is unused #}
+  <!-- Invoice text -->
+  <fieldset id="options_basic" class="mb3 form-group">
+    <legend class="primary-color"><label for="@extra_invoice_text" class="form-label">Optional invoice text</label></legend>
+    <div class="mb-3">
+      <textarea class="form-control" id="@extra_invoice_text" name="extra_invoice_text" rows="5">{{ extra_invoice_text }}</textarea>
+    </div>
+  </fieldset>
+{% endcomment %}
 

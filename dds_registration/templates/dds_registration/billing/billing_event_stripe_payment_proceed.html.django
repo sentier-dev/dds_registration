@@ -1,0 +1,54 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module billing_event_stripe_payment_proceed.html.django
+  @changed 2024.03.29, 18:03
+-->
+
+{% extends "base-regular.html.django" %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Proceed event registration payment — {{ block.super }}{% endblock title %}
+
+{% block content %}
+{{ block.super }}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Proceed event registration payment</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+{% include "assets/render-messages/render-messages.django" %}
+
+<div id="checkout">
+  <!-- Checkout will insert the payment form here -->
+</div>
+
+<div class="common-actions">
+  <input class="btn btn-primary" type="submit" value="Ok" />
+  {% include "assets/back-button/back-button.django" %}
+</div>
+
+{% endblock content %}
+
+{% block client_scripts %}
+{{ block.super }}
+
+{% include "assets/stripe-init/stripe-init.django" %}
+
+<script type="text/javascript">
+  // @ts-check
+
+  // Using link with event code, amount and currency
+  const create_checkout_session_url = '{% url "billing_event_payment_stripe_create_checkout_session" event_code=event.code amount=total_price currency=currency %}';
+  window.billing_event_payment_stripe_create_checkout_session({
+      STRIPE_PUBLISHABLE_KEY: '{{ settings.STRIPE_PUBLISHABLE_KEY }}',
+      create_checkout_session_url,
+    });
+
+</script>
+
+{% endblock client_scripts %}
+

@@ -1,0 +1,7 @@
+# @changed 2024.03.28, 15:18
+
+- model: sites.site
+  pk: 1
+  fields:
+    domain: "localhost:8000"
+    name: "DdS Local"

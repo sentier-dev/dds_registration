@@ -1,0 +1,45 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module dds_registration/templates/dds_registration/billing/billing_test.html.django
+  @changed 2024.03.28, 16:47
+-->
+
+{% extends "base-regular.html.django" %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Billing (test) — {{ block.super }}{% endblock title %}
+
+{% block content %}
+{{ block.super }}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Billing (test)</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+{% include "assets/render-messages/render-messages.django" %}
+
+<p>Here comes invoice pdf for the event {{ event.title }}...</p>
+
+<p>event: {{ event }}</p>
+<p>registration: {{ registration }}</p>
+<p>optional_text: {{ optional_text }}</p>
+<p>client_name: {{ client_name }}</p>
+<p>client_address: {{ client_address }}</p>
+<p>dds_name: {{ dds_name }}</p>
+<p>dds_address: {{ dds_address }}</p>
+<p>invoice_no: {{ invoice_no }}</p>
+<p>invoice_date: {{ invoice_date }}</p>
+<p>payment_terms: {{ payment_terms }}</p>
+<p>payment_details: {{ payment_details }}</p>
+<p>table_data: {{ table_data }}</p>
+
+<div class="common-actions">
+  <input class="btn btn-primary" type="submit" value="Ok" />
+  {% include "assets/back-button/back-button.django" %}
+</div>
+
+{% endblock content %}

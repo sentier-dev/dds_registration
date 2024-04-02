@@ -27,7 +27,7 @@
 <p>Now you can:</p>
 <ul>
   <li><a href="{% url 'event_registration_payment' event_code=event.code %}">View your payment info</a></li>
-  <li><a href="{% url 'event_registration_invoice' event_code=event.code %}">Download an invoice</a></li>
+  <li><a href="{% url "billing_event_invoice_download" event_code=event.code %}">Download an invoice</a></li>
   <li><a href="{% url 'event_registration_edit' event_code=event_code %}">Edit registration</a></li>
   <li><a href="{% url 'event_registration_cancel' event_code=event_code %}">Cancel registration</a></li>
   <li><a href="{% url 'profile' %}">Go to the profile</a> to view all your registrations.</li>

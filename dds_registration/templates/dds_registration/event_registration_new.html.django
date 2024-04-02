@@ -1,6 +1,6 @@
 {# ex: set ft=htmldjango : #}
 <!--
-  @module profile.html.django
+  @module event_registration_new.html.django
   @changed 2024.03.12, 23:14
 -->
 
@@ -8,14 +8,14 @@
 
 {% load crispy_forms_tags %}
 
-{% block title %}Create new event registration — {{ block.super }}{% endblock title %}
+{% block title %}Register for the event — {{ block.super }}{% endblock title %}
 
 {% block content %}
 {{ block.super }}
 
 <fieldset>
   <legend>
-    <h1 class="page-title primary-color">Create new event registration</h1>
+    <h1 class="page-title primary-color">Register for the event</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
@@ -45,7 +45,7 @@
 
   <fieldset class="mb3 form-group">
     <input class="btn btn-primary" type="submit" value="Save" />
-    <a class="btn btn-default" href="{% url 'index' %}" onClick="history.back(); return false">Back</a>
+    {% include "assets/back-button/back-button.django" %}
   </fieldset>
 
 </form>

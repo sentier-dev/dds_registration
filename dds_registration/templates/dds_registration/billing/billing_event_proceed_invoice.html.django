@@ -1,0 +1,52 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module billing_event_invoice_payment_proceed.html.django
+  @changed 2024.03.28, 16:47
+-->
+
+{% extends "base-regular.html.django" %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Registration complete pending payment — {{ block.super }}{% endblock title %}
+
+{% block content %}
+{{ block.super }}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Registration complete pending payment</h1>
+  </legend>
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</fieldset>
+
+{% include "assets/render-messages/render-messages.django" %}
+
+{% comment %}
+{# Show event/registration info... #}
+<p><span class="item-label">User:</span> {{ user.get_full_name }}</p>
+<p><span class="item-label">Event:</span> {{ event.title }}</p>
+{% if registration %}
+<p><span class="item-label">Registration:</span> {{ registration }}</p>
+{% endif %}
+{% if invoice %}
+<p><span class="item-label">Invoice:</span> {{ invoice }}</p>
+{% endif %}
+{% endcomment %}
+
+<p>The invoice for {{ event.title }} has been mailed to your user account email address. You can also download it directly:</p>
+
+{# Place form... #}
+
+<form role="form" method="post">
+  {% csrf_token %}
+
+  <div class="common-actions">
+    <a class="btn btn-primary" href="{% url "billing_event_invoice_download" event_code=event.code %}" target="_blank">Download invoice</a>
+    <a class="btn btn-default" href="{% url "profile" %}">Go to the profile</a>
+    <a class="btn btn-default" href="{% url "index" %}">Homepage</a>
+  </div>
+
+</form>
+
+{% endblock content %}

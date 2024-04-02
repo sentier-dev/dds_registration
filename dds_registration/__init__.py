@@ -1,3 +1,12 @@
+import stripe
+from django.conf import settings
+
+
+# Initalize stripe api
+stripe.api_key = settings.STRIPE_SECRET_KEY  # 'sk_...'
+
+
+# Project version properties
 __version__ = "0.0.14"
 __timestamp__ = "2024.03.25 19:17 +0700"
 __timetag__ = "240325-1917"

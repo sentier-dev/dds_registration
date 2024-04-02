@@ -25,13 +25,27 @@
 <form class="data-form" method="post">
   {% csrf_token %}
 
+  <div class="event-info mb-3">
+    <p><span class="item-label">Event:</span> {{ event.title }}</p>
+    {% if event.description %}
+    <p><span class="item-label">Description:</span> {{ event.description }}</p>
+    {% endif %}
+    {% if event.registration_open %}
+      <p><span class="item-label">Registration opens:</span> {{ event.registration_open }}</p>
+    {% endif %}
+    {% if event.registration_close %}
+      <p><span class="item-label">Registration closes:</span> {{ event.registration_close }}</p>
+    {% endif %}
+    {# TODO: Add extra information about the event? #}
+  </div>
+
   <input type="hidden" name="event_code" value="{{ event_code }}" />
 
   {% include "assets/event_registration_form/event_registration_form.django" %}
 
   <fieldset class="common-actions mb3 form-group">
     <input class="btn btn-primary" type="submit" value="Save" />
-    <a class="btn btn-default" href="{% url 'index' %}" onClick="history.back(); return false">Back</a>
+    {% include "assets/back-button/back-button.django" %}
     <a class="btn btn-default" href="{% url 'profile' %}">Go to profile</a>
   </fieldset>
 

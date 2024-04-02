@@ -23,13 +23,14 @@ SITE_ID = 1
 env = environ.Env(
     # @see local `.dev` file and example in `.dev.SAMPLE`
     # @see https://django-environ.readthedocs.io
-    DEV=(bool, False),  # Dev server mode
     DEBUG=(bool, False),  # Django debug mode
-    LOCAL=(bool, False),  # Local dev server mode
     SECRET_KEY=(str, ""),
     SENDGRID_API_KEY=(str, ""),
     REGISTRATION_SALT=(str, ""),
     DEFAULT_FROM_EMAIL=(str, "events@d-d-s.ch"),
+    STRIPE_PAYMENT_PRODUCT_NAME=(str, ""),
+    STRIPE_PUBLISHABLE_KEY=(str, ""),
+    STRIPE_SECRET_KEY=(str, ""),
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
@@ -41,18 +42,29 @@ def random_string(length: int = 32) -> str:
     return "".join(random.sample(possibles, length))
 
 
-# Preprocess scss source files wwith django filters
-USE_DJANGO_PREPROCESSORS = DEV = env("DEV")
-DEBUG = LOCAL = env("DEBUG") or env("LOCAL")
+# Dev-time flags
+DEBUG = env("DEBUG")
+DEV = DEBUG
+LOCAL = DEBUG
 
+# Preprocess scss source files with django filters
+USE_DJANGO_PREPROCESSORS = False  # LOCAL
+
+# Secrets
 SECRET_KEY = env("SECRET_KEY")
 REGISTRATION_SALT = env("REGISTRATION_SALT")
 SENDGRID_API_KEY = env("SENDGRID_API_KEY")
+STRIPE_PAYMENT_PRODUCT_NAME = env("STRIPE_PAYMENT_PRODUCT_NAME")
+STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY")
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 
 SECRETS = [
     (SECRET_KEY, "SECRET_KEY"),
     (REGISTRATION_SALT, "REGISTRATION_SALT"),
     (SENDGRID_API_KEY, "SENDGRID_API_KEY"),
+    (STRIPE_PAYMENT_PRODUCT_NAME, "STRIPE_PAYMENT_PRODUCT_NAME"),
+    (STRIPE_PUBLISHABLE_KEY, "STRIPE_PUBLISHABLE_KEY"),
+    (STRIPE_SECRET_KEY, "STRIPE_SECRET_KEY"),
 ]
 
 for key, label in SECRETS:
@@ -110,8 +122,12 @@ COMPRESS_PRECOMPILERS = (
 )
 
 # These settings already exist in `default_settings.py` Should we remove those?
-ALLOWED_HOSTS = ["events.d-d-s.ch"]
-CSRF_TRUSTED_ORIGINS = ["https://events.d-d-s.ch"]
+ALLOWED_HOSTS = [
+    "events.d-d-s.ch",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://events.d-d-s.ch",
+]
 
 if LOCAL:
     # Allow work with local server in local dev mode
@@ -334,6 +350,9 @@ PASS_VARIABLES = {
     "DEV": DEV,  # Dev server mode (from the environment)
     "LOCAL": LOCAL,  # Local dev server mode (from the environment)
     "USE_DJANGO_PREPROCESSORS": USE_DJANGO_PREPROCESSORS,
+    "STRIPE_PAYMENT_PRODUCT_NAME": STRIPE_PAYMENT_PRODUCT_NAME,
+    "STRIPE_PUBLISHABLE_KEY": STRIPE_PUBLISHABLE_KEY,
+    "DEFAULT_FROM_EMAIL": DEFAULT_FROM_EMAIL,
     # NOTE: Site url and name could be taken from site data via `get_current_site`
     "SITE_NAME": SITE_NAME,
     "SITE_TITLE": SITE_TITLE,

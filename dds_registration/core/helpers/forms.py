@@ -4,7 +4,7 @@ from django.forms import ModelForm
 from django.contrib import messages
 from django.http import HttpRequest
 
-from .core.helpers.utils import capitalize_id
+from .utils import capitalize_id
 
 
 __all__ = [
@@ -22,7 +22,7 @@ def pass_form_errors_to_messages(request: HttpRequest, form: ModelForm):
     if len(error_items):
         # TODO: Show errors?
         # Data example: {'name': ['This field is required.'], 'email': ['This field is required.']}
-        LOG("Form has errors")
+        LOG.error("Form has errors")
         # Pass messages to the client...
         for error, texts in error_items:
             msg = capitalize_id(error) + ": " + " ".join(texts)

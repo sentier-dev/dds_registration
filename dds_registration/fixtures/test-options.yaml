@@ -1,0 +1,19 @@
+# @changed 2024.03.28, 15:18
+
+- model: dds_registration.registrationoption
+  pk: 1
+  fields:
+    id: 1
+    item: "Registration"
+    price: 100
+    currency: "USD"
+    event_id: 1
+
+- model: dds_registration.registrationoption
+  pk: 2
+  fields:
+    id: 2
+    item: "T-Shirt"
+    price: 10
+    currency: "USD"
+    event_id: 1

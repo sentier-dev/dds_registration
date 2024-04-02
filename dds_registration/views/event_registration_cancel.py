@@ -15,6 +15,7 @@ import logging
 from ..core.helpers.errors import errorToString
 
 from ..models import (
+    REGISTRATION_ACTIVE_QUERY,
     Event,
     Registration,
 )
@@ -34,7 +35,7 @@ def send_event_registration_cancelled_message(request: HttpRequest, context: dic
     user = request.user
 
     try:
-        LOG.debug("start: %s", context)
+        # LOG.debug("start: %s", context)
         subject = render_to_string(
             template_name=email_subject_template,
             context=context,
@@ -50,7 +51,7 @@ def send_event_registration_cancelled_message(request: HttpRequest, context: dic
             "subject": subject,
             "body": body,
         }
-        LOG.debug("mail_user: %s", context)
+        # LOG.debug("mail_user: %s", context)
         user.email_user(subject, body, settings.DEFAULT_FROM_EMAIL)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
@@ -105,7 +106,7 @@ def get_event_registration_cancel_context(request: HttpRequest, event_code: str)
     # Try to find active registrations for this event (prevent constrain exception)...
     try:
         # TODO: Go to the next stage with a message text?
-        regs = Registration.objects.filter(event=event, user=user, active=True)
+        regs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, event=event, user=user)
         regs_count = len(regs)
         has_reg = bool(regs_count)
         if not has_reg:
@@ -140,12 +141,12 @@ def get_event_registration_cancel_context(request: HttpRequest, event_code: str)
         debug_data = {
             "registration": registration,
         }
-        LOG.debug("Object data: %s", debug_data)
+        # LOG.debug("Object data: %s", debug_data)
         context["registration"] = registration
 
     # Final step: prepare data, save created registration, render form...
     try:
-        LOG.debug("Successfully got context: %s", context)
+        # LOG.debug("Successfully got context: %s", context)
         context["success"] = True
         return context
     except Exception as err:
@@ -197,7 +198,7 @@ def event_registration_cancel_process_action(
         return redirect("profile")
     # Else (on success) make a registration record inactive and go to profile page with a message...
     registration: Registration = context["registration"]
-    registration.active = False
+    registration.status = "WITHDRAWN"
     registration.save()
     # Send an email message?
     send_event_registration_cancelled_message(request, context)

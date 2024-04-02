@@ -1,6 +1,6 @@
 /**
  * @module styles.scss
- * @changed 2024.03.21, 16:50
+ * @changed 2024.03.30, 17:56
  */
 
 @import 'common/common.scss';
@@ -23,3 +23,5 @@
 
 @import 'events-list-table/events-list-table.scss';
 @import 'events-list-block/events-list-block.scss';
+
+@import 'membership-choose-list/membership-choose-list.scss';

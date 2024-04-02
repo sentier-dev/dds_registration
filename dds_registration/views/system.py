@@ -24,17 +24,17 @@ class RobotsView(TemplateView):
 
 
 def page403(request, *args, **argv):
-    LOG.debug("403 error")
+    LOG.error("403 error")
     return render(request, "403.html", {}, status=403)
 
 
 def page404(request, *args, **argv):
-    LOG.debug("404 error")
+    LOG.error("404 error")
     return render(request, "404.html", {}, status=404)
 
 
 def page500(request, *args, **argv):
-    LOG.debug("500 error")
+    LOG.error("500 error")
     return render(request, "500.html", {}, status=500)
 
 

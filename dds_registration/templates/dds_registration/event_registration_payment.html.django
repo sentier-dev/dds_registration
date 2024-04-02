@@ -22,20 +22,23 @@
 
 {% include "assets/render-messages/render-messages.django" %}
 
-<p>Here comes payment info for the event <strong>{{ event.title }}</strong> ({{ event.code }}):</p>
+<p>You are almost ready to finish your registration for the event <strong>{{ event.title }}</strong>{% if settings.DEV %} <i>({{ event.code }})</i>{% endif %}:</p>
 
-<p>Your options:</p>
+<p>Your option:</p>
 
 <ul>
-{% for option in registration.options.all %}
-  <li>{{ option.item }} {% if option.price %}({% if event.currency %}{{ event.currency }}{% endif %} {{ option.price }}){% endif %}</li>
-{% empty %}
-  <li>No options were set</li>
-{% endfor -%}
+{% with option=registration.option %}
+  <li>{{ option.item }} {% if option.price %}({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}</li>
+{% endwith %}
 </ul>
 
-<p>Total amount due: <strong>{% if event.currency %}{{ event.currency }}{% endif %} {{ total_price }}</strong></p>
+<form method="get" action="{% url "billing_event_invoice_download" event_code=event.code %}">
+  {% csrf_token %}
 
-<p>Download <a href="{% url 'event_registration_invoice' event_code=event.code %}">invoice</a>.</li>
+  <p>Explanation text for invoice download option</p>
+
+  <input class="btn btn-primary" type="submit" value="Download invoice" />
+
+</form>
 
 {% endblock content %}

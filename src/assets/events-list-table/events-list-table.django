@@ -12,8 +12,9 @@
         <th class="col-event" rowspan="2" scope="col">Event</th>
         <th class="col-participants" rowspan="2" scope="col">Participants</th>
         <th class="col-registration" colspan="2" scope="col" align="center">Registration</th>
-        <th class="col-payment" rowspan="2" scope="col">Payment</th>
         <th class="col-options" rowspan="2" scope="col">Options</th>
+        <th class="col-payment" rowspan="2" scope="col">Payment method</th>
+        <th class="col-invoice" rowspan="2" scope="col">Invoice no</th>
         <th class="col-paid" rowspan="2" scope="col">Paid</th>
         <th class="col-actions" rowspan="2" scope="col">Actions</th>
       </tr>
@@ -23,43 +24,54 @@
       </tr>
     </thead>
     <tbody>
+  {# See preparation of the events list in `dds_registration/views/helpers.py:get_events_list` #}
   {% for event_info in events %}
-    {% with event=event_info.event registration=event_info.registration %}
+    {% with event=event_info.event registration=event_info.registration invoice=event_info.invoice %}
       <tr data-event-code="{{ event.code }}">
         <th class="col-event" scope="row">
           {{ event.title }}
         </th>
         <td class="col-participants">
           {% if event.max_participants > 0 %}
-            {{event.get_active_registrations.count}}/{{event.max_participants}}
+            {{ event.get_active_registrations.count }}/{{ event.max_participants }}
           {% endif %}
         </td>
         <td class="col-opens">
           {% if event.registration_open %}
-            {{event.registration_open}}
+            {{ event.registration_open }}
           {% endif %}
         </td>
         <td class="col-closes">
           {% if event.registration_close %}
-            {{event.registration_close}}
+            {{ event.registration_close }}
           {% endif %}
         </td>
-        <td class="col-payment">
-          {{ registration.get_payment_method_display }}
-        </td>
         <td class="col-options">
+          {% with option=registration.option %}
+          <div>{{ option.item }} {% if option.price %}({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}</div>
+          {% endwith %}
+          {% comment %}
+          {# XXX: Multiple options approach #}
           {% for option in registration.options.all %}
           <div>{{ option.item }} {% if option.price %}({{ option.price }}){% endif %}</div>
           {% empty %}
             —
           {% endfor %}
+          {% endcomment %}
+        </td>
+        <td class="col-payment">
+          {{ invoice.get_payment_method_display }}
+        </td>
+        <td class="col-payment">
+          {{ invoice.invoice_no }}
         </td>
         <td class="col-paid">
-          {% if registration.paid %}Yes{% else %}No{% endif %}
+          {% if invoice.is_paid %}Yes{% else %}No{% endif %}
         </td>
         <td class="col-actions">
           <div class="col-actions-wrapper">
-            <a class="btn btn-primary btn-icon" title="Download a pdf invoice" target="_blank" href="{% url 'event_registration_invoice' event_code=event.code %}">
+            {# TODO: Check if invoice exist to allow download it #}
+            <a class="btn btn-primary btn-icon" title="Download a pdf invoice" target="_blank" href="{% url "billing_event_invoice_download" event_code=event.code %}">
               <i class="bi bi-filetype-pdf"></i>
             </a>
             <a class="btn btn-primary btn-icon" title="Edit registration" href="{% url 'event_registration_edit' event_code=event.code %}">
