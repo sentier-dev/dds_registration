@@ -4,24 +4,19 @@
 import logging
 import traceback
 
+import requests
+import stripe
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest
+from django.http import HttpRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
 
-import stripe
-
-from django.conf import settings
-from django.http import HttpRequest
-
-from .helpers.create_stripe_return_url import create_stripe_return_url
-
+from .. import settings
 from ..core.helpers.errors import errorToString
-
 from .get_invoice_context import get_event_invoice_context
-
+from .helpers.create_stripe_return_url import create_stripe_return_url
 
 LOG = logging.getLogger(__name__)
 
@@ -148,6 +143,11 @@ def billing_event_stripe_payment_success(request: HttpRequest, event_code: str, 
             messages.error(request, "Your payment was unsuccessfull")
             return redirect("billing_event", event_code=event_code)
         messages.success(request, "Your payment successfully proceed")
+        if settings.SLACK_WEBHOOK:
+            requests.post(
+                url=settings.SLACK_WEBHOOK,
+                json={"text": "Membership payment for {} of €{}".format(request.user.get_full_name(), total_price)},
+            )
         # Update invoice status
         invoice.status = "PAID"
         # TODO: To save some payment details to invoice?

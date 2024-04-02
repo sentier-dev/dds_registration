@@ -37,19 +37,18 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    # dependencies as strings with quotes, e.g. "foo"
-    # You can add version requirements like "foo>2.0"
-    "django>=5.0",
-    "django-timezone-field>=3.1",
+    "crispy-bootstrap5>=2024.2",
     "django-compressor>=4.4",
+    "django-crispy-forms>=2.1",
+    "django-environ>=0.11.2",
     "django-livereload-server>=0.5.1",
     "django-preferences>=1.0.0",
-    "django-crispy-forms>=2.1",
-    "crispy-bootstrap5>=2024.2",
-    "django-environ>=0.11.2",
     "django-registration>=3.4", # @see https://django-registration.readthedocs.io
-    "sendgrid>=6.11.0", # @see https://docs.sendgrid.com/for-developers/sending-email/django
+    "django-timezone-field>=3.1",
+    "django>=5.0",
     "fpdf2>=2.7.8", # @see https://github.com/py-pdf/fpdf2
+    "requests",
+    "sendgrid>=6.11.0", # @see https://docs.sendgrid.com/for-developers/sending-email/django
     "stripe>=8.9.0",
 ]
 
