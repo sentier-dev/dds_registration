@@ -20,10 +20,7 @@ from .helpers.create_stripe_return_url import create_stripe_return_url
 
 from ..core.helpers.errors import errorToString
 
-
-from .get_invoice_context import (
-    get_event_invoice_context,
-)
+from .get_invoice_context import get_event_invoice_context
 
 
 LOG = logging.getLogger(__name__)
@@ -39,6 +36,10 @@ def billing_event_payment_stripe_create_checkout_session(
     """
     Create stripe session.
     Called from js code on checkout page.
+
+    TODO: To use `PaymentIntent` instead of `checkout.Session`?
+
+    @see: https://docs.stripe.com/payments/accept-a-payment?platform=web&ui=elements
     """
     try:
         product_data = {
@@ -151,9 +152,6 @@ def billing_event_stripe_payment_success(request: HttpRequest, event_code: str, 
         invoice.status = "PAID"
         # TODO: To save some payment details to invoice?
         invoice.save()
-        # TODO:
-        # Send email message?
-        # Smth else?
         template = "dds_registration/billing/billing_event_stripe_payment_success.html.django"
         return render(request, template, context)
     except Exception as err:

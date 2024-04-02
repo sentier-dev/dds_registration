@@ -1,11 +1,9 @@
 {# ex: set ft=htmldjango : #}
 
-{% with site_name=site.name %}
 You (or someone pretending to be you) have asked
-to register an account at {{ site_name }}.
+to register an account at {{ site.name }}.
 If this wasn't you, please ignore this email
 and your address will be removed from our records.
-{% endwith %}
 
 To activate this account, please click
 the following link within the next {{ expiration_days }} days:
@@ -13,7 +11,6 @@ the following link within the next {{ expiration_days }} days:
 {{ scheme }}://{{site.domain}}{% url 'django_registration_activate' activation_key %}
 
 Sincerely, {{ site.name }} Management
-
 {% comment %}
 @see https://django-registration.readthedocs.io/en/latest/quickstart.html#django-registration-activation-email-body-txt
 
