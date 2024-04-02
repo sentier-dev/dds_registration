@@ -182,7 +182,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
                 LOG.info("%s (redirecting): %s", msg_text, debug_data)
                 messages.info(request, msg_text)
                 # TODO: Already exists redirect?
-                context["redirect"] = "SUCCESS"
+                context["redirect"] = "profile"
                 return context
             else:
                 reg = regs[0]
