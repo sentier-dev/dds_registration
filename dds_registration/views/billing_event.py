@@ -79,11 +79,11 @@ def billing_event(request: HttpRequest, event_code: str):
             if form.is_valid():
                 cleaned_data = form.cleaned_data
                 invoice = form.save()
-                debug_data = {
-                    "cleaned_data": cleaned_data,
-                    "invoice": invoice,
-                }
-                LOG.debug("Get form data: %s", debug_data)
+                #  debug_data = {
+                #      "cleaned_data": cleaned_data,
+                #      "invoice": invoice,
+                #  }
+                #  LOG.debug("Get form data: %s", debug_data)
                 new_verb = "created" if is_new else "updated"
                 messages.success(request, "Invoice has been successfully " + new_verb)
                 # TODO: What if changing an existing invoice and the `payment_method` parameter has changed? Should we provide for actions in such a case?

@@ -84,6 +84,10 @@ class User(AbstractUser):
             self._original_username = self.username
             # TODO: To do smth else if email has changed?
 
+    def get_full_name_or_email(self):
+        name = self.get_full_name()
+        return name if name else self.email
+
     def get_full_name_with_email(self):
         name = self.get_full_name()
         email = self.email

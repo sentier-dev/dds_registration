@@ -1,0 +1,20 @@
+{# ex: set ft=htmldjango : #}
+Hi {{ user.get_full_name }}!
+
+Thanks for registering for DdS Membership!
+
+{% if invoice.payment_method == "STRIPE" %}You have chosen to pay by credit card.
+
+{% elif invoice.payment_method == "INVOICE" %}You have chosen to pay by bank transfer.
+
+{% endif %}The payment option you have chosen: {% with option=registration.option %}{{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}{% endwith %}.
+
+Your invoice is attached, but can also be download anytime at {{ scheme }}://{{site.domain}}{% url 'billing_membership_invoice_download' membership_code=membership.code %}.
+
+If you need to change your payment method (e.g. pay by {% if invoice.payment_method == "INVOICE" %}credit card{% else %}by bank transfer{% endif %}), you can do that at {{ scheme }}://{{site.domain}}{% url 'billing_membership' membership_code=membership.code %}.
+
+Please note that payment must be made with {{ payment_deadline_days }} days.
+
+If you have questions or comments, you can reach us at {{ settings.DEFAULT_FROM_EMAIL }}.
+
+Sincerely, {{ site.name }} Management
