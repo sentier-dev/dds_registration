@@ -17,6 +17,8 @@ from ..core.helpers.errors import errorToString
 from ..forms import BillingMembershipForm
 from ..models import Invoice, Membership
 
+from .membership import send_membership_registration_success_message
+
 
 LOG = logging.getLogger(__name__)
 
@@ -78,6 +80,8 @@ def billing_membership(request: HttpRequest, membership_type: str):
                 membership.invoice = invoice  # Link the invoice
                 #  membership.status = "PAYMENT_PENDING"  # Change the status -- now we're expecting the payment
                 membership.save()
+                # Send an e-mail message...
+                send_membership_registration_success_message(request)
                 # Redirect to invoice downloading or to payment page?
                 if invoice.payment_method == "INVOICE":
                     return redirect("billing_membership_invoice_payment_proceed")

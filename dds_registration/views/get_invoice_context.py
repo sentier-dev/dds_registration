@@ -10,8 +10,6 @@ from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpRequest
 
-from dds_registration.views.membership import get_membership_cost
-
 from ..core.constants.date_time_formats import dateFormat
 from ..core.constants.payments import (
     payment_details_by_currency,
@@ -30,9 +28,9 @@ from ..models import (
     Invoice,
     Membership,
 )
-from .helpers.events import (
-    calculate_total_registration_price,
-)
+from .helpers.events import calculate_total_registration_price
+from .helpers.get_membership_cost import get_membership_cost
+
 
 LOG = logging.getLogger(__name__)
 
@@ -315,11 +313,13 @@ def get_membership_invoice_context(request: HttpRequest):
         today = date.today()
         invoice_date = today.strftime(dateFormat)
         invoice_no = invoice.invoice_no  # if invoice else "Unknown"
-        payment_terms = "Within **{} business days** of invoice issuance".format(default_payment_deadline_days)
+        payment_deadline_days = default_payment_deadline_days
+        payment_terms = "Within **{} business days** of invoice issuance".format(payment_deadline_days)
         payment_details = payment_details_by_currency[currency]
         # TInvoicePdfParams data...
         context["total_price"] = get_membership_cost(membership)
         context["currency"] = currency
+        context["payment_deadline_days"] = payment_deadline_days
         context["optional_text"] = optional_text
         context["client_name"] = client_name
         context["client_address"] = client_address
