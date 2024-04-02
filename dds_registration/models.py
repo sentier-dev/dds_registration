@@ -1,14 +1,13 @@
 # @module models.py
 # @changed 2024.03.28, 19:28
 
+import base64
 import random
 import string
 from datetime import date
-from functools import partial
-from io import BytesIO
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, Group
+from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site  # To access site properties
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -18,13 +17,11 @@ from fpdf import FPDF
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import (
     Attachment,
-    Content,
     Disposition,
     FileContent,
     FileName,
     FileType,
     Mail,
-    To,
 )
 
 from dds_registration.core.constants.payments import (
@@ -95,10 +92,6 @@ class User(AbstractUser):
             self._original_username = self.username
             # TODO: To do smth else if email has changed?
 
-    def get_full_name_or_email(self):
-        name = self.get_full_name()
-        return name if name else self.email
-
     def get_full_name_with_email(self):
         name = self.get_full_name()
         email = self.email
@@ -142,7 +135,12 @@ class User(AbstractUser):
     ) -> None:
         sg = SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
         message = Mail(
-            from_email=settings.DEFAULT_FROM_EMAIL, to_emails=self.email, subject=subject, html_content=message
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to_emails=self.email,
+            subject=subject,
+            # NOTE: We use only plain text templates
+            plain_text_content=message,
+            #  html_content=message,
         )
         if attachment_content is None or attachment_name is None:
             pass
