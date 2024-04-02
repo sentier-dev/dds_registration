@@ -81,6 +81,11 @@ class DdsRegistrationForm(BaseRegistrationForm):
             "password2": forms.PasswordInput(attrs={"class": "form-control"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True
+
 
 class RegistrationOptionAdminForm(ModelForm):
     class Meta:
@@ -159,6 +164,11 @@ class UpdateUserForm(forms.ModelForm):
             "address",
             #  'is_active',  # ???
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True
 
 
 # Issue #63: Temporarily unused
