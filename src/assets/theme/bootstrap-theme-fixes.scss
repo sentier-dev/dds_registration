@@ -1,6 +1,6 @@
 /**
  * @module bootstrap-theme-fixes
- * @changed 2024.03.08, 17:13
+ * @changed 2024.04.02, 16:21
  */
 
 @use 'sass:color';
@@ -26,7 +26,7 @@
   // --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: #{$primaryDarkColor}; // #0b5ed7;
   --bs-btn-hover-border-color: #{$primaryDarkenColor}; // #0a58ca;
-  // --bs-btn-focus-shadow-rgb: 49, 132, 253;
+  --bs-btn-focus-shadow-rgb: #{$primaryLightColor}; // #3184fd; // 49, 132, 253;
   // --bs-btn-active-color: #fff;
   --bs-btn-active-bg: #{$primaryDarkenColor}; // #0a58ca;
   --bs-btn-active-border-color: #{$primaryDarkenColor}; // #0a53be;
@@ -34,6 +34,23 @@
   // --bs-btn-disabled-color: #fff;
   --bs-btn-disabled-bg: #{$primaryColor}; // #0d6efd;
   --bs-btn-disabled-border-color: #{$primaryColor}; // #0d6efd;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: #{$primaryColor}; // #0d6efd
+  --bs-btn-border-color: #{$primaryColor}; // #0d6efd
+  // --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #{$primaryColor}; // #0d6efd
+  --bs-btn-hover-border-color: #{$primaryColor}; // #0d6efd
+  --bs-btn-focus-shadow-rgb: #{$primaryColor}; // #0d6efd
+  // --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #{$primaryColor}; // #0d6efd
+  --bs-btn-active-border-color: #{$primaryColor}; // #0d6efd
+  // --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #{$primaryColor}; // #0d6efd
+  // --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: #{$primaryColor}; // #0d6efd
+  // --bs-gradient: none;
 }
 
 .progress, .progress-stacked {

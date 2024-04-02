@@ -87,7 +87,7 @@ body {
 
 /**
  * @module bootstrap-theme-fixes
- * @changed 2024.03.08, 17:13
+ * @changed 2024.04.02, 16:21
  */
 /* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
  * - xs: 0
@@ -110,9 +110,22 @@ body {
   --bs-btn-border-color: #486;
   --bs-btn-hover-bg: #375;
   --bs-btn-hover-border-color: #24533c;
+  --bs-btn-focus-shadow-rgb: #8a9;
   --bs-btn-active-bg: #24533c;
   --bs-btn-active-border-color: #24533c;
   --bs-btn-disabled-bg: #486;
+  --bs-btn-disabled-border-color: #486;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: #486;
+  --bs-btn-border-color: #486;
+  --bs-btn-hover-bg: #486;
+  --bs-btn-hover-border-color: #486;
+  --bs-btn-focus-shadow-rgb: #486;
+  --bs-btn-active-bg: #486;
+  --bs-btn-active-border-color: #486;
+  --bs-btn-disabled-color: #486;
   --bs-btn-disabled-border-color: #486;
 }
 
