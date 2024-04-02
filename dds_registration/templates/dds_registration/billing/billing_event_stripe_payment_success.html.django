@@ -32,7 +32,7 @@
 
 <div class="common-actions">
   <a class="btn btn-primary" href="{% url "profile" %}">Go to the profile</a>
-  <a class="btn btn-default" href="{% url "billing_event_invoice_download" event_code=event.code %}" target="_blank">Download invoice</a>
+  <a class="btn btn-outline-primary" href="{% url "billing_event_invoice_download" event_code=event.code %}" target="_blank">Download invoice</a>
   {% comment %}
     <input class="btn btn-primary" type="submit" value="Ok" />
     {% include "assets/back-button/back-button.django" %}

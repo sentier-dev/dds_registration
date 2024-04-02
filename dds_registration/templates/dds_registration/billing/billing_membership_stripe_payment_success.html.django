@@ -27,7 +27,7 @@
 
 <div class="common-actions">
   <a class="btn btn-primary" href="{% url "profile" %}">Go to the profile</a>
-  <a class="btn btn-default" href="{% url "billing_membership_invoice_download" %}" target="_blank">Download invoice</a>
+  <a class="btn btn-outline-primary" href="{% url "billing_membership_invoice_download" %}" target="_blank">Download invoice</a>
 </div>
 
 {% endblock content %}

@@ -30,9 +30,9 @@
     <div class="common-actions">
       <input type="submit" class="btn btn-primary" value="Save" />
       {% include "assets/back-button/back-button.django" %}
-      <button type="reset" class="btn btn-default">Reset changes</button>
-      <a class="btn btn-link" href="{% url 'password_change' %}">Change password</a>
-      <a class="btn btn-link" href="{% url 'password_reset' %}">Reset password</a>
+      <button type="reset" class="btn btn-outline-primary">Reset changes</button>
+      <a class="btn btn-link btn-outline-primary" href="{% url 'password_change' %}">Change password</a>
+      <a class="btn btn-link btn-outline-primary" href="{% url 'password_reset' %}">Reset password</a>
     </div>
 </form>
 
