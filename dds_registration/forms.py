@@ -25,13 +25,9 @@ class BillingInvoiceForm(ModelForm):
             "name",
             "address",
             "payment_method",
+            #  "currency",  # TODO: Hide currency for `BillingEventForm`: it should come from event registration option
             "extra_invoice_text",
         ]
-        help_texts = {
-            "name": "In case it needs to be different on the invoice or receipt.",
-            "address": "In case it needs to be different on the invoice or receipt.",
-            "extra_invoice_text": "For things like reference or purchase order numbers.",
-        }
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "address": forms.Textarea(attrs={"class": "form-control", "rows": 5}),

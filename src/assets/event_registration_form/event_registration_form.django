@@ -47,7 +47,7 @@
           >
           <label class="form-check-label" for="option-{{ option.id }}">
             {{ option.item }} {% if option.price %}
-              ({{ option.price }})
+              ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }})
             {% endif %} {% if option.add_on %}
                <i class="bi bi-plus-square-fill primary-color"></i>
             {% endif %}
