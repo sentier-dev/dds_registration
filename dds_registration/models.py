@@ -132,7 +132,7 @@ class User(AbstractUser):
         self,
         subject: str,
         message: str,
-        attachment_content: FPDF | BytesIO | None = None,
+        attachment_content: FPDF | None = None,
         attachment_name: str | None = None,
         from_email: str | None = None,
     ) -> None:
@@ -140,15 +140,11 @@ class User(AbstractUser):
         message = Mail(
             from_email=settings.DEFAULT_FROM_EMAIL, to_emails=self.email, subject=subject, html_content=message
         )
-        if attachment_content is None:
+        if attachment_content is None or attachment_name is None:
             pass
-        elif attachment_name is None:
-            raise ValueError
         else:
-            if isinstance(attachment_content, FPDF):
-                attachment_content = BytesIO(attachment_content.output(dest="S"))
             attachment = Attachment()
-            attachment.file_content = FileContent(attachment_content)
+            attachment.file_content = FileContent(base64.b64encode(attachment_content.output()).decode())
             attachment.file_type = FileType("application/pdf")
             attachment.file_name = FileName(attachment_name)
             attachment.disposition = Disposition("attachment")
