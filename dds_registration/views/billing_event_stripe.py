@@ -46,13 +46,13 @@ def start_stripe_payment_intent(
             "amount": amount,
         }
         # @see https://docs.stripe.com/api/metadata
-        metadata =dict(payment_data, **extra_metadata)
+        metadata = dict(payment_data, **extra_metadata)
         amount_in_cents = round(amount * 100)
         # @see https://docs.stripe.com/api/payment_intents/create
         session = stripe.PaymentIntent.create(
             amount=amount_in_cents,
             currency=currency,
-            automatic_payment_methods={"enabled": True},
+            #  automatic_payment_methods={"enabled": True},  # This is default
             metadata=metadata,
         )
         #  Reponse example (see https://docs.stripe.com/api/payment_intents/object):
