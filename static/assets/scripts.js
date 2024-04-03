@@ -34,104 +34,252 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-(function () {
-    window.billing_event_payment_stripe_create_checkout_session =
-        function billing_event_payment_stripe_create_checkout_session(params) {
-            var STRIPE_PUBLISHABLE_KEY = params.STRIPE_PUBLISHABLE_KEY, create_checkout_session_url = params.create_checkout_session_url;
-            console.log('[billing_event_payment_stripe_create_checkout_session]', {
-                STRIPE_PUBLISHABLE_KEY: STRIPE_PUBLISHABLE_KEY,
-                create_checkout_session_url: create_checkout_session_url
-            });
-            // Initialize Stripe.js
-            var stripe = window.Stripe(STRIPE_PUBLISHABLE_KEY);
-            initialize();
-            // Fetch Checkout Session and retrieve the client secret
-            function initialize() {
-                return __awaiter(this, void 0, void 0, function () {
-                    var fetchClientSecret, checkout;
-                    var _this = this;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                fetchClientSecret = function () { return __awaiter(_this, void 0, void 0, function () {
-                                    var response, clientSecret;
-                                    return __generator(this, function (_a) {
-                                        switch (_a.label) {
-                                            case 0: return [4 /*yield*/, fetch(create_checkout_session_url, {
-                                                    method: 'POST'
-                                                })];
-                                            case 1:
-                                                response = _a.sent();
-                                                return [4 /*yield*/, response.json()];
-                                            case 2:
-                                                clientSecret = (_a.sent()).clientSecret;
-                                                return [2 /*return*/, clientSecret];
-                                        }
-                                    });
-                                }); };
-                                return [4 /*yield*/, stripe.initEmbeddedCheckout({
-                                        fetchClientSecret: fetchClientSecret
-                                    })];
-                            case 1:
-                                checkout = _a.sent();
-                                // Mount Checkout
-                                checkout.mount('#checkout');
-                                return [2 /*return*/];
-                        }
-                    });
+/**
+ * @module billing_event_stripe_payment_proceed.ts
+ * @changed 2024.04.03, 17:13
+ */
+define("stripe-init/billing_event_stripe_payment_proceed", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.billing_event_stripe_payment_proceed = void 0;
+    var test = 77;
+    // Export function to the global scope...
+    // window.billing_event_stripe_payment_proceed =
+    function billing_event_stripe_payment_proceed(params) {
+        var STRIPE_PUBLISHABLE_KEY = params.STRIPE_PUBLISHABLE_KEY, success_url = params.success_url, client_secret = params.client_secret;
+        console.log('[billing_event_stripe_payment_proceed]', {
+            STRIPE_PUBLISHABLE_KEY: STRIPE_PUBLISHABLE_KEY,
+            client_secret: client_secret,
+            success_url: success_url,
+        });
+        // Initialize Stripe.js
+        var stripe = window.Stripe(STRIPE_PUBLISHABLE_KEY);
+        /** Form action */
+        function submitForm(elements, event) {
+            return __awaiter(this, void 0, void 0, function () {
+                var error, messageContainer;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            event.preventDefault();
+                            console.log('[billing_event_stripe_payment_proceed:startElements:submit] check', {
+                                event: event,
+                                params: params,
+                                stripe: stripe,
+                                elements: elements,
+                                // options,
+                                // paymentElement,
+                                // form,
+                            });
+                            debugger;
+                            return [4 /*yield*/, stripe.confirmPayment({
+                                    //`Elements` instance that was used to create the Payment Element
+                                    elements: elements,
+                                    confirmParams: {
+                                        return_url: success_url, // 'https://example.com/order/123/complete',
+                                    },
+                                })];
+                        case 1:
+                            error = (_a.sent()).error;
+                            console.log('[billing_event_stripe_payment_proceed:startElements:submit] checked', {
+                                error: error,
+                                event: event,
+                                params: params,
+                                stripe: stripe,
+                                // elements,
+                                // options,
+                                // paymentElement,
+                                // form,
+                            });
+                            debugger;
+                            if (error) {
+                                console.log('[billing_event_stripe_payment_proceed:startElements:submit] error', {
+                                    error: error,
+                                    event: event,
+                                    params: params,
+                                    stripe: stripe,
+                                    // elements,
+                                    // options,
+                                    // paymentElement,
+                                    // form,
+                                });
+                                debugger;
+                                messageContainer = document.querySelector('#error-message');
+                                if (messageContainer) {
+                                    messageContainer.textContent = error.message || '';
+                                }
+                            }
+                            else {
+                                // Your customer will be redirected to your `return_url`. For some payment
+                                // methods like iDEAL, your customer will be redirected to an intermediate
+                                // site first to authorize the payment, then redirected to the `return_url`.
+                                console.log('[billing_event_stripe_payment_proceed:startElements:submit] success', {
+                                    success_url: success_url,
+                                    event: event,
+                                    params: params,
+                                    stripe: stripe,
+                                    // elements,
+                                    // options,
+                                    // paymentElement,
+                                    // form,
+                                });
+                                debugger;
+                                window.location.href = success_url;
+                            }
+                            return [2 /*return*/];
+                    }
                 });
-            }
-        };
-})();
-(function () {
-    window.billing_membership_payment_stripe_create_checkout_session =
-        function billing_membership_payment_stripe_create_checkout_session(params) {
-            var STRIPE_PUBLISHABLE_KEY = params.STRIPE_PUBLISHABLE_KEY, create_checkout_session_url = params.create_checkout_session_url;
-            console.log('[billing_membership_payment_stripe_create_checkout_session]', {
-                STRIPE_PUBLISHABLE_KEY: STRIPE_PUBLISHABLE_KEY,
-                create_checkout_session_url: create_checkout_session_url
             });
-            // Initialize Stripe.js
-            var stripe = window.Stripe(STRIPE_PUBLISHABLE_KEY);
-            initialize();
-            // Fetch Checkout Session and retrieve the client secret
-            function initialize() {
-                return __awaiter(this, void 0, void 0, function () {
-                    var fetchClientSecret, checkout;
-                    var _this = this;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                fetchClientSecret = function () { return __awaiter(_this, void 0, void 0, function () {
-                                    var response, clientSecret;
-                                    return __generator(this, function (_a) {
-                                        switch (_a.label) {
-                                            case 0: return [4 /*yield*/, fetch(create_checkout_session_url, {
-                                                    method: 'POST'
-                                                })];
-                                            case 1:
-                                                response = _a.sent();
-                                                return [4 /*yield*/, response.json()];
-                                            case 2:
-                                                clientSecret = (_a.sent()).clientSecret;
-                                                return [2 /*return*/, clientSecret];
-                                        }
-                                    });
-                                }); };
-                                return [4 /*yield*/, stripe.initEmbeddedCheckout({
-                                        fetchClientSecret: fetchClientSecret
-                                    })];
-                            case 1:
-                                checkout = _a.sent();
-                                // Mount Checkout
-                                checkout.mount('#checkout');
-                                return [2 /*return*/];
-                        }
-                    });
+        }
+        startElements();
+        // initializeCheckout();
+        function startElements() {
+            var options = {
+                clientSecret: client_secret,
+                // Fully customizable with appearance API.
+                appearance: { /*...*/},
+            };
+            console.log('[billing_event_stripe_payment_proceed:startElements] started', {
+                options: options,
+                STRIPE_PUBLISHABLE_KEY: STRIPE_PUBLISHABLE_KEY,
+                client_secret: client_secret,
+                success_url: success_url,
+                stripe: stripe,
+                params: params,
+            });
+            // debugger;
+            // Set up Stripe.js and Elements to use in checkout form, passing the client secret obtained in a previous step
+            var elements = stripe.elements(options);
+            // Create and mount the Payment Element
+            var paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+            var form = document.getElementById('payment-form');
+            if (!form) {
+                var errorText = 'Form node could not be found!';
+                var error = new Error(errorText);
+                console.log('[billing_event_stripe_payment_proceed:startElements] error', errorText, {
+                    error: error,
+                    params: params,
+                    stripe: stripe,
+                    options: options,
+                    elements: elements,
+                    paymentElement: paymentElement,
+                    form: form,
                 });
+                debugger;
+                return;
             }
-        };
-})();
+            console.log('[billing_event_stripe_payment_proceed:startElements] created', {
+                // params,
+                // stripe,
+                // options,
+                elements: elements,
+                paymentElement: paymentElement,
+                form: form,
+            });
+            debugger;
+            form.addEventListener('submit', submitForm.bind(null, elements));
+        }
+        /* OBSOLETE: Fetch Checkout Session and retrieve the client secret
+        async function initializeCheckout() {
+          const fetchClientSecret = async () => {
+            const response = await fetch(create_checkout_session_url, {
+              method: 'POST',
+            });
+            const { clientSecret } = await response.json();
+            return clientSecret;
+          };
+      
+          // Initialize Checkout
+          const checkout = await stripe.initEmbeddedCheckout({
+            fetchClientSecret,
+          });
+      
+          // Mount Checkout
+          checkout.mount('#checkout');
+        }
+        */
+    }
+    exports.billing_event_stripe_payment_proceed = billing_event_stripe_payment_proceed;
+});
+/**
+ * @module billing_membership_stripe_payment_proceed.ts
+ * @changed 2024.04.03, 16:18
+ */
+define("stripe-init/billing_membership_stripe_payment_proceed", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.billing_membership_stripe_payment_proceed = void 0;
+    function billing_membership_stripe_payment_proceed(params) {
+        var STRIPE_PUBLISHABLE_KEY = params.STRIPE_PUBLISHABLE_KEY, success_url = params.success_url;
+        console.log('[billing_membership_stripe_payment_proceed]', {
+            STRIPE_PUBLISHABLE_KEY: STRIPE_PUBLISHABLE_KEY,
+            success_url: success_url,
+        });
+        // Initialize Stripe.js
+        var stripe = window.Stripe(STRIPE_PUBLISHABLE_KEY);
+        initialize();
+        // Fetch Checkout Session and retrieve the client secret
+        function initialize() {
+            return __awaiter(this, void 0, void 0, function () {
+                var fetchClientSecret, checkout;
+                var _this = this;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            fetchClientSecret = function () { return __awaiter(_this, void 0, void 0, function () {
+                                var response, clientSecret;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, fetch(success_url, {
+                                                method: 'POST',
+                                            })];
+                                        case 1:
+                                            response = _a.sent();
+                                            return [4 /*yield*/, response.json()];
+                                        case 2:
+                                            clientSecret = (_a.sent()).clientSecret;
+                                            return [2 /*return*/, clientSecret];
+                                    }
+                                });
+                            }); };
+                            return [4 /*yield*/, stripe.initEmbeddedCheckout({
+                                    fetchClientSecret: fetchClientSecret,
+                                })];
+                        case 1:
+                            checkout = _a.sent();
+                            // Mount Checkout
+                            checkout.mount('#checkout');
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        }
+    }
+    exports.billing_membership_stripe_payment_proceed = billing_membership_stripe_payment_proceed;
+});
+/**
+ * @desc Main js entry point module (scripts)
+ * @module src/assets/scripts.ts
+ * @changed 2024.04.03, 20:03
+ */
+define("scripts", ["require", "exports", "stripe-init/billing_event_stripe_payment_proceed", "stripe-init/billing_membership_stripe_payment_proceed"], function (require, exports, billing_event_stripe_payment_proceed_1, billing_membership_stripe_payment_proceed_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    // Expose functions to global scope...
+    window.billing_event_stripe_payment_proceed = billing_event_stripe_payment_proceed_1.billing_event_stripe_payment_proceed;
+    window.billing_membership_stripe_payment_proceed = billing_membership_stripe_payment_proceed_1.billing_membership_stripe_payment_proceed;
+});
+/*
+ * console.log('[scripts] Main client code entry point', {
+ *   billing_event_stripe_payment_proceed,
+ *   billing_membership_stripe_payment_proceed,
+ * });
+ */
+/**
+ * @module test.ts
+ * @changed 2024.04.03, 16:18
+ */
 (function (window) {
     // console.log('Test', window);
 })(window);
