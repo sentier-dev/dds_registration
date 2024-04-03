@@ -73,25 +73,9 @@ def billing_event_stripe_payment_proceed(request: HttpRequest, event_code: str):
 def billing_event_stripe_payment_success(request: HttpRequest, event_code: str):
     """
     Success info.
-
-    Show page with information about successfull payment creation and a link to
-    proceed it.
     """
     context = get_event_invoice_context(request, event_code)
-    event = context["event"]
-    registration = context["registration"]
-    total_price = context["total_price"]
-    currency = context["currency"]
     invoice = context["invoice"]
-    debug_data = {
-        "event_code": event_code,
-        "event": event,
-        "registration": registration,
-        "invoice": invoice,
-        "total_price": total_price,
-        "currency": currency,
-        "context": context,
-    }
     messages.success(request, "Your payment successfully proceed")
     # Update invoice status
     invoice.status = "PAID"

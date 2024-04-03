@@ -77,38 +77,13 @@ def billing_membership_stripe_payment_proceed(request: HttpRequest):
 def billing_membership_stripe_payment_success(request: HttpRequest):
     """
     Success info.
-
-    Show page with information about successfull payment creation and a link to
-    proceed it.
     """
     context = get_membership_invoice_context(request)
-    membership = context["membership"]
-    total_price = context["total_price"]
-    currency = context["currency"]
     invoice = context["invoice"]
-    try:
-        # DEBUG...
-        debug_data = {
-            "membership": membership,
-            "invoice": invoice,
-            "total_price": total_price,
-            "currency": currency,
-            "context": context,
-        }
-        # Update invoice status
-        invoice.status = "PAID"
-        # TODO: To save some payment details to invoice?
-        invoice.save()
-        template = "dds_registration/billing/billing_membership_stripe_payment_success.html.django"
-        return render(request, template, context)
-    except Exception as err:
-        sError = errorToString(err, show_stacktrace=False)
-        error_text = "Cannot start checkout session for the membership: {}".format(sError)
-        messages.error(request, error_text)
-        sTraceback = str(traceback.format_exc())
-        debug_data = {
-            "err": err,
-            "traceback": sTraceback,
-        }
-        LOG.error("%s (re-raising): %s", error_text, debug_data)
-        raise Exception(error_text)
+    messages.success(request, "Your payment successfully proceed")
+    # Update invoice status
+    invoice.status = "PAID"
+    # TODO: To save some payment details to invoice?
+    invoice.save()
+    template = "dds_registration/billing/billing_membership_stripe_payment_success.html.django"
+    return render(request, template, context)
