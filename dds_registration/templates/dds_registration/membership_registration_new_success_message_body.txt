@@ -9,9 +9,9 @@ Thanks for registering for DdS Membership!
 
 {% endif %}The payment option you have chosen: {% with option=registration.option %}{{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}{% endwith %}.
 
-Your invoice is attached, but can also be download anytime at {{ scheme }}://{{site.domain}}{% url 'billing_membership_invoice_download' membership_code=membership.code %}.
+Your invoice is attached, but can also be download anytime at {{ scheme }}://{{site.domain}}{% url 'billing_membership_invoice_download' %}.
 
-If you need to change your payment method (e.g. pay by {% if invoice.payment_method == "INVOICE" %}credit card{% else %}by bank transfer{% endif %}), you can do that at {{ scheme }}://{{site.domain}}{% url 'billing_membership' membership_code=membership.code %}.
+If you need to change your payment method (e.g. pay by {% if invoice.payment_method == "INVOICE" %}credit card{% else %}by bank transfer{% endif %}), you can do that at {{ scheme }}://{{site.domain}}{% url 'billing_membership' membership_type=membership.membership_type %}.
 
 Please note that payment must be made with {{ payment_deadline_days }} days.
 

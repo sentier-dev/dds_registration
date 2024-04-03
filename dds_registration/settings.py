@@ -45,7 +45,7 @@ def random_string(length: int = 32) -> str:
 # Dev-time flags
 DEBUG = env("DEBUG")
 DEV = DEBUG
-LOCAL = DEBUG
+LOCAL = DEV
 
 # Preprocess scss source files with django filters
 USE_DJANGO_PREPROCESSORS = False  # LOCAL
@@ -129,7 +129,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://events.d-d-s.ch",
 ]
 
-if LOCAL:
+if LOCAL or DEBUG:
     # Allow work with local server in local dev mode
     ALLOWED_HOSTS.append("localhost")
 
@@ -174,7 +174,6 @@ INSTALLED_APPS.insert(0, "livereload")
 #  {% load livereload_tags %}
 #  {% endif %}
 # ```
-# -- but probably it doesn't work?
 
 if DEV:
     MIDDLEWARE.append("livereload.middleware.LiveReloadScript")

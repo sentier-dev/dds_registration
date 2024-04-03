@@ -1,54 +1,70 @@
 {# ex: set ft=htmldjango : #}
 <!--
   @module billing_event_stripe_payment_proceed.html.django
-  @changed 2024.03.29, 18:03
+  @changed 2024.04.03, 21:22
 -->
-
 {% extends "base-regular.html.django" %}
 
 {% load crispy_forms_tags %}
 
-{% block title %}Proceed event registration payment — {{ block.super }}{% endblock title %}
+{% block title %}
+  Proceed event registration payment — {{ block.super }}
+{% endblock title %}
 
 {% block content %}
-{{ block.super }}
+  {{ block.super }}
 
-<fieldset>
-  <legend>
-    <h1 class="page-title primary-color">Proceed event registration payment</h1>
-  </legend>
-  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-</fieldset>
+  <fieldset>
+    <legend>
+      <h1 class="page-title primary-color">Proceed event registration payment</h1>
+    </legend>
+    {% if error_message %}
+      <p>
+        <strong>{{ error_message }}</strong>
+      </p>
+    {% endif %}
+  </fieldset>
 
-{% include "assets/render-messages/render-messages.django" %}
+  {% include "assets/render-messages/render-messages.django" %}
 
-<div id="checkout">
-  <!-- Checkout will insert the payment form here -->
-</div>
-
-<div class="common-actions">
-  <input class="btn btn-primary" type="submit" value="Ok" />
-  {% include "assets/back-button/back-button.django" %}
-</div>
+  <form id="payment-form" data-secret="{{ client_secret }}">
+    <div id="error-message" class="optional-message alert alert-warning" role="alert"></div>
+    <div id="payment-element" class="mb-3">
+      <!-- Elements will create form elements here -->
+      {# TODO: Make this node full-height? #}
+    </div>
+    <div class="common-actions">
+      <input id="submit" class="btn btn-primary" type="submit" value="Pay now" />
+      {% include "assets/back-button/back-button.django" %}
+    </div>
+  </form>
 
 {% endblock content %}
 
 {% block client_scripts %}
-{{ block.super }}
+  {{ block.super }}
 
-{% include "assets/stripe-init/stripe-init.django" %}
+  {% include "assets/stripe-init/stripe-init.django" %}
 
-<script type="text/javascript">
+  <script type="text/javascript">
   // @ts-check
 
   // Using link with event code, amount and currency
-  const create_checkout_session_url = '{% url "billing_event_payment_stripe_create_checkout_session" event_code=event.code amount=total_price currency=currency %}';
-  window.billing_event_payment_stripe_create_checkout_session({
-      STRIPE_PUBLISHABLE_KEY: '{{ settings.STRIPE_PUBLISHABLE_KEY }}',
-      create_checkout_session_url,
-    });
+  const success_url = '{{ scheme}}://{{ site.domain }}{% url "billing_event_stripe_payment_success" event_code=event.code %}';
 
-</script>
+  /** @type {TCreateCheckoutSessionParams} */
+  const createCheckoutSessionParams = {
+    STRIPE_PUBLISHABLE_KEY: '{{ settings.STRIPE_PUBLISHABLE_KEY }}',
+    client_secret: '{{ client_secret }}',
+    success_url,
+  };
+
+  // Invoke stripe form creation...
+  requirejs(['stripe-init/billing_event_stripe_payment_proceed'], ({ billing_event_stripe_payment_proceed }) => {
+    billing_event_stripe_payment_proceed(createCheckoutSessionParams);
+  });
+  // NOTE: It's possible to use `startStripeElementsForm` directly here.
+
+  </script>
 
 {% endblock client_scripts %}
-
