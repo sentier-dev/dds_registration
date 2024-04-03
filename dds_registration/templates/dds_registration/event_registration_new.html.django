@@ -39,6 +39,7 @@
   {% include "assets/event_registration_form/event_registration_form.django" %}
 
   <fieldset class="mb3 form-group">
+    {# TODO: Issue #71: Change the submit button texts dynamically depending on the payment method control: 'Save' for 'INVOICE' and 'Pay now' for 'STRIPE'. #}
     <input class="btn btn-primary" type="submit" value="Pay now / Save" />
     {% include "assets/back-button/back-button.django" %}
   </fieldset>

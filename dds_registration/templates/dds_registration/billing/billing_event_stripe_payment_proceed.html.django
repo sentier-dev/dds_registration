@@ -13,6 +13,7 @@
 
 {% block content %}
   {{ block.super }}
+
   <fieldset>
     <legend>
       <h1 class="page-title primary-color">Proceed event registration payment</h1>
@@ -23,7 +24,9 @@
       </p>
     {% endif %}
   </fieldset>
+
   {% include "assets/render-messages/render-messages.django" %}
+
   <form id="payment-form" data-secret="{{ client_secret }}">
     <div id="error-message" class="optional-message alert alert-warning" role="alert"></div>
     <div id="payment-element" class="mb-3">
@@ -35,11 +38,14 @@
       {% include "assets/back-button/back-button.django" %}
     </div>
   </form>
+
 {% endblock content %}
 
 {% block client_scripts %}
   {{ block.super }}
+
   {% include "assets/stripe-init/stripe-init.django" %}
+
   <script type="text/javascript">
   // @ts-check
 
@@ -57,6 +63,8 @@
   requirejs(['stripe-init/billing_event_stripe_payment_proceed'], ({ billing_event_stripe_payment_proceed }) => {
     billing_event_stripe_payment_proceed(createCheckoutSessionParams);
   });
+  // NOTE: It's possible to use `startStripeElementsForm` directly here.
 
   </script>
+
 {% endblock client_scripts %}

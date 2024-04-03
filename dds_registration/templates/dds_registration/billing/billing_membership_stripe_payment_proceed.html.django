@@ -11,25 +11,38 @@
 {% block title %}Proceed membership registration payment — {{ block.super }}{% endblock title %}
 
 {% block content %}
-{{ block.super }}
+  {{ block.super }}
 
-<fieldset>
-  <legend>
-    <h1 class="page-title primary-color">Proceed membership registration payment</h1>
-  </legend>
-  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-</fieldset>
+  <fieldset>
+    <legend>
+      <h1 class="page-title primary-color">Proceed membership registration payment</h1>
+    </legend>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+  </fieldset>
 
-{% include "assets/render-messages/render-messages.django" %}
+  {% include "assets/render-messages/render-messages.django" %}
 
-<div id="checkout">
-  <!-- Checkout will insert the payment form here -->
-</div>
+  {% comment %}
+    <div id="checkout">
+      <!-- Checkout will insert the payment form here -->
+    </div>
+    <div class="common-actions">
+      <input class="btn btn-primary" type="submit" value="Ok" />
+      {% include "assets/back-button/back-button.django" %}
+    </div>
+  {% endcomment %}
 
-<div class="common-actions">
-  <input class="btn btn-primary" type="submit" value="Ok" />
-  {% include "assets/back-button/back-button.django" %}
-</div>
+  <form id="payment-form" data-secret="{{ client_secret }}">
+    <div id="error-message" class="optional-message alert alert-warning" role="alert"></div>
+    <div id="payment-element" class="mb-3">
+      <!-- Elements will create form elements here -->
+      {# TODO: Make this node full-height? #}
+    </div>
+    <div class="common-actions">
+      <input id="submit" class="btn btn-primary" type="submit" value="Pay now" />
+      {% include "assets/back-button/back-button.django" %}
+    </div>
+  </form>
 
 {% endblock content %}
 
@@ -41,12 +54,21 @@
 <script type="text/javascript">
   // @ts-check
 
-  // Using link with membership code, amount and currency
-  const create_checkout_session_url = '{% url "billing_membership_payment_stripe_create_checkout_session" membership_type=membership.membership_type amount=total_price currency=currency %}';
-  window.billing_membership_payment_stripe_create_checkout_session({
-      STRIPE_PUBLISHABLE_KEY: '{{ settings.STRIPE_PUBLISHABLE_KEY }}',
-      create_checkout_session_url,
-    });
+  // Using link with event code, amount and currency
+  const success_url = '{{ scheme}}://{{ site.domain }}{% url "billing_membership_stripe_payment_success" %}';
+
+  /** @type {TCreateCheckoutSessionParams} */
+  const createCheckoutSessionParams = {
+    STRIPE_PUBLISHABLE_KEY: '{{ settings.STRIPE_PUBLISHABLE_KEY }}',
+    client_secret: '{{ client_secret }}',
+    success_url,
+  };
+
+  // Invoke stripe form creation...
+  requirejs(['stripe-init/billing_membership_stripe_payment_proceed'], ({ billing_membership_stripe_payment_proceed }) => {
+    billing_membership_stripe_payment_proceed(createCheckoutSessionParams);
+  });
+  // NOTE: It's possible to use `startStripeElementsForm` directly here.
 
 </script>
 
