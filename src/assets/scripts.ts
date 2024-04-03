@@ -11,9 +11,7 @@ import { billing_membership_stripe_payment_proceed } from './stripe-init/billing
 window.billing_event_stripe_payment_proceed = billing_event_stripe_payment_proceed;
 window.billing_membership_stripe_payment_proceed = billing_membership_stripe_payment_proceed;
 
-/*
- * console.log('[scripts] Main client code entry point', {
- *   billing_event_stripe_payment_proceed,
- *   billing_membership_stripe_payment_proceed,
- * });
- */
+console.log('[scripts] Main client code entry point', {
+  billing_event_stripe_payment_proceed,
+  billing_membership_stripe_payment_proceed,
+});
