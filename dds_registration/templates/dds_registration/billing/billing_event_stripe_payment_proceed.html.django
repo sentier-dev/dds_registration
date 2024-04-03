@@ -1,7 +1,7 @@
 {# ex: set ft=htmldjango : #}
 <!--
   @module billing_event_stripe_payment_proceed.html.django
-  @changed 2024.03.29, 18:03
+  @changed 2024.04.03, 16:35
 -->
 
 {% extends "base-regular.html.django" %}
@@ -22,14 +22,26 @@
 
 {% include "assets/render-messages/render-messages.django" %}
 
-<div id="checkout">
-  <!-- Checkout will insert the payment form here -->
-</div>
+{% comment %}
+  <div id="checkout">
+    <!-- Checkout will insert the payment form here -->
+  </div>
+{% endcomment %}
 
-<div class="common-actions">
-  <input class="btn btn-primary" type="submit" value="Ok" />
-  {% include "assets/back-button/back-button.django" %}
-</div>
+<form id="payment-form" data-secret="{{ client_secret }}">
+
+  <div id="payment-element">
+    <!-- Elements will create form elements here -->
+  </div>
+
+  <div class="common-actions">
+    <input id="submit" class="btn btn-primary" type="submit" value="Ok" />
+    {% include "assets/back-button/back-button.django" %}
+  </div>
+
+  <div id="error-message">
+    <!-- Display error message to your customers here -->
+  </div></form>
 
 {% endblock content %}
 
@@ -42,11 +54,13 @@
   // @ts-check
 
   // Using link with event code, amount and currency
-  const create_checkout_session_url = '{% url "billing_event_payment_stripe_create_checkout_session" event_code=event.code amount=total_price currency=currency %}';
-  window.billing_event_payment_stripe_create_checkout_session({
-      STRIPE_PUBLISHABLE_KEY: '{{ settings.STRIPE_PUBLISHABLE_KEY }}',
-      create_checkout_session_url,
-    });
+  {% comment %} // const create_checkout_session_url = '{% url "billing_event_payment_stripe_create_checkout_session" event_code=event.code amount=total_price currency=currency %}'; {% endcomment %}
+  const success_url = '{{ scheme}}://{{ site.domain }}{% url "billing_event_stripe_payment_success" event_code=event.code %}';
+  window.billing_event_stripe_payment_proceed({
+    STRIPE_PUBLISHABLE_KEY: '{{ settings.STRIPE_PUBLISHABLE_KEY }}',
+    client_secret: '{{ client_secret }}',
+    success_url,
+  });
 
 </script>
 

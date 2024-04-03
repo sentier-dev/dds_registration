@@ -1,15 +1,20 @@
+/**
+ * @module billing_membership_stripe_payment_proceed.ts
+ * @changed 2024.04.03, 16:18
+ */
+
 (function(){
 
-  window.billing_event_payment_stripe_create_checkout_session =
-  function billing_event_payment_stripe_create_checkout_session(params: TCreateCheckoutSessionParams) {
+  window.billing_membership_stripe_payment_proceed =
+  function billing_membership_stripe_payment_proceed(params: TCreateCheckoutSessionParams) {
     const {
       STRIPE_PUBLISHABLE_KEY,
-      create_checkout_session_url,
+      success_url,
     } = params;
 
-    console.log('[billing_event_payment_stripe_create_checkout_session]', {
+    console.log('[billing_membership_stripe_payment_proceed]', {
       STRIPE_PUBLISHABLE_KEY,
-      create_checkout_session_url,
+      success_url,
     });
 
     // Initialize Stripe.js
@@ -20,7 +25,7 @@
     // Fetch Checkout Session and retrieve the client secret
     async function initialize() {
       const fetchClientSecret = async () => {
-        const response = await fetch(create_checkout_session_url, {
+        const response = await fetch(success_url, {
           method: 'POST',
         });
         const { clientSecret } = await response.json();
