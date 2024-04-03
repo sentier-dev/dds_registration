@@ -1,0 +1,12 @@
+{# ex: set ft=htmldjango : #}
+
+{# NOTE: Used js entrypoint; See gulpfile and typescript configurations. #}
+
+<script>
+  // Initialize AMD/RequireJS modules system...
+  if (typeof window.requirejs !== 'undefined') {
+    window.requirejs(['scripts']);
+  } else {
+    console.error('Not found AMD/RequireJS modules support');
+  }
+</script>

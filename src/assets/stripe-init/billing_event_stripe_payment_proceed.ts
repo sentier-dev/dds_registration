@@ -8,8 +8,8 @@ import type { StripeElements } from '@stripe/stripe-js/dist/stripe-js';
 const test = 77;
 
 // Export function to the global scope...
-window.billing_event_stripe_payment_proceed =
-function billing_event_stripe_payment_proceed(params: TCreateCheckoutSessionParams) {
+// window.billing_event_stripe_payment_proceed =
+export function billing_event_stripe_payment_proceed(params: TCreateCheckoutSessionParams) {
   const {
     STRIPE_PUBLISHABLE_KEY,
     success_url,

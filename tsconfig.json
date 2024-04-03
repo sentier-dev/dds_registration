@@ -1,27 +1,15 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
+    "module": "amd",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "experimentalDecorators": true,
     "baseUrl": ".",
     "paths": {
       "src/*": ["src/assets/*"]
-    }
+    },
+    "outFile": "scripts.js"
   },
+  "files": ["src/assets/scripts.ts"],
   "typeRoots": ["src/assets/@types/**/*"],
   "include": ["src/assets"]
 }
