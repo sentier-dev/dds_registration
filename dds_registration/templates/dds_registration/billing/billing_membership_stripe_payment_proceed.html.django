@@ -22,16 +22,6 @@
 
   {% include "assets/render-messages/render-messages.django" %}
 
-  {% comment %}
-    <div id="checkout">
-      <!-- Checkout will insert the payment form here -->
-    </div>
-    <div class="common-actions">
-      <input class="btn btn-primary" type="submit" value="Ok" />
-      {% include "assets/back-button/back-button.django" %}
-    </div>
-  {% endcomment %}
-
   <form id="payment-form" data-secret="{{ client_secret }}">
     <div id="error-message" class="optional-message alert alert-warning" role="alert"></div>
     <div id="payment-element" class="mb-3">
