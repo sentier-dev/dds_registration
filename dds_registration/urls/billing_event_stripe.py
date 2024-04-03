@@ -11,13 +11,6 @@ from ..converters.FloatUrlParameterConverter import FloatUrlParameterConverter
 register_converter(FloatUrlParameterConverter, "float")
 
 urlpatterns = [
-    # UNUSED in intent stripe api
-    #  path(
-    #      # Create stripe session (Link with event code, currency and amount)
-    #      "billing/event/<str:event_code>/payment/stripe/create_checkout_session/<str:currency>/<float:amount>",
-    #      billing_event_stripe_views.billing_event_payment_stripe_create_checkout_session,
-    #      name="billing_event_payment_stripe_create_checkout_session",
-    #  ),
     path(
         # Proceed stripe payment
         "billing/event/<str:event_code>/payment/stripe/proceed",
