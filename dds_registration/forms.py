@@ -33,6 +33,11 @@ class BillingInvoiceForm(ModelForm):
             "extra_invoice_text": "For things like reference or purchase order numbers.",
         }
         widgets = {
+            # Issue #71: Make payment method control inline, add option
+            # icons. To clarify: Add 'highlighting'? Change names to
+            # 'Credit Card' or 'Invoice'? Probably it'll be neccesary to
+            # redefine widget class.
+            "payment_method": forms.RadioSelect(attrs={"class": "form-control form-check-inline"}),
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "address": forms.Textarea(attrs={"class": "form-control", "rows": 5}),
             "extra_invoice_text": forms.Textarea(attrs={"class": "form-control", "rows": 5}),
