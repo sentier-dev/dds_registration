@@ -23,6 +23,10 @@
   color: #486;
 }
 
+.optional-message:empty {
+  display: none;
+}
+
 .common-actions a:not(.btn) {
   margin-left: 8px;
   margin-right: 8px;

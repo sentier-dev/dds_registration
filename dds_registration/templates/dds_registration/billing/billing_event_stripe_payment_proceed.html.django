@@ -25,15 +25,14 @@
   </fieldset>
   {% include "assets/render-messages/render-messages.django" %}
   <form id="payment-form" data-secret="{{ client_secret }}">
-    <div id="payment-element">
+    <div id="error-message" class="optional-message alert alert-warning" role="alert"></div>
+    <div id="payment-element" class="mb-3">
       <!-- Elements will create form elements here -->
+      {# TODO: Make this node full-height? #}
     </div>
     <div class="common-actions">
-      <input id="submit" class="btn btn-primary" type="submit" value="Ok" />
+      <input id="submit" class="btn btn-primary" type="submit" value="Pay now" />
       {% include "assets/back-button/back-button.django" %}
-    </div>
-    <div id="error-message">
-      <!-- Display error message to your customers here -->
     </div>
   </form>
 {% endblock content %}
@@ -44,20 +43,19 @@
   <script type="text/javascript">
   // @ts-check
 
-  // Invoke stripe form creation...
-
   // Using link with event code, amount and currency
-  var success_url = '{{ scheme}}://{{ site.domain }}{% url "billing_event_stripe_payment_success" event_code=event.code %}';
+  const success_url = '{{ scheme}}://{{ site.domain }}{% url "billing_event_stripe_payment_success" event_code=event.code %}';
 
   /** @type {TCreateCheckoutSessionParams} */
-  var createCheckoutSessionParams = {
+  const createCheckoutSessionParams = {
     STRIPE_PUBLISHABLE_KEY: '{{ settings.STRIPE_PUBLISHABLE_KEY }}',
     client_secret: '{{ client_secret }}',
     success_url,
   };
 
-  requirejs(['stripe-init/billing_event_stripe_payment_proceed'], function(module) {
-    module.billing_event_stripe_payment_proceed(createCheckoutSessionParams);
+  // Invoke stripe form creation...
+  requirejs(['stripe-init/billing_event_stripe_payment_proceed'], ({ billing_event_stripe_payment_proceed }) => {
+    billing_event_stripe_payment_proceed(createCheckoutSessionParams);
   });
 
   </script>

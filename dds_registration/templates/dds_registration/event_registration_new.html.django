@@ -15,7 +15,7 @@
 
 <fieldset>
   <legend>
-    <h1 class="page-title primary-color">Register for the event</h1>
+    <h1 class="page-title primary-color">Register for the event {{ event.title }}</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
@@ -26,17 +26,12 @@
   {% csrf_token %}
 
   <div class="event-info mb-3">
-    <p><span class="item-label">Event:</span> {{ event.title }}</p>
     {% if event.description %}
-    <p><span class="item-label">Description:</span> {{ event.description }}</p>
+    <p class="primary-color"><strong>{{ event.description }}</strong></p>
     {% endif %}
-    {% if event.registration_open %}
-      <p><span class="item-label">Registration opens:</span> {{ event.registration_open }}</p>
+    {% if event.registration_open and event.registration_close %}
+    <p>Registration open from {{ event.registration_open }} to {{ event.registration_close }} (inclusive).</p>
     {% endif %}
-    {% if event.registration_close %}
-      <p><span class="item-label">Registration closes:</span> {{ event.registration_close }}</p>
-    {% endif %}
-    {# TODO: Add extra information about the event? #}
   </div>
 
   <input type="hidden" name="event_code" value="{{ event_code }}" />
@@ -44,7 +39,7 @@
   {% include "assets/event_registration_form/event_registration_form.django" %}
 
   <fieldset class="mb3 form-group">
-    <input class="btn btn-primary" type="submit" value="Save" />
+    <input class="btn btn-primary" type="submit" value="Pay now / Save" />
     {% include "assets/back-button/back-button.django" %}
   </fieldset>
 

@@ -8,31 +8,33 @@
 
 {% load crispy_forms_tags %}
 
-{% block title %}Billing for the event registration — {{ block.super }}{% endblock title %}
+{% block title %}Payment for {{ event.title }} — {{ block.super }}{% endblock title %}
 
 {% block content %}
 {{ block.super }}
 
 <fieldset>
   <legend>
-    <h1 class="page-title primary-color">Billing for the event registration</h1>
+    <h1 class="page-title primary-color">Payment for {{ event.title }}</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
 
 {% include "assets/render-messages/render-messages.django" %}
 
-{# Show event/registration info... #}
+{% comment %}
+  <p><span class="item-label">User:</span> {{ user.get_full_name }}</p>
+  <p><span class="item-label">Event:</span> {{ event.title }}</p>
+  {% if registration %}
+  <p><span class="item-label">Registration:</span> {{ registration }}</p>
+  <p><span class="item-label">Option:</span> {{ registration.option }}</p>
+  {% endif %}
+  {% if invoice %}
+  <p><span class="item-label">Invoice:</span> {{ invoice }}</p>
+  {% endif %}
+{% endcomment %}
 
-<p><span class="item-label">User:</span> {{ user.get_full_name }}</p>
-<p><span class="item-label">Event:</span> {{ event.title }}</p>
-{% if registration %}
-<p><span class="item-label">Registration:</span> {{ registration }}</p>
 <p><span class="item-label">Option:</span> {{ registration.option }}</p>
-{% endif %}
-{% if invoice %}
-<p><span class="item-label">Invoice:</span> {{ invoice }}</p>
-{% endif %}
 
 {# Place form... #}
 
@@ -41,7 +43,8 @@
   {{ form|crispy }}
 
   <div class="common-actions">
-    <input class="btn btn-primary" type="submit" value="Save" />
+    {# Issue #71: Change the submit button dynamically by payment method control: 'Save' for 'INVOICE' and 'Pay now' for 'STRIPE' #}
+    <input class="btn btn-primary" type="submit" value="Pay now / save" />
     {% include "assets/back-button/back-button.django" %}
   </div>
 

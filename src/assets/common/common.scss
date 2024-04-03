@@ -12,6 +12,9 @@
 .primary-color {
   color: $primaryColor;
 }
+.optional-message:empty {
+  display: none;
+}
 
 .common-actions {
   a:not(.btn) {

@@ -36,14 +36,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 /**
  * @module billing_event_stripe_payment_proceed.ts
- * @changed 2024.04.03, 17:13
+ * @changed 2024.04.03, 23:01
  */
 define("stripe-init/billing_event_stripe_payment_proceed", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.billing_event_stripe_payment_proceed = void 0;
     function billing_event_stripe_payment_proceed(params) {
-        var STRIPE_PUBLISHABLE_KEY = params.STRIPE_PUBLISHABLE_KEY, success_url = params.success_url, client_secret = params.client_secret;
+        var 
+        // \<\(STRIPE_PUBLISHABLE_KEY\|success_url\|client_secret\)\>
+        STRIPE_PUBLISHABLE_KEY = params.STRIPE_PUBLISHABLE_KEY, success_url = params.success_url, client_secret = params.client_secret;
         console.log('[billing_event_stripe_payment_proceed]', {
             STRIPE_PUBLISHABLE_KEY: STRIPE_PUBLISHABLE_KEY,
             client_secret: client_secret,
@@ -52,24 +54,14 @@ define("stripe-init/billing_event_stripe_payment_proceed", ["require", "exports"
         // Initialize Stripe.js
         var stripe = window.Stripe(STRIPE_PUBLISHABLE_KEY);
         startElements();
-        // initializeCheckout(); // Old api
         /** Start stripe payment form */
         function startElements() {
             // @see https://docs.stripe.com/js/elements_object/create_payment_element#payment_element_create-options
             var options = {
                 clientSecret: client_secret,
-                // Fully customizable with appearance API.
-                // appearance: {[>...<]},
+                // TODO: Customize forms (use bootstrap styles)...
+                // appearance: {},
             };
-            console.log('[billing_event_stripe_payment_proceed:startElements] started', {
-                options: options,
-                STRIPE_PUBLISHABLE_KEY: STRIPE_PUBLISHABLE_KEY,
-                client_secret: client_secret,
-                success_url: success_url,
-                stripe: stripe,
-                params: params,
-            });
-            // debugger;
             // Set up Stripe.js and Elements to use in checkout form, passing the client secret obtained in a previous step
             var elements = stripe.elements(options);
             // Create and mount the Payment Element
@@ -92,96 +84,54 @@ define("stripe-init/billing_event_stripe_payment_proceed", ["require", "exports"
                 debugger;
                 return;
             }
-            console.log('[billing_event_stripe_payment_proceed:startElements] created', {
-                paymentElement: paymentElement,
-                elements: elements,
-                form: form,
-            });
-            // NOTE: Stripe elements couldn't start if we have debugger statements here
-            // debugger;
             form.addEventListener('submit', submitForm.bind(null, elements));
         }
         /** Form action */
         function submitForm(elements, event) {
-            return __awaiter(this, void 0, void 0, function () {
-                var error, messageContainer;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            event.preventDefault();
-                            console.log('[billing_event_stripe_payment_proceed:startElements:submit] check', {
-                                event: event,
-                                params: params,
-                                stripe: stripe,
-                                elements: elements,
-                            });
-                            debugger;
-                            return [4 /*yield*/, stripe.confirmPayment({
-                                    //`Elements` instance that was used to create the Payment Element
-                                    elements: elements,
-                                    confirmParams: {
-                                        return_url: success_url, // 'https://example.com/order/123/complete',
-                                    },
-                                })];
-                        case 1:
-                            error = (_a.sent()).error;
-                            console.log('[billing_event_stripe_payment_proceed:startElements:submit] checked', {
-                                error: error,
-                                event: event,
-                                params: params,
-                                stripe: stripe,
-                            });
-                            debugger;
-                            if (error) {
-                                console.log('[billing_event_stripe_payment_proceed:startElements:submit] error', {
-                                    error: error,
-                                    event: event,
-                                    params: params,
-                                    stripe: stripe,
-                                });
-                                debugger;
-                                messageContainer = document.querySelector('#error-message');
-                                if (messageContainer) {
-                                    messageContainer.textContent = error.message || '';
-                                }
-                            }
-                            else {
-                                // Your customer will be redirected to your `return_url`. For some payment
-                                // methods like iDEAL, your customer will be redirected to an intermediate
-                                // site first to authorize the payment, then redirected to the `return_url`.
-                                console.log('[billing_event_stripe_payment_proceed:startElements:submit] success', {
-                                    success_url: success_url,
-                                    event: event,
-                                    params: params,
-                                    stripe: stripe,
-                                });
-                                debugger;
-                                window.location.href = success_url;
-                            }
-                            return [2 /*return*/];
+            event.preventDefault();
+            // @see https://docs.stripe.com/payments/accept-a-payment?platform=web&ui=elements#web-submit-payment
+            // const result = await
+            stripe.confirmPayment({
+                elements: elements,
+                confirmParams: {
+                    return_url: success_url,
+                },
+            }).then(function (result) {
+                var error = result.error;
+                if (error) {
+                    // debugger;
+                    console.error('[billing_event_stripe_payment_proceed:startElements:submitForm] error', {
+                        error: error,
+                        event: event,
+                        params: params,
+                        stripe: stripe,
+                    });
+                    // Show error
+                    var messageContainer = document.querySelector('#error-message');
+                    if (messageContainer) {
+                        messageContainer.textContent = error.message || '';
                     }
+                }
+                else {
+                    // Success: redirect to success message
+                    console.log('[billing_event_stripe_payment_proceed:startElements:submitForm] success', {
+                        success_url: success_url,
+                        event: event,
+                        params: params,
+                        stripe: stripe,
+                    });
+                    debugger;
+                    window.location.href = success_url;
+                }
+            }).catch(function (error) {
+                console.error('[billing_event_stripe_payment_proceed:startElements:submitForm] error', {
+                    error: error,
+                    event: event,
+                    params: params,
+                    stripe: stripe,
                 });
             });
         }
-        /* OBSOLETE: Fetch Checkout Session and retrieve the client secret
-        async function initializeCheckout() {
-          const fetchClientSecret = async () => {
-            const response = await fetch(create_checkout_session_url, {
-              method: 'POST',
-            });
-            const { clientSecret } = await response.json();
-            return clientSecret;
-          };
-      
-          // Initialize Checkout
-          const checkout = await stripe.initEmbeddedCheckout({
-            fetchClientSecret,
-          });
-      
-          // Mount Checkout
-          checkout.mount('#checkout');
-        }
-        */
     }
     exports.billing_event_stripe_payment_proceed = billing_event_stripe_payment_proceed;
 });
