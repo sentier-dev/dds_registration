@@ -108,7 +108,7 @@ export function startStripeElementsForm(params: TCreateCheckoutSessionParams) {
   if (!form) {
     const errorText = 'Form node could not be found!';
     const error = new Error(errorText);
-    console.log('[stripe_payment_intents_support:startStripeElementsForm] error', errorText, {
+    console.error('[stripe_payment_intents_support:startStripeElementsForm] error', errorText, {
       error,
       params,
       stripe,
