@@ -60,10 +60,9 @@
   };
 
   // Invoke stripe form creation...
-  requirejs(['stripe-init/billing_event_stripe_payment_proceed'], ({ billing_event_stripe_payment_proceed }) => {
-    billing_event_stripe_payment_proceed(createCheckoutSessionParams);
+  requirejs(['stripe-init/stripe_payment_intents_support'], ({ startStripeElementsForm }) => {
+    startStripeElementsForm(createCheckoutSessionParams);
   });
-  // NOTE: It's possible to use `startStripeElementsForm` directly here.
 
   </script>
 
