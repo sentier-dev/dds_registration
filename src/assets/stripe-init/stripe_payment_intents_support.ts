@@ -23,7 +23,7 @@ function submitStripeForm(
   event.preventDefault();
 
   // @see https://docs.stripe.com/payments/accept-a-payment?platform=web&ui=elements#web-submit-payment
-  // const result = await
+  // TODO: Show 'busy' spinner at stripe interaction begin? (It could take some time.)
   stripe
     .confirmPayment({
       elements,

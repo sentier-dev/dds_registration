@@ -4,9 +4,6 @@
 import logging
 import traceback
 
-import requests
-import stripe
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
@@ -14,13 +11,12 @@ from django.shortcuts import render
 
 from django.http import HttpRequest
 
-from .. import settings
 from ..core.helpers.errors import errorToString
 
+#  from .helpers.send_payment_receipt import send_payment_receipt
 from .helpers.start_stripe_payment_intent import start_stripe_payment_intent
 
 from .get_invoice_context import get_event_invoice_context
-from .helpers.create_stripe_return_url import create_stripe_return_url
 
 LOG = logging.getLogger(__name__)
 
@@ -76,15 +72,25 @@ def billing_event_stripe_payment_proceed(request: HttpRequest, event_code: str):
 @login_required
 def billing_event_stripe_payment_success(request: HttpRequest, event_code: str):
     """
-    Success info.
+    Show payment success info.
     """
     context = get_event_invoice_context(request, event_code)
     invoice = context["invoice"]
     messages.success(request, "Your payment successfully proceed")
     # Update invoice status
-    invoice.mark_paid()
-    # @see Issues #94, #96
-    # TODO: Invoice should be saved earlier. Create and save invoice pdf and datastamp (into the `data` filed), add it as attachment to the email message
-    # Check where we're sending emails?
+    if invoice.status != "PAID":
+        # XXX: To do it only on the first payment? (TODO: Disable payments if invoice has been already paid?)
+        invoice.mark_paid()
+        # TODO: To save some other payment details to invoice?
+        invoice.save()
+        #  # TODO: Issue #103: Send payment receipt message (do we need to send these messages?)
+        #  email_body_template = "dds_registration/event/event_payment_receipt_message_body.txt"
+        #  email_subject_template = "dds_registration/event/event_payment_receipt_message_subject.txt"
+        #  send_payment_receipt(
+        #      request=request,
+        #      email_body_template=email_body_template,
+        #      email_subject_template=email_subject_template,
+        #      context=context,
+        #  )
     template = "dds_registration/billing/billing_event_stripe_payment_success.html.django"
     return render(request, template, context)

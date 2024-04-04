@@ -15,6 +15,7 @@ from ..core.helpers.errors import errorToString
 
 from ..models import Membership
 
+#  from .helpers.send_payment_receipt import send_payment_receipt
 from .helpers.start_stripe_payment_intent import start_stripe_payment_intent
 
 from .get_invoice_context import get_membership_invoice_context
@@ -76,14 +77,28 @@ def billing_membership_stripe_payment_proceed(request: HttpRequest):
 @login_required
 def billing_membership_stripe_payment_success(request: HttpRequest):
     """
-    Success info.
+    Show payment success info.
     """
+    # Check method
+    if request.method != "POST":
+        pass
     context = get_membership_invoice_context(request)
     invoice = context["invoice"]
     messages.success(request, "Your payment successfully proceed")
-    # Update invoice status
-    invoice.status = "PAID"
-    # TODO: To save some payment details to invoice?
-    invoice.save()
+    # Update invoice status, send receipt...
+    if invoice.status != "PAID":
+        # XXX: To do it only on the first payment? (TODO: Disable payments if invoice has been already paid?)
+        invoice.mark_paid()
+        # TODO: To save some other payment details to invoice?
+        invoice.save()
+        #  # TODO: Issue #103: Send payment receipt message (do we need to send these messages?)
+        #  email_body_template = "dds_registration/membership/membership_payment_receipt_message_body.txt"
+        #  email_subject_template = "dds_registration/membership/membership_payment_receipt_message_subject.txt"
+        #  send_payment_receipt(
+        #      request=request,
+        #      email_body_template=email_body_template,
+        #      email_subject_template=email_subject_template,
+        #      context=context,
+        #  )
     template = "dds_registration/billing/billing_membership_stripe_payment_success.html.django"
     return render(request, template, context)
