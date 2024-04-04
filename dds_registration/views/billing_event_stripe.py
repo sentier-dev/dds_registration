@@ -4,6 +4,9 @@
 import logging
 import traceback
 
+import requests
+import stripe
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
@@ -11,13 +14,14 @@ from django.shortcuts import render
 
 from django.http import HttpRequest
 
+from .. import settings
 from ..core.helpers.errors import errorToString
 
 #  from .helpers.send_payment_receipt import send_payment_receipt
 from .helpers.start_stripe_payment_intent import start_stripe_payment_intent
 
 from .get_invoice_context import get_event_invoice_context
-
+from .helpers.create_stripe_return_url import create_stripe_return_url
 
 LOG = logging.getLogger(__name__)
 
@@ -78,10 +82,10 @@ def billing_event_stripe_payment_success(request: HttpRequest, event_code: str):
     context = get_event_invoice_context(request, event_code)
     invoice = context["invoice"]
     messages.success(request, "Your payment successfully proceed")
-    # Update invoice status, send receipt...
+    # Update invoice status
     if invoice.status != "PAID":
         # XXX: To do it only on the first payment? (TODO: Disable payments if invoice has been already paid)
-        invoice.status = "PAID"
+        invoice.mark_paid()
         # TODO: To save some other payment details to invoice?
         invoice.save()
         #  # TODO: Issue #103: Send payment receipt message (do we need to send these messages?)

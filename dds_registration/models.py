@@ -6,6 +6,7 @@ import random
 import string
 from datetime import date
 
+import requests
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site  # To access site properties
@@ -199,6 +200,15 @@ class Invoice(Model):
 
     # TODO: reg
 
+    def mark_paid(self):
+        self.status = "PAID"
+        if settings.SLACK_WEBHOOK:
+            requests.post(
+                url=settings.SLACK_WEBHOOK,
+                json={"text": "Membership payment for {} of €{}".format(self.name, "DUMMY")},
+            )
+        self.save()
+
     def is_paid(self):
         return self.status == "PAID"
 
@@ -248,8 +258,7 @@ class Membership(Model):
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
 
-    # XXX: To use different delete handler, like `SET_NULL`?
-    invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.CASCADE, null=True)
+    invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.SET_NULL, null=True)
 
     @property
     def active(self) -> bool:

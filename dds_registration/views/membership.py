@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 from .helpers.check_for_available_membership import check_for_available_membership
 
 from ..core.helpers.errors import errorToString
+from ..core.helpers.create_invoice_pdf import create_invoice_pdf
 
 from ..models import Membership
 
@@ -70,8 +71,6 @@ def send_membership_registration_success_message(request: HttpRequest):
     Send successful membership registration message to the user
 
     TODO: Send different messages depending on the `payment_method`?
-
-    TODO: Issue #74: Send invoice pdf (see `create_invoice_pdf`) as atachment for `INVOICE` payment method
     """
 
     email_body_template = "dds_registration/membership_registration_new_success_message_body.txt"
@@ -95,14 +94,13 @@ def send_membership_registration_success_message(request: HttpRequest):
             context=context,
             request=request,
         )
-        debug_data = {
-            "invoice": invoice,
-            "subject": subject,
-            "body": body,
-            "context": context,
-        }
-        LOG.debug("mail_user: %s", context)
-        user.email_user(subject, body)
+
+        if invoice.payment_method == "INVOICE" and invoice.status in ("ISSUED", "CREATED"):
+            user.email_user(subject=subject, message=body, attachment_content=create_invoice_pdf(context), attachment_name="DdS Membership Invoice {}.pdf".format(user.get_full_name()))
+            invoice.status = "ISSUED"
+            invoice.save()
+        else:
+            user.email_user(subject=subject, message=body)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())
