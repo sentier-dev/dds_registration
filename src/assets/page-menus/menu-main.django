@@ -18,7 +18,7 @@
 {% if user.is_authenticated %}
 <li class="nav-item dropdown">
   <span class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class="bi bi-person-fill"></i> {{ user.get_full_name|default:user.username }}
+    <i class="bi bi-{% if user.is_member %}star-fill{% else %}person-fill{% endif %}"></i> {{ user.get_full_name|default:user.username }}
   </span>
   <form id="menu-logout-form" action="{% url 'logout' %}" method="post">
   {% csrf_token %}
