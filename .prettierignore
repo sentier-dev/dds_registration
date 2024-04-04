@@ -26,3 +26,4 @@ package-lock.*
 /src/vendor
 /static/
 /*.egg-info
+/dds_registration/templates/
