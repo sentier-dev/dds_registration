@@ -3,7 +3,7 @@
  * @changed 2024.03.08, 12:00
  */
 
-@import "../shared";
+@import '../shared';
 
 .page-header-navbar {
   padding: 0;
@@ -45,7 +45,7 @@
     white-space: nowrap;
     color: #fff;
     transition: all $transitionTime;
-    opacity: .85;
+    opacity: 0.85;
     &:hover {
       opacity: 1;
     }

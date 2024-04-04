@@ -3,25 +3,24 @@
  * @changed 2024.03.30, 17:56
  */
 
-@import 'common/common.scss';
-@import 'common/forms.scss';
-@import 'common/customize.scss';
+@import 'common/common';
+@import 'common/forms';
+@import 'common/customize';
 
-// @import 'test/test.scss'; // DEBUG
+// @import 'test/test'; // DEBUG
 
-@import 'body/body.scss';
-@import 'forms/data-form.scss';
+@import 'body/body';
+@import 'forms/data-form';
 
-@import 'theme/bootstrap-theme-fixes.scss';
+@import 'theme/bootstrap-theme-fixes';
 
-@import 'page-header-navbar/page-header-navbar.scss';
-@import 'page-footer-navbar/page-footer-navbar.scss';
+@import 'page-header-navbar/page-header-navbar';
+@import 'page-footer-navbar/page-footer-navbar';
 
+@import 'main-page-splash/main-page-splash';
+@import 'membership-splash/membership-splash';
 
-@import 'main-page-splash/main-page-splash.scss';
-@import 'membership-splash/membership-splash.scss';
+@import 'events-list-table/events-list-table';
+@import 'events-list-block/events-list-block';
 
-@import 'events-list-table/events-list-table.scss';
-@import 'events-list-block/events-list-block.scss';
-
-@import 'membership-choose-list/membership-choose-list.scss';
+@import 'membership-choose-list/membership-choose-list';

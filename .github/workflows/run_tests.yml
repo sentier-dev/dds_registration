@@ -4,7 +4,7 @@ on:
   push:
   schedule:
     # Every 13th and 28th of the month at 07:42
-    - cron: '42 7 13,28 * *' 
+    - cron: '42 7 13,28 * *'
 
 jobs:
   tests:
@@ -31,7 +31,7 @@ jobs:
       - name: Run Tests
         env:
           DJANGO_VERSION: ${{ matrix.django-version }}
-        run: "./dev_server.sh -d test"
+        run: './dev_server.sh -d test'
 
   all-tests:
     runs-on: ubuntu-latest

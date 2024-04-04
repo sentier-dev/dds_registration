@@ -7,4 +7,3 @@ See original templates in the folder:
 See also:
 
 - [Django Login, Logout, Signup, Password Change, and Password Reset](https://learndjango.com/tutorials/django-login-and-logout-tutorial)
-

@@ -33,12 +33,14 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
         event.preventDefault();
         // @see https://docs.stripe.com/payments/accept-a-payment?platform=web&ui=elements#web-submit-payment
         // const result = await
-        stripe.confirmPayment({
+        stripe
+            .confirmPayment({
             elements: elements,
             confirmParams: {
                 return_url: success_url,
             },
-        }).then(function (result) {
+        })
+            .then(function (result) {
             var error = result.error;
             if (error) {
                 // debugger;
@@ -65,7 +67,8 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
                 debugger;
                 window.location.href = success_url;
             }
-        }).catch(function (error) {
+        })
+            .catch(function (error) {
             console.error('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error', {
                 error: error,
                 event: event,
@@ -115,10 +118,8 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
 });
 /**
  * @module test.ts
- * @changed 2024.04.03, 16:18
+ * @changed 2024.04.04, 16:19
  */
-(function (window) {
-    // console.log('Test', window);
-})(window);
+// console.log('Test', window);
 
 //# sourceMappingURL=scripts.js.map

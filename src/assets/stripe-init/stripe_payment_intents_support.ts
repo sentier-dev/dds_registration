@@ -12,56 +12,71 @@ import type {
 } from '@stripe/stripe-js/dist/stripe-js';
 
 /** Form action */
-function submitStripeForm(stripe: Stripe, params: TCreateCheckoutSessionParams, elements: StripeElements, event: SubmitEvent) {
-  const {
-    success_url,
-  } = params;
+function submitStripeForm(
+  stripe: Stripe,
+  params: TCreateCheckoutSessionParams,
+  elements: StripeElements,
+  event: SubmitEvent,
+) {
+  const { success_url } = params;
 
   event.preventDefault();
 
   // @see https://docs.stripe.com/payments/accept-a-payment?platform=web&ui=elements#web-submit-payment
   // const result = await
-  stripe.confirmPayment({
-    elements,
-    confirmParams: {
-      return_url: success_url,
-    },
-  }).then((result) => {
-    const error: StripeError = result.error;
+  stripe
+    .confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: success_url,
+      },
+    })
+    .then((result) => {
+      const error: StripeError = result.error;
 
-    if (error) {
-      // debugger;
-      console.error('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error', {
-        error,
-        event,
-        params,
-        stripe,
-      });
+      if (error) {
+        // debugger;
+        console.error(
+          '[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error',
+          {
+            error,
+            event,
+            params,
+            stripe,
+          },
+        );
 
-      // Show error
-      const messageContainer = document.querySelector('#error-message');
-      if (messageContainer) {
-        messageContainer.textContent = error.message || '';
+        // Show error
+        const messageContainer = document.querySelector('#error-message');
+        if (messageContainer) {
+          messageContainer.textContent = error.message || '';
+        }
+      } else {
+        // Success: redirect to success message
+        console.log(
+          '[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] success',
+          {
+            success_url,
+            event,
+            params,
+            stripe,
+          },
+        );
+        debugger;
+        window.location.href = success_url;
       }
-    } else {
-      // Success: redirect to success message
-      console.log('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] success', {
-        success_url,
-        event,
-        params,
-        stripe,
-      });
-      debugger;
-      window.location.href = success_url;
-    }
-  }).catch((error) => {
-      console.error('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error', {
-        error,
-        event,
-        params,
-        stripe,
-      });
-  });
+    })
+    .catch((error) => {
+      console.error(
+        '[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error',
+        {
+          error,
+          event,
+          params,
+          stripe,
+        },
+      );
+    });
 }
 
 /** Start stripe payment form */
@@ -93,7 +108,7 @@ export function startStripeElementsForm(params: TCreateCheckoutSessionParams) {
   const form = document.getElementById('payment-form');
 
   if (!form) {
-    const errorText = 'Form node could not be found!'
+    const errorText = 'Form node could not be found!';
     const error = new Error(errorText);
     console.log('[stripe_payment_intents_support:startStripeElementsForm] error', errorText, {
       error,

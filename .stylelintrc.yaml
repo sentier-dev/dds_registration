@@ -7,7 +7,7 @@ extends:
   # - stylelint-config-styled-components
   # - stylelint-config-standard
   - stylelint-config-recommended-scss
-  - stylelint-config-css-modules
+  # - stylelint-config-css-modules
 
 files:
   - 'src/**/*.css'
@@ -29,7 +29,7 @@ rules:
   no-duplicate-selectors: null
   no-invalid-double-slash-comments: true
   declaration-block-single-line-max-declarations: null
-  declaration-colon-space-after: null
+  # declaration-colon-space-after: null
   rule-empty-line-before: null
   at-rule-empty-line-before: null
   comment-empty-line-before: null

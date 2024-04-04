@@ -3,7 +3,7 @@
   "version": "0.0.14",
   "timetag": "240325-1917",
   "timestamp": "2024.03.25 19:17 +0700",
-  "changed": "2024.04.04, 15:25",
+  "changed": "2024.04.04, 16:23",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -32,10 +32,12 @@
     "gulp-sass": "^5.1.0",
     "gulp-sourcemaps": "^3.0.0",
     "gulp-typescript": "^6.0.0-alpha.1",
+    "npm-run-all": "^4.1.5",
     "prettier": "^3.2.5",
     "sass": "^1.71.1",
     "stylelint": "^16.3.1",
     "stylelint-config-recommended": "^14.0.0",
+    "stylelint-config-recommended-scss": "^14.0.0",
     "stylelint-config-standard": "^36.0.0",
     "typescript": "^5.4.3",
     "typescript-eslint": "^7.5.0"
@@ -53,6 +55,7 @@
     "stylelint-fix": "echo --Lint styles-- && stylelint src/assets/**/*.{css,scss,less} --fix",
     "type-check": "echo --Run typescript linter-- && tsc --pretty --noEmit",
     "eslint": "echo --Lint sources-- && eslint src/assets",
+    "check-all-assets": "echo --Run all pre-commit check-ups-- && npm-run-all prettier stylelint eslint type-check && echo --All check-ups passed--",
     "check-all": "echo --Run all python checkers /autopep8, venv/-- && npm-run-all pyformat pylint",
     "help": "echo --List all available script commands-- && npm-package-user-scripts-list"
   }

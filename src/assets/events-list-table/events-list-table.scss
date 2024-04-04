@@ -3,7 +3,7 @@
  * @changed 2024.03.21, 16:50
  */
 
-@import "../shared";
+@import '../shared';
 
 .events-list-table {
   /*
@@ -27,7 +27,8 @@
   }
 
   tbody {
-    th, td {
+    th,
+    td {
       vertical-align: middle;
     }
     .col-event {
@@ -40,5 +41,4 @@
       flex-wrap: wrap;
     }
   }
-
 }

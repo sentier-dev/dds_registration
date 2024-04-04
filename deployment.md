@@ -27,7 +27,7 @@ npm install node-sass
 This requires some manual steps, I don't know how to automate some of them. Probably easiest to use a later version of Ubuntu. We don't really need 3.12.
 
 ```bash
-sudo apt update 
+sudo apt update
 sudo apt upgrade -y
 sudo apt install software-properties-common -y
 sudo add-apt-repository ppa:deadsnakes/ppa

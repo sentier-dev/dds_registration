@@ -1,7 +1,7 @@
-@use "sass:color";
-@import "../shared";
+@use 'sass:color';
+@import '../shared';
 
-$font-stack:    Helvetica, sans-serif;
+$font-stack: Helvetica, sans-serif;
 $primary-color: color.adjust(#333, $alpha: -0.7);
 
 body {
@@ -9,5 +9,5 @@ body {
   font: 100% $font-stack;
   color: $primary-color;
   border: 3px solid red;
-  width: map-get($grid-breakpoints, 'sm') - 0.1;
+  width: map.get($grid-breakpoints, 'sm') - 0.1;
 }

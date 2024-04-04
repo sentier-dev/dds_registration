@@ -61,7 +61,6 @@ sphinx-build docs docs/_build
 
 ## How to test the project
 
-
 1. Install the package with development requirements:
 
 ```console
@@ -73,7 +72,6 @@ $ pip install -e ".[testing]"
 ```console
 $ pytest
 ```
-
 
 Unit tests are located in the _tests_ directory,
 and are written using the [pytest][pytest] testing framework.
@@ -103,13 +101,11 @@ or
 $ pip install pre-commit
 ```
 
-
 It is recommended to open an issue before starting work on anything.
 This will allow a chance to talk it over with the owners and validate your approach.
 
 [pytest]: https://pytest.readthedocs.io/
 [pull request]: https://github.com/{{cookiecutter.github_username}}/{{cookiecutter.project_name}}/pulls
-
 
 <!-- github-only -->
 
