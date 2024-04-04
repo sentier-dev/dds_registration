@@ -17,8 +17,8 @@ LOG = logging.getLogger(__name__)
 
 
 def index(request: HttpRequest):
+    user = request.user
     try:
-        user = request.user
         # Get active and available public events list...
         public_events_data = []
         public_events = Event.objects.filter(public=True)
@@ -48,6 +48,7 @@ def index(request: HttpRequest):
                 "user_has_registration": True,
             }
             user_events_data.append(data)
+
         context = {
             "public_events_data": public_events_data,
             "user_events_data": user_events_data,

@@ -10,7 +10,9 @@
 
 {% with user_authenticated=user.is_authenticated %}
   {% if user_authenticated %}
-    {% include "assets/membership-splash/membership-splash-user.django" %}
+    {% if not user.is_member %}
+      {% include "assets/membership-splash/membership-splash-user.django" %}
+    {% endif %}
   {% else %}
     {% include "assets/membership-splash/membership-splash-default.django" %}
   {% endif %}
