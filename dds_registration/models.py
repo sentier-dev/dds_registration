@@ -131,11 +131,11 @@ class User(AbstractUser):
         message: str,
         attachment_content: FPDF | None = None,
         attachment_name: str | None = None,
-        from_email: str | None = None,
+        from_email: str | None = settings.DEFAULT_FROM_EMAIL,
     ) -> None:
         sg = SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
         message = Mail(
-            from_email=settings.DEFAULT_FROM_EMAIL,
+            from_email=from_email,
             to_emails=self.email,
             subject=subject,
             # NOTE: We use only plain text templates
@@ -145,6 +145,7 @@ class User(AbstractUser):
         if attachment_content is None or attachment_name is None:
             pass
         else:
+            # NOTE: Assuming only pdf data as an fpdf object
             attachment = Attachment()
             attachment.file_content = FileContent(base64.b64encode(attachment_content.output()).decode())
             attachment.file_type = FileType("application/pdf")

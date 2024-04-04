@@ -4,7 +4,6 @@
 import logging
 import traceback
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
@@ -82,6 +81,8 @@ def send_membership_registration_success_message(request: HttpRequest):
 
     context = get_membership_invoice_context(request)
 
+    invoice = context.get("invoice")
+
     try:
         subject = render_to_string(
             template_name=email_subject_template,
@@ -94,7 +95,14 @@ def send_membership_registration_success_message(request: HttpRequest):
             context=context,
             request=request,
         )
-        user.email_user(subject, body, settings.DEFAULT_FROM_EMAIL)
+        debug_data = {
+            "invoice": invoice,
+            "subject": subject,
+            "body": body,
+            "context": context,
+        }
+        LOG.debug("mail_user: %s", context)
+        user.email_user(subject, body)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())

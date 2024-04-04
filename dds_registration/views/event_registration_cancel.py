@@ -6,7 +6,6 @@ from django.contrib import messages
 from django.http import HttpRequest
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
-from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 
 import traceback
@@ -52,7 +51,7 @@ def send_event_registration_cancelled_message(request: HttpRequest, context: dic
             "body": body,
         }
         # LOG.debug("mail_user: %s", context)
-        user.email_user(subject, body, settings.DEFAULT_FROM_EMAIL)
+        user.email_user(subject, body)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         sTraceback = str(traceback.format_exc())

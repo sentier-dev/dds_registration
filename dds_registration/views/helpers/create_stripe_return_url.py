@@ -1,5 +1,6 @@
 # @module billing_event_stripe.py
 # @changed 2024.04.01, 23:57
+# NOTE: UNUSED: It was used for stripe checkout payment method.
 
 
 from django.http import HttpRequest
