@@ -35,7 +35,6 @@ function submitStripeForm(
       const error: StripeError = result.error;
 
       if (error) {
-        // debugger;
         console.error(
           '[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error',
           {
@@ -62,7 +61,6 @@ function submitStripeForm(
             stripe,
           },
         );
-        debugger;
         window.location.href = success_url;
       }
     })
@@ -119,6 +117,7 @@ export function startStripeElementsForm(params: TCreateCheckoutSessionParams) {
       paymentElement,
       form,
     });
+    // eslint-disable-next-line no-debugger
     debugger;
     return;
   }
