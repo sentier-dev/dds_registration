@@ -1,0 +1,16 @@
+{# ex: set ft=htmldjango : #}
+Hi {{ user.get_full_name }}!
+
+You have registered and already paid for {{ event.title }}!
+
+{% comment %}{% if invoice.payment_method == "STRIPE" %}You have chosen to pay by credit card.
+
+{% elif invoice.payment_method == "INVOICE" %}You have chosen to pay by bank transfer.
+
+{% endif %}The payment option you have chosen: {% with option=registration.option %}{{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}{% endwith %}.
+
+{% endcomment %}Your invoice is attached, but can also be download anytime at {{ scheme }}://{{site.domain}}{% url 'billing_event_invoice_download' event_code=event.code %}.
+
+If you have questions or comments, you can reach us at {{ settings.DEFAULT_FROM_EMAIL }}.
+
+Sincerely, {{ site.name }} Management

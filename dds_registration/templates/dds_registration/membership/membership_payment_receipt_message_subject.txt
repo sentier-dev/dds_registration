@@ -1,0 +1,3 @@
+{# ex: set ft=htmldjango : #}
+
+[DdS]: Your payment for membership {{ membership.get_membership_type_display }} has been successfully completed
