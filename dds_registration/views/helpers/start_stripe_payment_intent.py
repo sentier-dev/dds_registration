@@ -17,32 +17,27 @@ from ...core.helpers.errors import errorToString
 LOG = logging.getLogger(__name__)
 
 
-def start_stripe_payment_intent(
+def initiate_stripe_payment(
     request: HttpRequest,
+    amount_in_cents: int,
     currency: str,
-    amount: float,
-    payment_data: dict = {},
-):
+    metadata: dict,
+) -> stripe.PaymentIntent:
+    user = request.user
     try:
-        user = request.user
-        extra_metadata = {
-            "user_id": user.id,
-            "user_email": user.email,
-            "currency": currency,
-            "amount": amount,
-        }
+        # TODO: Probably it'd be better to use old approach: to start payment and to fetch the secret via async ajax request: this operation requires a noticeable time (up to 1-2 seconds required to open the page)
         # @see https://docs.stripe.com/api/metadata
-        metadata = dict(payment_data, **extra_metadata)
-        #  metadata = dict(payment_data if payment_data else {}, **extra_metadata)
-        amount_in_cents = round(amount * 100)
         # @see https://docs.stripe.com/api/payment_intents/create
-        session = stripe.PaymentIntent.create(
+        intent = stripe.PaymentIntent.create(
             amount=amount_in_cents,
             currency=currency,
             #  automatic_payment_methods={"enabled": True},  # This is default
             metadata=metadata,
+            # NOTE: Issue #103: Send automatic email receipt
+            # @see: https://docs.stripe.com/api/payment_intents/confirm#confirm_payment_intent-receipt_email
+            receipt_email=user.email,
         )
-        #  Reponse example (see https://docs.stripe.com/api/payment_intents/object):
+        #  The `PaymentIntent` result example (see https://docs.stripe.com/api/payment_intents/object):
         #  {
         #    "id": "pi_3MtwBwLkdIwHu7ix28a3tqPa",
         #    "object": "payment_intent",
@@ -101,12 +96,47 @@ def start_stripe_payment_intent(
         #    "transfer_data": null,
         #    "transfer_group": null
         #  }
+        return intent
+    except Exception as err:
+        sError = errorToString(err, show_stacktrace=False)
+        error_text = "Cannot initiate stripe payment intent: {}".format(sError)
+        messages.error(request, error_text)
+        sTraceback = str(traceback.format_exc())
+        debug_data = {
+            "err": err,
+            "traceback": sTraceback,
+        }
+        LOG.error("%s (re-raising): %s", error_text, debug_data)
+        raise Exception(error_text)
+
+
+def start_stripe_payment_intent(
+    request: HttpRequest,
+    currency: str,
+    amount: float,
+    payment_data: dict = {},
+):
+    user = request.user
+    extra_metadata = {
+        "user_id": user.id,
+        "user_email": user.email,
+        "currency": currency,
+        "amount": amount,
+    }
+    # @see https://docs.stripe.com/api/metadata
+    metadata = dict(payment_data, **extra_metadata)
+    amount_in_cents = round(amount * 100)
+    try:
+        intent = initiate_stripe_payment(
+            request,
+            amount_in_cents,
+            currency,
+            metadata,
+        )
         result = {
-            #  "id": session.id,
-            "client_secret": session.client_secret,
+            "client_secret": intent.client_secret,
         }
         return result
-        #  return JsonResponse(result)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
         error_text = 'Cannot start stripe intent session for "{}": {}'.format(payment_data, sError)
