@@ -6,11 +6,12 @@ import traceback
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest
-from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404, HttpRequest
+from django.shortcuts import redirect, render
 
 from ..core.helpers.errors import errorToString
-
+from ..models import Event, Payment, Registration, RegistrationOption
 from .event_registration_cancel import (
     event_registration_cancel_confirm_form,
     event_registration_cancel_process_action,
@@ -25,14 +26,95 @@ LOG = logging.getLogger(__name__)
 
 
 @login_required
-def event_registration_new(request: HttpRequest, event_code: str):
-    return event_registration_form(
-        request,
-        event_code=event_code,
-        form_template="dds_registration/event_registration_new.html.django",
-        success_redirect="billing_event",
-        create_new=True,
-    )
+def event_registration(request: HttpRequest, event_code: str):
+    try:
+        event = Event.objects.get(code=event_code)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    if not event.can_register():
+        messages.error(request, f"Registration for {event.title} isn't open")
+        return redirect("index")
+
+    if request.method == "GET":
+        if event.get_active_registration_for_user(request.user):
+            messages.error(request, f"You are already registered for {event.title}")
+            return redirect("index")
+        else:
+            return render(
+                request=request,
+                template_name="dds_registration/event_registration_new.html.django",
+                context={
+                    "event": event,
+                    "error_message": None,
+                    "payment_methods": Payment.PAYMENT_METHODS,
+                    "default_payment_method": "INVOICE",
+                },
+            )
+    else:
+        registration = event.get_active_registration_for_user(request.user)
+        if registration:
+            # Can only change if not yet paid
+            if registration.payment.status == "PAID":
+                messages.error(
+                    request,
+                    f"Changing a paid registration isn't currently possible. You need to cancel and register again for {event.title}. Sorry for the inconvenience.",
+                )
+                return redirect("profile")
+            # Set up new payment and registration option
+            registration.option.delete()
+            registration.payment.status = "OBSOLETE"
+            registration.payment.save()
+        else:
+            registration = Registration(event=event, status="SUBMITTED", user=request.user)
+        try:
+            option = RegistrationOption.objects.get(id=int(request.POST["registration_option_radio"]))
+        except ObjectDoesNotExist:
+            raise Http404
+
+        registration.option = option
+        registration.save()
+
+        payment_method = request.POST["payment_method"]
+        payment = Payment(
+            status="CREATED",
+            data={
+                "user": {
+                    "id": request.user.id,
+                    "name": request.user.get_full_name(),
+                    "address": request.user.address,
+                },
+                "extra": "",
+                "method": payment_method,
+                "event": {
+                    "id": event.id,
+                    "title": event.title,
+                },
+                "registration": {
+                    "id": registration.id,
+                },
+                "option": {
+                    "id": option.id,
+                    "item": option.item,
+                    "price": option.stripe_price if payment_method == "STRIPE" else option.price,
+                    "currency": option.currency,
+                },
+            },
+        )
+        payment.save()
+
+        registration.payment = payment
+        registration.save()
+
+        # TODO: Render payment form
+
+    # return event_registration_form(
+    #     request,
+    #     event_code=event_code,
+    #     form_template="dds_registration/event_registration_new.html.django",
+    #     success_redirect="billing_event",
+    #     create_new=True,
+    # )
 
 
 @login_required
@@ -136,7 +218,7 @@ def event_registration_payment(request: HttpRequest, event_code: str):
 
 
 __all__ = [
-    event_registration_new,
+    event_registration,
     event_registration_edit,
     event_registration_new_success,
     event_registration_edit_success,

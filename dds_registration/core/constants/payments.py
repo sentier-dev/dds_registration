@@ -4,7 +4,7 @@ site_supported_currencies = [
     ("EUR", "Euro"),
     ("CAD", "Canadian Dollar"),  # AKA Loonie :)
 ]
-site_default_currency = site_supported_currencies[0][0]
+site_default_currency = "EUR"
 
 default_payment_deadline_days = 30
 

@@ -27,9 +27,6 @@ from .get_invoice_context import (
 LOG = logging.getLogger(__name__)
 
 
-# Basic billing form...
-
-
 @login_required
 def billing_event(request: HttpRequest, event_code: str):
     """
@@ -53,8 +50,6 @@ def billing_event(request: HttpRequest, event_code: str):
     """
     try:
         user = request.user
-        if not user.is_authenticated:
-            return redirect("index")
         # TODO: Check if invoice has been already created?
         context = get_basic_event_registration_context(request, event_code)
         # TODO: Catch registration doesn't exist
