@@ -11,7 +11,7 @@ from django.http import HttpRequest
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 
-from .helpers import check_for_available_membership
+from .helpers.check_for_available_membership import check_for_available_membership
 
 from ..core.helpers.errors import errorToString
 
@@ -83,7 +83,6 @@ def send_membership_registration_success_message(request: HttpRequest):
     context = get_membership_invoice_context(request)
 
     try:
-        # LOG.debug("start: %s", context)
         subject = render_to_string(
             template_name=email_subject_template,
             context=context,
@@ -95,11 +94,6 @@ def send_membership_registration_success_message(request: HttpRequest):
             context=context,
             request=request,
         )
-        #  debug_data = {
-        #      "subject": subject,
-        #      "body": body,
-        #  }
-        # LOG.debug("mail_user: %s", context)
         user.email_user(subject, body, settings.DEFAULT_FROM_EMAIL)
     except Exception as err:
         sError = errorToString(err, show_stacktrace=False)
