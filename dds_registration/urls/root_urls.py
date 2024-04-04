@@ -21,3 +21,9 @@ urlpatterns = [
         name="robots",
     ),
 ]
+
+if settings.DEV:
+    # Demo pages (for debug/dev purposes only)...
+    urlpatterns.append(
+        path("components-demo", views.components_demo, name="components_demo"),
+    )
