@@ -27,3 +27,6 @@ package-lock.*
 /static/
 /*.egg-info
 /dds_registration/templates/
+/.github/
+/.pre-commit-config.yaml
+/*.md
