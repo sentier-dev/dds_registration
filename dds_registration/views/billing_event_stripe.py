@@ -82,14 +82,7 @@ def billing_event_stripe_payment_success(request: HttpRequest, event_code: str):
     invoice = context["invoice"]
     messages.success(request, "Your payment successfully proceed")
     # Update invoice status
-    invoice.status = "PAID"
-    if settings.SLACK_WEBHOOK:
-        requests.post(
-            url=settings.SLACK_WEBHOOK,
-            json={"text": "Membership payment for {} of €{}".format(request.user.get_full_name(), context["total_price"])},
-        )
-    # TODO: To save some payment details to invoice?
-    invoice.save()
+    invoice.mark_paid()
     # @see Issues #94, #96
     # TODO: Invoice should be saved earlier. Create and save invoice pdf and datastamp (into the `data` filed), add it as attachment to the email message
     # Check where we're sending emails?
