@@ -5,7 +5,7 @@
 
 @use 'sass:color';
 
-@import "../shared";
+@import '../shared';
 
 .membership-splash {
   overflow: hidden;
@@ -71,7 +71,7 @@
     transition: all $transitionTime;
     text-decoration-thickness: 2px;
     text-decoration-line: underline;
-    opacity: .8;
+    opacity: 0.8;
     &:hover {
       opacity: 1;
     }

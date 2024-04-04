@@ -163,6 +163,7 @@ class Invoice(Model):
         ("ISSUED", "Issued"),
         ("PAID", "Paid"),
         ("REFUNDED", "Refunded"),
+        ("OBSOLETE", "Obsolete"),  # Invoice not paid but not needed
     ]
     DEFAULT_INVOICE_STATUS = INVOICE_STATUS[0][0]
 
