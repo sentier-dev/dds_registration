@@ -6,6 +6,7 @@ import random
 import string
 from datetime import date
 
+import requests
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site  # To access site properties
@@ -196,6 +197,15 @@ class Invoice(Model):
     extra_invoice_text = models.TextField(blank=True, default="")
 
     # TODO: reg
+
+    def mark_paid(self):
+        self.status = "PAID"
+        if settings.SLACK_WEBHOOK:
+            requests.post(
+                url=settings.SLACK_WEBHOOK,
+                json={"text": "Membership payment for {} of €{}".format(self.name, "DUMMY")},
+            )
+        self.save()
 
     def is_paid(self):
         return self.status == "PAID"

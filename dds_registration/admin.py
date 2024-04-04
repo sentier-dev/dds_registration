@@ -194,6 +194,12 @@ class EventAdmin(admin.ModelAdmin):
 admin.site.register(Event, EventAdmin)
 
 
+@admin.action(description="Mark selected invoices as paid")
+def mark_invoice_paid(modeladmin, request, queryset):
+    for inv in queryset:
+        inv.mark_paid()
+
+
 class InvoiceAdmin(admin.ModelAdmin):
     form = InvoiceAdminForm
     # TODO: Show related objects: registration, membership etc?
@@ -211,6 +217,7 @@ class InvoiceAdmin(admin.ModelAdmin):
         "memberships_column",
         "created",
     ]
+    actions = [mark_invoice_paid]
 
     def currency_id(self, invoice):
         return invoice.currency
