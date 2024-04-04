@@ -30,7 +30,7 @@ env = environ.Env(
     DEFAULT_FROM_EMAIL=(str, "events@d-d-s.ch"),
     STRIPE_PUBLISHABLE_KEY=(str, ""),
     STRIPE_SECRET_KEY=(str, ""),
-    SLACK_WEBHOOK=(str, "")
+    SLACK_WEBHOOK=(str, ""),
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))

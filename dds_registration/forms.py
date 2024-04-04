@@ -28,7 +28,7 @@ class BillingInvoiceForm(ModelForm):
             "extra_invoice_text",
         ]
         labels = {
-            'extra_invoice_text': 'Extra invoice text details, like reference or purchase order numbers',
+            "extra_invoice_text": "Extra invoice text details, like reference or purchase order numbers",
         }
         help_texts = {
             "name": "In case it needs to be different on the invoice or receipt.",

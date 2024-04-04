@@ -96,7 +96,12 @@ def send_membership_registration_success_message(request: HttpRequest):
         )
 
         if invoice.payment_method == "INVOICE" and invoice.status in ("ISSUED", "CREATED"):
-            user.email_user(subject=subject, message=body, attachment_content=create_invoice_pdf(context), attachment_name="DdS Membership Invoice {}.pdf".format(user.get_full_name()))
+            user.email_user(
+                subject=subject,
+                message=body,
+                attachment_content=create_invoice_pdf(context),
+                attachment_name="DdS Membership Invoice {}.pdf".format(user.get_full_name()),
+            )
             invoice.status = "ISSUED"
             invoice.save()
         else:
