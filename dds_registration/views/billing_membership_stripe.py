@@ -87,8 +87,8 @@ def billing_membership_stripe_payment_success(request: HttpRequest):
     messages.success(request, "Your payment successfully proceed")
     # Update invoice status, send receipt...
     if invoice.status != "PAID":
-        # XXX: To do it only on the first payment? (TODO: Disable payments if invoice has been already paid)
-        invoice.status = "PAID"
+        # XXX: To do it only on the first payment? (TODO: Disable payments if invoice has been already paid?)
+        invoice.mark_paid()
         # TODO: To save some other payment details to invoice?
         invoice.save()
         #  # TODO: Issue #103: Send payment receipt message (do we need to send these messages?)
