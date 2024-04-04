@@ -1,4 +1,25 @@
 /**
+ * @desc Main js entry point module (scripts)
+ * @module src/assets/scripts.ts
+ * @changed 2024.04.04, 16:06
+ */
+/* NOTE: These modules are unused. Used only
+ * `src/assets/stripe-init/stripe_payment_intents_support.ts`, via requirejs,
+ * without exposing to global scope.
+ *
+ * import { billing_event_stripe_payment_proceed } from './stripe-init/billing_event_stripe_payment_proceed';
+ * import { billing_membership_stripe_payment_proceed } from './stripe-init/billing_membership_stripe_payment_proceed';
+ *
+ * // Expose functions to global scope...
+ * window.billing_event_stripe_payment_proceed = billing_event_stripe_payment_proceed;
+ * window.billing_membership_stripe_payment_proceed = billing_membership_stripe_payment_proceed;
+ *
+ * console.log('[scripts] Main client code entry point', {
+ *   billing_event_stripe_payment_proceed,
+ *   billing_membership_stripe_payment_proceed,
+ * });
+ */
+/**
  * @module stripe_payment_intents_support.ts
  * @changed 2024.04.04, 00:21
  */
@@ -12,16 +33,18 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
         event.preventDefault();
         // @see https://docs.stripe.com/payments/accept-a-payment?platform=web&ui=elements#web-submit-payment
         // const result = await
-        stripe.confirmPayment({
+        stripe
+            .confirmPayment({
             elements: elements,
             confirmParams: {
                 return_url: success_url,
             },
-        }).then(function (result) {
+        })
+            .then(function (result) {
             var error = result.error;
             if (error) {
                 // debugger;
-                console.error('[billing_event_stripe_payment_proceed:startStripeElementsForm:submitStripeForm] error', {
+                console.error('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error', {
                     error: error,
                     event: event,
                     params: params,
@@ -35,7 +58,7 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
             }
             else {
                 // Success: redirect to success message
-                console.log('[billing_event_stripe_payment_proceed:startStripeElementsForm:submitStripeForm] success', {
+                console.log('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] success', {
                     success_url: success_url,
                     event: event,
                     params: params,
@@ -44,8 +67,9 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
                 debugger;
                 window.location.href = success_url;
             }
-        }).catch(function (error) {
-            console.error('[billing_event_stripe_payment_proceed:startStripeElementsForm:submitStripeForm] error', {
+        })
+            .catch(function (error) {
+            console.error('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error', {
                 error: error,
                 event: event,
                 params: params,
@@ -76,7 +100,7 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
         if (!form) {
             var errorText = 'Form node could not be found!';
             var error = new Error(errorText);
-            console.log('[billing_event_stripe_payment_proceed:startStripeElementsForm] error', errorText, {
+            console.log('[stripe_payment_intents_support:startStripeElementsForm] error', errorText, {
                 error: error,
                 params: params,
                 stripe: stripe,
@@ -93,49 +117,9 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
     exports.startStripeElementsForm = startStripeElementsForm;
 });
 /**
- * @module billing_event_stripe_payment_proceed.ts
- * @changed 2024.04.04, 00:21
- */
-define("stripe-init/billing_event_stripe_payment_proceed", ["require", "exports", "stripe-init/stripe_payment_intents_support"], function (require, exports, stripe_payment_intents_support_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.billing_event_stripe_payment_proceed = void 0;
-    exports.billing_event_stripe_payment_proceed = stripe_payment_intents_support_1.startStripeElementsForm;
-});
-// NOTE: It's possible to use `startStripeElementsForm` directly here.
-/**
- * @module billing_membership_stripe_payment_proceed.ts
- * @changed 2024.04.04, 01:15
- */
-define("stripe-init/billing_membership_stripe_payment_proceed", ["require", "exports", "stripe-init/stripe_payment_intents_support"], function (require, exports, stripe_payment_intents_support_2) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.billing_membership_stripe_payment_proceed = void 0;
-    exports.billing_membership_stripe_payment_proceed = stripe_payment_intents_support_2.startStripeElementsForm;
-});
-// NOTE: It's possible to use `startStripeElementsForm` directly here.
-/**
- * @desc Main js entry point module (scripts)
- * @module src/assets/scripts.ts
- * @changed 2024.04.03, 20:03
- */
-define("scripts", ["require", "exports", "stripe-init/billing_event_stripe_payment_proceed", "stripe-init/billing_membership_stripe_payment_proceed"], function (require, exports, billing_event_stripe_payment_proceed_1, billing_membership_stripe_payment_proceed_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    // Expose functions to global scope...
-    window.billing_event_stripe_payment_proceed = billing_event_stripe_payment_proceed_1.billing_event_stripe_payment_proceed;
-    window.billing_membership_stripe_payment_proceed = billing_membership_stripe_payment_proceed_1.billing_membership_stripe_payment_proceed;
-    console.log('[scripts] Main client code entry point', {
-        billing_event_stripe_payment_proceed: billing_event_stripe_payment_proceed_1.billing_event_stripe_payment_proceed,
-        billing_membership_stripe_payment_proceed: billing_membership_stripe_payment_proceed_1.billing_membership_stripe_payment_proceed,
-    });
-});
-/**
  * @module test.ts
- * @changed 2024.04.03, 16:18
+ * @changed 2024.04.04, 16:19
  */
-(function (window) {
-    // console.log('Test', window);
-})(window);
+// console.log('Test', window);
 
 //# sourceMappingURL=scripts.js.map

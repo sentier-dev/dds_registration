@@ -1,8 +1,6 @@
 /**
  * @module test.ts
- * @changed 2024.04.03, 16:18
+ * @changed 2024.04.04, 16:19
  */
 
-(function (window) {
-  // console.log('Test', window);
-})(window);
+// console.log('Test', window);

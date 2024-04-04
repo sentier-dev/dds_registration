@@ -49,15 +49,13 @@ function compileStyles() {
     .pipe(sassRunner().on('error', sassRunner.logError))
     .pipe(gulpAutoprefixer())
     .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(stylesDest))
-    // Delayed final tasks...
-    // .on('end', onFinish.bind(null, 'styles')) // TODO?
-  ;
+    .pipe(gulp.dest(stylesDest));
+  // Delayed final tasks...
+  // .on('end', onFinish.bind(null, 'styles')) // TODO?
 }
 gulp.task('compileStyles', compileStyles);
 gulp.task('compileStylesWatch', () => {
-  return gulp
-    .watch(stylesSrcAll.concat(stylesSrcEntry), watchOptions, compileStyles)
+  return gulp.watch(stylesSrcAll.concat(stylesSrcEntry), watchOptions, compileStyles);
   // .on('change', onWatchChange); // TODO?
 });
 
@@ -69,15 +67,13 @@ function compileScripts() {
   return gulp
     .src(scriptsSrcAll)
     .pipe(sourcemaps.init())
-    .pipe(tsProject()).js
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(scriptsDest))
-  ;
+    .pipe(tsProject())
+    .js.pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest(scriptsDest));
 }
 gulp.task('compileScripts', compileScripts);
 gulp.task('compileScriptsWatch', () => {
-  return gulp
-    .watch(scriptsSrcAll, watchOptions, compileScripts)
+  return gulp.watch(scriptsSrcAll, watchOptions, compileScripts);
   // .on('change', onWatchChange); // TODO?
 });
 

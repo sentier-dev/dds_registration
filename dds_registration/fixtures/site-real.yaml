@@ -3,5 +3,5 @@
 - model: sites.site
   pk: 1
   fields:
-    domain: "events.d-d.sch"
-    name: "Départ de Sentier Events and Membership Portal"
+    domain: 'events.d-d.sch'
+    name: 'Départ de Sentier Events and Membership Portal'
