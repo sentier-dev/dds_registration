@@ -246,8 +246,7 @@ class Membership(Model):
     until = models.IntegerField(default=this_year)
     honorary = models.BooleanField(default=False)
 
-    # XXX: To use different delete handler, like `SET_NULL`?
-    invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.CASCADE, null=True)
+    invoice = models.ForeignKey(Invoice, related_name="memberships", on_delete=models.SET_NULL, null=True)
 
     @property
     def active(self) -> bool:
