@@ -16,5 +16,3 @@ If you need to change your payment method (e.g. pay by {% if invoice.payment_met
 Please note that payment must be made with {{ payment_deadline_days }} days.
 
 If you have questions or comments, you can reach us at {{ settings.DEFAULT_FROM_EMAIL }}.
-
-Sincerely, {{ site.name }} Management
