@@ -31,7 +31,7 @@ function submitStripeForm(stripe: Stripe, params: TCreateCheckoutSessionParams, 
 
     if (error) {
       // debugger;
-      console.error('[billing_event_stripe_payment_proceed:startStripeElementsForm:submitStripeForm] error', {
+      console.error('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error', {
         error,
         event,
         params,
@@ -45,7 +45,7 @@ function submitStripeForm(stripe: Stripe, params: TCreateCheckoutSessionParams, 
       }
     } else {
       // Success: redirect to success message
-      console.log('[billing_event_stripe_payment_proceed:startStripeElementsForm:submitStripeForm] success', {
+      console.log('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] success', {
         success_url,
         event,
         params,
@@ -55,7 +55,7 @@ function submitStripeForm(stripe: Stripe, params: TCreateCheckoutSessionParams, 
       window.location.href = success_url;
     }
   }).catch((error) => {
-      console.error('[billing_event_stripe_payment_proceed:startStripeElementsForm:submitStripeForm] error', {
+      console.error('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error', {
         error,
         event,
         params,
@@ -95,7 +95,7 @@ export function startStripeElementsForm(params: TCreateCheckoutSessionParams) {
   if (!form) {
     const errorText = 'Form node could not be found!'
     const error = new Error(errorText);
-    console.log('[billing_event_stripe_payment_proceed:startStripeElementsForm] error', errorText, {
+    console.log('[stripe_payment_intents_support:startStripeElementsForm] error', errorText, {
       error,
       params,
       stripe,
