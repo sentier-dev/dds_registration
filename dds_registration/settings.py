@@ -30,6 +30,7 @@ env = environ.Env(
     DEFAULT_FROM_EMAIL=(str, "events@d-d-s.ch"),
     STRIPE_PUBLISHABLE_KEY=(str, ""),
     STRIPE_SECRET_KEY=(str, ""),
+    SLACK_WEBHOOK=(str, "")
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
@@ -55,6 +56,7 @@ REGISTRATION_SALT = env("REGISTRATION_SALT")
 SENDGRID_API_KEY = env("SENDGRID_API_KEY")
 STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY")
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+SLACK_WEBHOOK = env("SLACK_WEBHOOK")
 
 SECRETS = [
     (SECRET_KEY, "SECRET_KEY"),

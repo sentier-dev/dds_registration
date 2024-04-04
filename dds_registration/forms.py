@@ -27,10 +27,12 @@ class BillingInvoiceForm(ModelForm):
             "payment_method",
             "extra_invoice_text",
         ]
+        labels = {
+            'extra_invoice_text': 'Extra invoice text details, like reference or purchase order numbers',
+        }
         help_texts = {
             "name": "In case it needs to be different on the invoice or receipt.",
             "address": "In case it needs to be different on the invoice or receipt.",
-            "extra_invoice_text": "For things like reference or purchase order numbers.",
         }
         widgets = {
             # Issue #71: Make payment method control inline, add option

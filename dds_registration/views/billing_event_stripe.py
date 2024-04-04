@@ -4,6 +4,9 @@
 import logging
 import traceback
 
+import requests
+import stripe
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
@@ -11,12 +14,13 @@ from django.shortcuts import render
 
 from django.http import HttpRequest
 
+from .. import settings
 from ..core.helpers.errors import errorToString
 
 from .helpers.start_stripe_payment_intent import start_stripe_payment_intent
 
 from .get_invoice_context import get_event_invoice_context
-
+from .helpers.create_stripe_return_url import create_stripe_return_url
 
 LOG = logging.getLogger(__name__)
 
@@ -78,9 +82,7 @@ def billing_event_stripe_payment_success(request: HttpRequest, event_code: str):
     invoice = context["invoice"]
     messages.success(request, "Your payment successfully proceed")
     # Update invoice status
-    invoice.status = "PAID"
-    # TODO: To save some payment details to invoice?
-    invoice.save()
+    invoice.mark_paid()
     # @see Issues #94, #96
     # TODO: Invoice should be saved earlier. Create and save invoice pdf and datastamp (into the `data` filed), add it as attachment to the email message
     # Check where we're sending emails?
