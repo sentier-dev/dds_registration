@@ -35,21 +35,20 @@ def event_registration(request: HttpRequest, event_code: str):
         return redirect("index")
 
     if request.method == "GET":
+        # TODO: Populate template with existing choices instead of defaults
         if event.get_active_event_registration_for_user(request.user):
-            messages.error(request, f"You are already registered for {event.title}")
-            return redirect("index")
-        else:
-            return render(
-                request=request,
-                template_name="dds_registration/event_registration_new.html.django",
-                context={
-                    "event": event,
-                    "options": event.options.all(),
-                    "error_message": None,
-                    "payment_methods": Payment.METHODS,
-                    "default_payment_method": Payment.DEFAULT_METHOD,
-                },
-            )
+            messages.success(request, "You are editing an existing registration")
+        return render(
+            request=request,
+            template_name="dds_registration/event_registration_new.html.django",
+            context={
+                "event": event,
+                "options": event.options.all(),
+                "error_message": None,
+                "payment_methods": Payment.METHODS,
+                "default_payment_method": Payment.DEFAULT_METHOD,
+            },
+        )
     else:
         registration = event.get_active_event_registration_for_user(request.user)
         if registration:
@@ -101,8 +100,7 @@ def event_registration(request: HttpRequest, event_code: str):
                 "option": {
                     "id": option.id,
                     "item": option.item,
-                    "price": option.stripe_price if payment_method == "STRIPE" else option.price,
-                    "stripe-converted": payment_method == "STRIPE",
+                    "price": option.price,
                     "currency": option.currency,
                 },
             },

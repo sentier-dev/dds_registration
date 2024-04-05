@@ -32,7 +32,8 @@ from dds_registration.core.constants.payments import (
 
 from .core.constants.date_time_formats import dateFormat
 from .core.constants.payments import payment_details_by_currency
-from .core.helpers.create_invoice_pdf import create_invoice_pdf
+from .core.helpers.create_receipt_pdf import create_receipt_pdf_from_payment
+from .core.helpers.create_invoice_pdf import create_invoice_pdf_from_payment
 from .core.helpers.dates import this_year
 from .money import get_stripe_amount_for_currency, get_stripe_basic_unit
 
@@ -232,29 +233,33 @@ class Payment(Model):
             return ""
 
     def __str__(self):
-        return f"Payment {self.id} ({self.get_status_display()})"
+        return f"Payment {self.id}"
 
     def invoice_pdf(self):
-        return create_invoice_pdf(
-            client_name=self.data['user']['name'],
-            client_address=self.data['user']['address'],
-            invoice_number=self.invoice_no,
-            items=[],
-            recipient_account=self.account,
-            extra=self.data['extra'],
-        )
+        return create_invoice_pdf_from_payment(self)
+
+    def receipt_pdf(self):
+        return create_receipt_pdf_from_payment(self)
 
     def email_invoice(self):
         user = User.objects.get(id=self.data['user']['id'])
+        kind = "Membership" if self.data['kind'] == 'membership' else 'Event'
         user.email_user(
-            subject="TODO",
-            message="TODO",
+            subject=f"DdS {kind} Invoice {self.invoice_no}",
+            message=f"Please find attached the requested invoice for {kind.lower()}. Please note that your purchase is not complete until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch.",
             attachment_content=self.invoice_pdf(),
-            attachment_name="TODO.pdf",
+            attachment_name=f"DdS invoice {self.invoice_no}.pdf",
         )
 
     def email_receipt(self):
-        pass
+        user = User.objects.get(id=self.data['user']['id'])
+        kind = "Membership" if self.data['kind'] == 'membership' else 'Event'
+        user.email_user(
+            subject=f"DdS {kind} Receipt {self.invoice_no}",
+            message=f"Thanks! A receipt for your event or membership payment is attached.\nIf you have any questions, please contact events@d-d-s.ch.",
+            attachment_content=self.receipt_pdf(),
+            attachment_name=f"DdS receipt {self.invoice_no}.pdf",
+        )
 
 
 class MembershipData:

@@ -26,3 +26,10 @@ def get_stripe_basic_unit(amount: float, currency: str) -> int:
         return amount * 100
     else:
         raise ValueError(f"Unrecognized currency {currency}")
+
+
+def convert_from_stripe_units(amount: float, currency: str) -> float:
+    if currency in ("CAD", "CHF", "EUR", "CAD"):
+        return round(amount / 100, 2)
+    else:
+        raise ValueError(f"Unrecognized currency {currency}")

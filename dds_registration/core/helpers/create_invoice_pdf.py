@@ -4,7 +4,8 @@ from pathlib import Path
 
 from fpdf import FPDF, Align
 
-from ...constants.payments import (
+from django.db.models import Model
+from ..constants.payments import (
     default_payment_deadline_days,
     payment_recipient_address,
     payment_recipient_name,
@@ -19,7 +20,6 @@ DDS_LOGO = BASE_DIR / "images" / "pdf-template-logo.svg"
 
 # Core constants/options
 
-col_widths = (15, 45, 20, 20)  # Table column widths
 margin_size = 20  # Default margin size
 left_column_pos = margin_size  # Position of the left top column
 right_column_pos = 132  # Postion of the right top column
@@ -36,6 +36,7 @@ def create_invoice_pdf(
     invoice_number: int,
     items: list,
     recipient_account: str,
+    column_layout: tuple,
     invoice_date: date | None = None,
     extra: str = "",
     recipient_name: str = payment_recipient_name,
@@ -46,19 +47,6 @@ def create_invoice_pdf(
 
     if invoice_date is None:
         invoice_date = date.today()
-
-    # Get params...
-    #  currency = params["currency"]
-    # optional_text = params["optional_text"]
-    # client_name = params["client_name"]
-    # client_address = params["client_address"]
-    # dds_name = params["dds_name"]
-    # dds_address = params["dds_address"]
-    # invoice_no = params["invoice_no"]
-    # invoice_date = params["invoice_date"]
-    # payment_terms = params["payment_terms"]
-    # payment_details = params["payment_details"]
-    # table_data = params["table_data"]
 
     # Create pdf...
     pdf = FPDF(unit="mm", format="A4")
@@ -122,7 +110,7 @@ def create_invoice_pdf(
 
     # @see https://py-pdf.github.io/fpdf2/Tables.html
     with pdf.table(
-        col_widths=col_widths,
+        col_widths=column_layout,
         text_align="LEFT",
         line_height=line_height,
         padding=2,
@@ -138,9 +126,6 @@ def create_invoice_pdf(
                 row.cell(str(data))
 
     # Put bottom texts...
-
-    pdf.set_y(pdf.get_y() + small_vertical_space)
-
     pdf.set_y(pdf.get_y() + small_vertical_space)
     pdf.multi_cell(
         text="Invoice date: " + invoice_date.strftime("%Y-%m-%d"), w=page_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
@@ -192,3 +177,30 @@ def create_invoice_pdf(
         )
 
     return pdf
+
+
+def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
+    if payment.data['kind'] == 'event':
+        items = [
+            ("Quantity", "Event", "Registration", f"Price ({payment.data['option']['currency']})"),
+            (1, payment.data['event']['title'], payment.data['option']['item'], payment.data['option']['price']),
+            ('', '**Total**', '', payment.data['option']['price']),
+        ]
+        column_layout = (15, 45, 20, 20)
+    else:
+        items = [
+            ("Quantity", "Membership type", f"Price ({payment.data['option']['currency']})"),
+            (1, payment.data['membersip']['type'], payment.data['option']['price']),
+            ('', '**Total**', payment.data['option']['price']),
+        ]
+        column_layout = (15, 55, 30)
+
+    return create_invoice_pdf(
+        client_name=payment.data['user']['name'],
+        client_address=payment.data['user']['address'],
+        invoice_number=payment.invoice_no,
+        items=items,
+        column_layout=column_layout,
+        recipient_account=payment.account,
+        extra=payment.data['extra'],
+    )
