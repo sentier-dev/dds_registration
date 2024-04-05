@@ -39,11 +39,6 @@ urlpatterns = [
         name="event_payment_details",
     ),
     path(
-        "payments/<int:payment_id>/membership",
-        membership_payment_view,
-        name="membership_payment_details",
-    ),
-    path(
         "payments/<int:payment_id>/membership/stripe",
         membership_payment_stripe,
         name="membership_payment_stripe",

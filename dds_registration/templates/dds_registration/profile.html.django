@@ -49,7 +49,7 @@
   <p>Member since {{ membership.started }}. Membership type: {{ membership.get_membership_type_display }}.</p>
 {% endwith %}
 {% else %}
-  <p>Not yet a DdS member. <a href="{% url 'membership_start' %}">Apply for membership</a>.</p>
+  <p>Not yet a DdS member. <a href="{% url 'membership_application' %}">Apply for membership</a>.</p>
 {% endif %}
 
 <div>
