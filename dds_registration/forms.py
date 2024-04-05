@@ -9,7 +9,8 @@ from .models import (
     Event,
     RegistrationOption,
     User,
-    Invoice,
+    Payment,
+    MEMBERSHIP_DATA
 )
 
 # A text field to use in those TextField's which don't require large texts, but can use one-line text inputs
@@ -17,46 +18,15 @@ textInputWidget = forms.TextInput(attrs={"class": "vLargeTextField"})
 textAreaWidget = forms.Textarea(attrs={"class": "vLargeTextField", "rows": 5})
 
 
-class BillingInvoiceForm(ModelForm):
-
-    class Meta:
-        model = Invoice
-        fields = [
-            "name",
-            "address",
-            "payment_method",
-            "extra_invoice_text",
-        ]
-        labels = {
-            "extra_invoice_text": "Extra invoice text details, like reference or purchase order numbers",
-        }
-        help_texts = {
-            "name": "In case it needs to be different on the invoice or receipt.",
-            "address": "In case it needs to be different on the invoice or receipt.",
-        }
-        widgets = {
-            # Issue #71: Make payment method control inline, add option
-            # icons. To clarify: Add 'highlighting'? Change names to
-            # 'Credit Card' or 'Invoice'? Probably it'll be neccesary to
-            # redefine widget class.
-            "payment_method": forms.RadioSelect(attrs={"class": "form-control form-check-inline"}),
-            "name": forms.TextInput(attrs={"class": "form-control"}),
-            "address": forms.Textarea(attrs={"class": "form-control", "rows": 5}),
-            "extra_invoice_text": forms.Textarea(attrs={"class": "form-control", "rows": 5}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["name"].required = True
-        self.fields["address"].required = True
+class MembershipForm(forms.Form):
+    membership_type = forms.ChoiceField(choices=MEMBERSHIP_DATA.public_choice_field_with_prices, widget=forms.RadioSelect, required=True)
+    payment_method = forms.ChoiceField(choices=Payment.METHODS, required=True, widget=forms.RadioSelect)
 
 
-class BillingEventForm(BillingInvoiceForm):
-    pass
-
-
-class BillingMembershipForm(BillingInvoiceForm):
-    pass
+class PaymentForm(forms.Form):
+    name = forms.CharField(label="Name on invoice", max_length=100, widget=textInputWidget, help_text="In case it needs to be different on the invoice or receipt.", required=True)
+    address = forms.CharField(label="Address on invoice", widget=textAreaWidget, required=True)
+    extra = forms.CharField(label="Extra invoice text details, like reference or purchase order numbers", widget=textAreaWidget, required=False)
 
 
 class DdsRegistrationForm(BaseRegistrationForm):
@@ -116,14 +86,13 @@ class EventAdminForm(ModelForm):
         fields = "__all__"
 
 
-class InvoiceAdminForm(ModelForm):
+class PaymentAdminForm(ModelForm):
     class Meta:
-        model = Invoice
+        model = Payment
         widgets = {
             "name": textInputWidget,
             "address": textAreaWidget,
             "data": textAreaWidget,
-            "extra_invoice_text": textAreaWidget,
         }
         fields = "__all__"
 
@@ -176,13 +145,3 @@ class UpdateUserForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["first_name"].required = True
         self.fields["last_name"].required = True
-
-
-# Issue #63: Temporarily unused
-#  class DiscountCodeAdminForm(ModelForm):
-#      class Meta:
-#          model = DiscountCode
-#          widgets = {
-#              "code": textInputWidget,
-#          }
-#          fields = "__all__"

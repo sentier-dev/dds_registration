@@ -8,7 +8,7 @@
 {% load crispy_forms_tags %}
 
 {% block title %}
-  Proceed event registration payment — {{ block.super }}
+  DdS Registration Credit Card Payment — {{ block.super }}
 {% endblock title %}
 
 {% block content %}
@@ -16,7 +16,7 @@
 
   <fieldset>
     <legend>
-      <h1 class="page-title primary-color">Proceed event registration payment</h1>
+      <h1 class="page-title primary-color">DdS Registration Credit Card Payment</h1>
     </legend>
     {% if error_message %}
       <p>
@@ -34,7 +34,7 @@
       {# TODO: Make this node full-height? #}
     </div>
     <div class="common-actions">
-      <input id="submit" class="btn btn-primary" type="submit" value="Pay now" />
+      <input id="submit" class="btn btn-primary" type="submit" value="Submit" />
       {% include "assets/back-button/back-button.django" %}
     </div>
   </form>
@@ -50,7 +50,7 @@
   // @ts-check
 
   // Using link with event code, amount and currency
-  const success_url = '{{ scheme}}://{{ site.domain }}{% url "billing_event_stripe_payment_success" event_code=event.code %}';
+  const success_url = '{{ scheme }}://{{ site.domain }}{% url "event_payment_stripe_success" payment_id=payment.id %}';
 
   /** @type {TCreateCheckoutSessionParams} */
   const createCheckoutSessionParams = {

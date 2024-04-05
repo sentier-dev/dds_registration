@@ -4,7 +4,13 @@ site_supported_currencies = [
     ("EUR", "Euro"),
     ("CAD", "Canadian Dollar"),  # AKA Loonie :)
 ]
-site_default_currency = site_supported_currencies[0][0]
+currency_emojis = {
+    "USD": "🇺🇸",
+    "CHF": "🇨🇭",
+    "EUR": "🇪🇺",
+    "CAD": "🇨🇦",
+}
+site_default_currency = "EUR"
 
 default_payment_deadline_days = 30
 
@@ -17,22 +23,6 @@ Dorfsteig 8
 Switzerland
 VAT CHE-329.638.515
 """
-
-# UNUSED? Used `payment_details_by_currency` dict instead (below)
-default_payment_details = """
-Account Holder: Départ de Sentier, Dorfsteig 8, 5223 Riniken AG, Switzerland
-Bank: Wise, Avenue Louise 54, Room S52, 1050 Brussels, Belgium
-IBAN: BE31 9673 6729 9455
-SWIFT-BIC: TRWIBEB1XXX
-"""
-
-membership_cost_by_type = {
-    "NORMAL": 20,
-    "BOARD": 30,
-    "HONORARY": 40,
-    "BUSINESS": 50,
-    "ACADEMIC": 60,
-}
 
 payment_details_by_currency = {
     "USD": """
