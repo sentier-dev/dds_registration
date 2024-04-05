@@ -3,7 +3,7 @@
 # @module index.wsgi
 # @desc Django wsgi start script
 # @since 2024.03.06, 20:47
-# @changed 2024.03.06, 20:47
+# @changed 2024.04.05, 18:38
 
 import os
 import sys
@@ -29,7 +29,7 @@ sys.path.insert(1, rootPath)
 
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'default_settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dds_registration.settings')
 from django.core.wsgi import get_wsgi_application
 
 try:

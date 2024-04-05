@@ -4,6 +4,7 @@ from django.contrib.sites.models import Site
 from django.shortcuts import render
 from django.views.generic import TemplateView
 
+
 LOG = logging.getLogger(__name__)
 
 
@@ -16,7 +17,10 @@ class RobotsView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(RobotsView, self).get_context_data(**kwargs)
-        context["domain"] = Site.objects.get_current().domain
+        site = Site.objects.get_current()
+        context["site"] = site
+        scheme = "https" if self.request.is_secure() else "http"
+        context["scheme"] = scheme
         return context
 
 

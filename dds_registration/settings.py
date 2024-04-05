@@ -121,11 +121,12 @@ COMPRESS_PRECOMPILERS = (
 )
 
 # These settings already exist in `default_settings.py` Should we remove those?
+DEFAULT_HOST = "events.d-d-s.ch"
 ALLOWED_HOSTS = [
-    "events.d-d-s.ch",
+    DEFAULT_HOST,
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "https://events.d-d-s.ch",
+    "https://" + DEFAULT_HOST,
 ]
 
 if LOCAL or DEBUG:
@@ -160,6 +161,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    APP_NAME + ".middleware.BeautifulMiddleware.BeautifulMiddleware",  # Html content prettifier
 ]
 
 # Add livereload app...
@@ -334,10 +336,20 @@ TIMEOUT = 30 if DEBUG else 300  # Short value for debug time
 # TODO: Use `Site.objects.get_current().name` (via `from django.contrib.sites.models import Site`) as site title.
 SITE_NAME = "Départ de Sentier Events and Membership Portal"
 SITE_TITLE = SITE_NAME
-SITE_DESCRIPTION = SITE_NAME
+# TODO: Issue #40: Add proper site description and keywords...
+SITE_DESCRIPTION = "The membership and events registration portal for the DdS. Départ de Sentier (abbreviated DdS) is a non-profit association which supports open sustainability assessment and public engagement. DdS organizes conferences and code, supports teaching, and rewards open software development."
 SITE_KEYWORDS = """
-Registration
-Events
+Départ de Sentier
+DdS
+d-d-s.ch
+events and membership portal
+non-profit association
+open sustainability conferences
+teaching
+open software development
+registration
+events
+membership
 """
 SITE_KEYWORDS = re.sub(r"\s*[\n\r]+\s*", ", ", SITE_KEYWORDS.strip())
 # TODO: Issue #30: Add correct tags, resources for SSO, search engines and social networks (open graph etc)
@@ -347,6 +359,7 @@ PASS_VARIABLES = {
     "DEBUG": DEBUG,  # Pass django debug flag to the code (from environment)
     "DEV": DEV,  # Dev server mode (from the environment)
     "LOCAL": LOCAL,  # Local dev server mode (from the environment)
+    "DEFAULT_HOST": DEFAULT_HOST,
     "USE_DJANGO_PREPROCESSORS": USE_DJANGO_PREPROCESSORS,
     "STRIPE_PUBLISHABLE_KEY": STRIPE_PUBLISHABLE_KEY,
     "DEFAULT_FROM_EMAIL": DEFAULT_FROM_EMAIL,

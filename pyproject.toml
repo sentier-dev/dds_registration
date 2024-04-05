@@ -50,6 +50,7 @@ dependencies = [
     "requests",
     "sendgrid>=6.11.0", # @see https://docs.sendgrid.com/for-developers/sending-email/django
     "stripe>=8.9.0",
+    "beautifulsoup4>=4.12.3",  # Html content prettifier
 ]
 
 [project.urls]
