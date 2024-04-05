@@ -33,10 +33,10 @@
     <meta property="og:title" content="{{ site.name }}" />
     <meta property="og:description" content="{{ settings.SITE_DESCRIPTION }}" />
     <meta property="og:url" content="{{ settings.DEFAULT_HOST }}" />
-    <meta property="og:image" content="https://{{ settings.DEFAULT_HOST }}/static/images/og-splash/dds-painting-splash.jpg" />
-    {% comment %}
-    <meta property="og:image" content="https://{{ settings.DEFAULT_HOST }}/static/images/dds-logo/svg/Green Logo.svg" />
-    {% endcomment %}
+    <meta property="og:image" content="https://{{ settings.DEFAULT_HOST }}/static/images/og-splash/dds-painting-1200x630.jpg" />
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="twitter:image" content="https://{{ settings.DEFAULT_HOST }}/static/images/og-splash/dds-painting-320x.jpg" />
   {% endblock %}
 
   <!-- {{{ CSS -->
