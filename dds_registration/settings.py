@@ -126,7 +126,7 @@ ALLOWED_HOSTS = [
     DEFAULT_HOST,
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "https://events.d-d-s.ch",
+    "https://" + DEFAULT_HOST,
 ]
 
 if LOCAL or DEBUG:
