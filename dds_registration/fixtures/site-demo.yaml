@@ -1,0 +1,7 @@
+# @changed 2024.04.05, 18:07
+
+- model: sites.site
+  pk: 1
+  fields:
+    domain: 'https://dds-registration.lilliputten.ru/'
+    name: 'DdS (Demo)'
