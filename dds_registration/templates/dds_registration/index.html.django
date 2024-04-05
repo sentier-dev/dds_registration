@@ -8,44 +8,22 @@
 
 {% include "assets/render-messages/render-messages.django" %}
 
-{% with user_authenticated=user.is_authenticated %}
-  {% if user_authenticated %}
-    {% if not user.is_member %}
-      {% include "assets/membership-splash/membership-splash-user.django" %}
-    {% endif %}
-  {% else %}
-    {% include "assets/membership-splash/membership-splash-default.django" %}
-  {% endif %}
-{% endwith %}
-
-{% if user_events_data %}
-  <fieldset>
-    <legend>
-      <h2 class="primary-color">Your events</h2>
-    </legend>
-  </fieldset>
-
-{% with event_list_data=user_events_data %}
-  {% include "assets/events-list-block/events-list-block.django" %}
-{% endwith %}
-
-{# TODO: To show smth if there aren't any available public events? #}
-
+{% if user.is_authenticated and not user.is_member or not user.is_authenticated %}
+    {% include "assets/membership-splash/membership-splash-user.django" %}
 {% endif %}
 
-{% if public_events_data %}
+{# TODO: To show smth if there aren't any available public events? #}
+
+{% if events %}
   <fieldset>
     <legend>
-      <h2 class="primary-color">Currently open events</h2>
+      <h2 class="primary-color">DdS events open for registration</h2>
     </legend>
   </fieldset>
 
-{% with event_list_data=public_events_data %}
   {% include "assets/events-list-block/events-list-block.django" %}
-{% endwith %}
-
-{# TODO: To show smth if there aren't any available public events? #}
-
+{% else %}
+  <p>No events are currently available</p>
 {% endif %}
 
 {% endblock content %}

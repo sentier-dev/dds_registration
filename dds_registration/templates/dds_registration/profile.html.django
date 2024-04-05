@@ -33,13 +33,12 @@
   </p>
 {% endif %}
 
-{% if events %}
+{% if active_regs %}
   <h3 class="primary-color">Your registrations:</h3>
   {% include "assets/events-list-table/events-list-table.django" %}
 {% else %}
   <p class="dimmed-info">
     You don't have any active registrations yet.
-    You must receive an invitation to the event from its owner to be able to apply for registration.
   </p>
 {% endif %}
 

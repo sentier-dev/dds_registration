@@ -8,14 +8,14 @@
 
 {% load crispy_forms_tags %}
 
-{% block title %}Register for the event — {{ block.super }}{% endblock title %}
+{% block title %}DdS Event Registration — {{ block.super }}{% endblock title %}
 
 {% block content %}
 {{ block.super }}
 
 <fieldset>
   <legend>
-    <h1 class="page-title primary-color">Register for the event {{ event.title }}</h1>
+    <h1 class="page-title primary-color">Register for {{ event.title }}</h1>
   </legend>
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 </fieldset>
@@ -29,21 +29,24 @@
     {% if event.description %}
     <p class="primary-color"><strong>{{ event.description }}</strong></p>
     {% endif %}
-    {% if event.registration_open and event.registration_close %}
-    <p>Registration open from {{ event.registration_open }} to {{ event.registration_close }} (inclusive).</p>
+    {% if event.registration_open %}
+      {% if event.registration_close %}
+        <p>Registration open from {{ event.registration_open }} to {{ event.registration_close }} (inclusive).</p>
+      {% else %}
+        <p>Registration open from {{ event.registration_open }}.</p>
+      {% endif %}
+    {% elif event.registration_close %}
+        <p>Registration closes after {{ event.registration_close }}.</p>
     {% endif %}
   </div>
 
-  <input type="hidden" name="event_code" value="{{ event_code }}" />
+  <input type="hidden" name="event_code" value="{{ event.code }}" />
 
   {% include "assets/event_registration_form/event_registration_form.django" %}
 
   <fieldset class="mb3 form-group">
-    {# TODO: Issue #71: Change the submit button texts dynamically depending on the payment method control: 'Save' for 'INVOICE' and 'Pay now' for 'STRIPE'. #}
-    <input class="btn btn-primary" type="submit" value="Pay now" />
+    <input class="btn btn-primary" type="submit" value="Submit" />
     {% include "assets/back-button/back-button.django" %}
   </fieldset>
-
 </form>
-
 {% endblock content %}

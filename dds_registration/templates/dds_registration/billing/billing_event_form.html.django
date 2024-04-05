@@ -22,32 +22,16 @@
 
 {% include "assets/render-messages/render-messages.django" %}
 
-{% comment %}
-  <p><span class="item-label">User:</span> {{ user.get_full_name }}</p>
-  <p><span class="item-label">Event:</span> {{ event.title }}</p>
-  {% if registration %}
-  <p><span class="item-label">Registration:</span> {{ registration }}</p>
-  <p><span class="item-label">Option:</span> {{ registration.option }}</p>
-  {% endif %}
-  {% if invoice %}
-  <p><span class="item-label">Invoice:</span> {{ invoice }}</p>
-  {% endif %}
-{% endcomment %}
-
 <p><span class="item-label">Option:</span> {{ registration.option }}</p>
-
-{# Place form... #}
 
 <form role="form" method="post">
   {% csrf_token %}
   {{ form|crispy }}
 
   <div class="common-actions">
-    {# Issue #71: Change the submit button dynamically by payment method control: 'Save' for 'INVOICE' and 'Pay now' for 'STRIPE' #}
-    <input class="btn btn-primary" type="submit" value="Pay now" />
+    <input class="btn btn-primary" type="submit" value="Submit" />
     {% include "assets/back-button/back-button.django" %}
   </div>
 
 </form>
-
 {% endblock content %}

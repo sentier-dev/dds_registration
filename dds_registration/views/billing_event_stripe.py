@@ -1,96 +1,85 @@
-# @module billing_event_stripe.py
-# @changed 2024.04.01, 23:57
-
-import logging
-import traceback
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404, HttpRequest
+from django.contrib.sites.shortcuts import get_current_site
 
-from django.http import HttpRequest
+from ..models import Payment, Registration
+from ..money import get_stripe_amount_for_currency, convert_from_stripe_units
 
-from ..core.helpers.errors import errorToString
-
-#  from .helpers.send_payment_receipt import send_payment_receipt
-from .helpers.start_stripe_payment_intent import start_stripe_payment_intent
-
-from .get_invoice_context import get_event_invoice_context
-
-LOG = logging.getLogger(__name__)
-
-
-# Stripe payment for event...
+from .helpers.stripe_payments import get_stripe_client_secret
 
 
 @login_required
-def billing_event_stripe_payment_proceed(request: HttpRequest, event_code: str):
-    """
-    Proceed stripe payment for event registration.
-    """
+def event_payment_stripe(request: HttpRequest, payment_id: int):
     try:
-        context = get_event_invoice_context(request, event_code)
-        event = context["event"]
-        registration = context["registration"]
-        total_price = context["total_price"]
-        currency = context["currency"]
-        payment_data = {
-            "event_code": event_code,
+        payment = Payment.objects.get(id=payment_id)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    if payment.status != "CREATED":
+        messages.error("This payment has already been paid or refunded")
+        redirect("profile")
+
+    if payment.data['user']['id'] != request.user.id:
+        messages.error(request, "Can't pay for someone else's items")
+        return redirect("profile")
+
+    # Stripe is in cents or centimes
+    stripe_amount = get_stripe_amount_for_currency(
+        amount=payment.data['price'],
+        currency=payment.data['currency'],
+    )
+    actual_amount = convert_from_stripe_units(
+        amount=stripe_amount,
+        currency=payment.data['currency'],
+    )
+
+    payment.data['stripe_charge_in_progress'] = actual_amount
+    payment.save()
+
+    stripe_intent = get_stripe_client_secret(
+        payment.data['currency'],
+        stripe_amount,
+        request.user.email,
+        {'payment_id': payment.id}
+    )
+
+    template = "dds_registration/billing/billing_event_stripe_payment_proceed.html.django"
+    return render(
+        request=request,
+        template_name=template,
+        context={
+            'client_secret': stripe_intent.client_secret,
+            'payment': payment,
+            'site': get_current_site(request),
+            'scheme': "https" if request.is_secure() else "http",
         }
-        intent_session = start_stripe_payment_intent(
-            request=request,
-            currency=currency,
-            amount=total_price,
-            payment_data=payment_data,
-        )
-        context.update(intent_session)
-        debug_data = {
-            "event": event,
-            "registration": registration,
-            "total_price": total_price,
-            "currency": currency,
-            "context": context,
-        }
-        LOG.debug("Start stripe payment: %s", debug_data)
-        # Make a payment to stripe
-        template = "dds_registration/billing/billing_event_stripe_payment_proceed.html.django"
-        return render(request, template, context)
-    except Exception as err:
-        sError = errorToString(err, show_stacktrace=False)
-        error_text = 'Cannot start stripe intent session for "{}": {}'.format(payment_data, sError)
-        messages.error(request, error_text)
-        sTraceback = str(traceback.format_exc())
-        debug_data = {
-            "err": err,
-            "traceback": sTraceback,
-        }
-        LOG.error("%s (re-raising): %s", error_text, debug_data)
-        raise Exception(error_text)
+    )
 
 
 @login_required
-def billing_event_stripe_payment_success(request: HttpRequest, event_code: str):
-    """
-    Show payment success info.
-    """
-    context = get_event_invoice_context(request, event_code)
-    invoice = context["invoice"]
-    messages.success(request, "Your payment successfully proceed")
-    # Update invoice status
-    if invoice.status != "PAID":
-        # XXX: To do it only on the first payment? (TODO: Disable payments if invoice has been already paid?)
-        invoice.mark_paid()
-        # TODO: To save some other payment details to invoice?
-        invoice.save()
-        #  # TODO: Issue #103: Send payment receipt message (do we need to send these messages?)
-        #  email_body_template = "dds_registration/event/event_payment_receipt_message_body.txt"
-        #  email_subject_template = "dds_registration/event/event_payment_receipt_message_subject.txt"
-        #  send_payment_receipt(
-        #      request=request,
-        #      email_body_template=email_body_template,
-        #      email_subject_template=email_subject_template,
-        #      context=context,
-        #  )
-    template = "dds_registration/billing/billing_event_stripe_payment_success.html.django"
-    return render(request, template, context)
+def event_payment_stripe_success(request: HttpRequest, payment_id: int):
+    try:
+        payment = Payment.objects.get(id=payment_id)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    if payment.status != "CREATED":
+        messages.error("This payment has already been paid or refunded")
+        redirect("profile")
+
+    if payment.data['user']['id'] != request.user.id:
+        messages.error(request, "Can't pay for someone else's items")
+        return redirect("profile")
+
+    messages.success(request, f"Awesome, your registration for {payment.data['event']['title']} is paid, and you are good to go!")
+
+    payment.data['price'] = payment.data.pop('stripe_charge_in_progress')
+    payment.mark_paid()
+
+    reg = Registration.objects.get(id=payment.data['registration']['id'])
+    reg.status = "REGISTERED"
+    reg.save()
+    return redirect("profile")
