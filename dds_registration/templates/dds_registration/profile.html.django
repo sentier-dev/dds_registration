@@ -23,7 +23,7 @@
 {% include "assets/render-messages/render-messages.django" %}
 
 {% if user.is_authenticated %}
-  {# DEMO: Show an invitation or other info? #}
+  {# DEMO: Show a greetings or other info? #}
   <p
     data-user-name="{{ user.get_username }}"
     data-user-email="{{ user.email }}"
@@ -33,14 +33,23 @@
   </p>
 {% endif %}
 
-{% if events %}
+{% if active_regs %}
   <h3 class="primary-color">Your registrations:</h3>
   {% include "assets/events-list-table/events-list-table.django" %}
 {% else %}
   <p class="dimmed-info">
     You don't have any active registrations yet.
-    You must receive an invitation to the event from its owner to be able to apply for registration.
   </p>
+{% endif %}
+
+<h3 class="primary-color">Membership:</h3>
+
+{% if user.is_member %}
+{% with membership=user.get_membership %}
+  <p>Member since {{ membership.started }} ({{ membership.get_membership_type_display }}).</p>
+{% endwith %}
+{% else %}
+  <p>Not yet a DdS member. <a href="{% url 'membership_start' %}">Apply for membership</a>.</p>
 {% endif %}
 
 <div>
