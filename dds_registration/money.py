@@ -23,7 +23,7 @@ def get_stripe_basic_unit(amount: float, currency: str) -> int:
 
     This varies by country."""
     if currency in ("CAD", "CHF", "EUR", "CAD"):
-        return amount * 100
+        return round(amount * 100)
     else:
         raise ValueError(f"Unrecognized currency {currency}")
 

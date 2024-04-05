@@ -35,6 +35,7 @@ from .core.constants.payments import payment_details_by_currency
 from .core.helpers.create_receipt_pdf import create_receipt_pdf_from_payment
 from .core.helpers.create_invoice_pdf import create_invoice_pdf_from_payment
 from .core.helpers.dates import this_year
+from .core.constants.payments import currency_emojis
 from .money import get_stripe_amount_for_currency, get_stripe_basic_unit
 
 alphabet = string.ascii_lowercase + string.digits
@@ -199,9 +200,10 @@ class Payment(Model):
             return
         self.status = "PAID"
         if settings.SLACK_WEBHOOK:
+            title = self.data['event']['title'] if self.data['kind'] == 'event' else 'membership'
             requests.post(
                 url=settings.SLACK_WEBHOOK,
-                json={"text": "Payment for {} of €{}".format(self.name, "DUMMY")},
+                json={"text": "Payment by {} of {}{} for {}".format(self.data['user']['name'], currency_emojis[self.data['currency']], self.data['price'], title)},
             )
         self.save()
 

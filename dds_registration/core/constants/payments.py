@@ -4,6 +4,12 @@ site_supported_currencies = [
     ("EUR", "Euro"),
     ("CAD", "Canadian Dollar"),  # AKA Loonie :)
 ]
+currency_emojis = {
+    "USD": "🇺🇸",
+    "CHF": "🇨🇭",
+    "EUR": "🇪🇺",
+    "CAD": "🇨🇦",
+}
 site_default_currency = "EUR"
 
 default_payment_deadline_days = 30
@@ -25,14 +31,6 @@ Bank: Wise, Avenue Louise 54, Room S52, 1050 Brussels, Belgium
 IBAN: BE31 9673 6729 9455
 SWIFT-BIC: TRWIBEB1XXX
 """
-
-membership_cost_by_type = {
-    "NORMAL": 20,
-    "BOARD": 30,
-    "HONORARY": 40,
-    "BUSINESS": 50,
-    "ACADEMIC": 60,
-}
 
 payment_details_by_currency = {
     "USD": """

@@ -100,9 +100,9 @@ def event_registration(request: HttpRequest, event_code: str):
                 "option": {
                     "id": option.id,
                     "item": option.item,
-                    "price": option.price,
-                    "currency": option.currency,
                 },
+                "price": option.price,
+                "currency": option.currency,
             },
         )
         payment.save()
@@ -131,25 +131,3 @@ def event_registration(request: HttpRequest, event_code: str):
 #         #  form_template=None,
 #         success_redirect="profile",
 #     )
-
-
-# @login_required
-# def event_registration_payment(request: HttpRequest, event_code: str):
-#     # XXX: OBSOLETE: Should be moved to `billing`
-#     try:
-#         # TODO: Place payment link/info here
-#         template = "dds_registration/event_registration_payment.html.django"
-#         context = get_event_registration_context(request, event_code)
-#         return render(request, template, context)
-#     except Exception as err:
-#         sError = errorToString(err, show_stacktrace=False)
-#         error_text = 'Can not get payment information the for event "{}": {}'.format(event_code, sError)
-#         messages.error(request, error_text)
-#         sTraceback = str(traceback.format_exc())
-#         debug_data = {
-#             "event_code": event_code,
-#             "err": err,
-#             "traceback": sTraceback,
-#         }
-#         LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
-#         raise Exception(error_text)
