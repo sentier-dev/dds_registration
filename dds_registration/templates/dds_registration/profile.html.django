@@ -45,8 +45,8 @@
 <h3 class="primary-color">Membership:</h3>
 
 {% if user.is_member %}
-{% with membership=user.get_membership %}
-  <p>Member since {{ membership.started }} ({{ membership.get_membership_type_display }}).</p>
+{% with membership=user.membership %}
+  <p>Member since {{ membership.started }}. Membership type: {{ membership.get_membership_type_display }}.</p>
 {% endwith %}
 {% else %}
   <p>Not yet a DdS member. <a href="{% url 'membership_start' %}">Apply for membership</a>.</p>
