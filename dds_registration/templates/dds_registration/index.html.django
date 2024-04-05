@@ -8,10 +8,8 @@
 
 {% include "assets/render-messages/render-messages.django" %}
 
-{% if user.is_authenticated %}
-  {% include "assets/membership-splash/membership-splash-user.django" %}
-{% else %}
-  {% include "assets/membership-splash/membership-splash-default.django" %}
+{% if user.is_authenticated and not user.is_member or not user.is_authenticated %}
+    {% include "assets/membership-splash/membership-splash-user.django" %}
 {% endif %}
 
 {# TODO: To show smth if there aren't any available public events? #}

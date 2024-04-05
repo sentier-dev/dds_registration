@@ -83,6 +83,18 @@ class User(AbstractUser):
         #  ]
         pass
 
+    def get_membership(self):
+        try:
+            if self.is_authenticated:
+                return Membership.objects.get(user_id=self.id)
+        except Membership.DoesNotExist:
+            pass
+        return None
+
+    def is_member(self):
+        membership = self.get_membership()
+        return True if membership else False
+
     def sync_email_and_username(self):
         # Check if email or username had changed?
         email_changed = self.email != self._original_email

@@ -23,7 +23,7 @@ def index(request: HttpRequest):
             'events': events
         })
 
-
+  
 @login_required
 def profile(request: HttpRequest):
     if not request.user.is_authenticated:
