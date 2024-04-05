@@ -4,10 +4,9 @@
   @changed 2024.03.11, 01:03
 -->
 
-{% if event_list_data %}
+{% if events %}
   <div class="events-list-block mb-3">
-    {% for data in event_list_data %}
-    {% with event=data.event registration=data.registration user_has_registration=data.user_has_registration %}
+    {% for event in events %}{% with registration=event.registration %}
     <div class="events-list-item {% if registration %}has-registration{% endif %}">
 
       <h3 class="events-list-item-title">
@@ -15,9 +14,7 @@
         {% if registration %} <i class="bi bi-check"></i>{% endif %}
       </h3>
 
-        {% if event.description %}
-          <p class="events-list-item-description">{{ event.description }}</p>
-        {% endif %}
+        <p class="events-list-item-description">{{ event.description }}</p>
 
         <div class="events-list-item-details">
           {% if registration %}
@@ -41,9 +38,9 @@
         {% if user.is_authenticated %}
           <p class="events-list-item-actions">
             {% if registration %}
-              <a href="{% url 'event_registration_edit' event_code=event.code %}">Show your registration</a>
+              <a href="{% url 'event_registration' event_code=event.code %}">Show your registration</a>
             {% else %}
-              <a href="{% url 'event_registration_new' event_code=event.code %}">Register to the event</a>
+              <a href="{% url 'event_registration' event_code=event.code %}">Register</a>
             {% endif %}
           </p>
         {% endif %}

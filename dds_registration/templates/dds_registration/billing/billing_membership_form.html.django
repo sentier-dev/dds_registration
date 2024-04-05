@@ -26,8 +26,7 @@
     {% csrf_token %}
     {{ form|crispy }}
     <div class="common-actions">
-      {# TODO: Issue #71: Change the submit button texts dynamically depending on the payment method control: 'Save' for 'INVOICE' and 'Pay now' for 'STRIPE'. #}
-      <input class="btn btn-primary" type="submit" value="Pay now" />
+      <input class="btn btn-primary" type="submit" value="Submit" />
       {% include "assets/back-button/back-button.django" %}
     </div>
   </form>

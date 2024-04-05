@@ -6,20 +6,17 @@ from django.db.models import Q
 from .forms import (
     EventAdminForm,
     RegistrationOptionAdminForm,
-    InvoiceAdminForm,
+    PaymentAdminForm,
     UserAdminForm,
 )
 from .models import (
-    # Issue #63: Temporarily unused
-    #  DiscountCode,
-    #  GroupDiscount,
     Event,
     Message,
     Registration,
     RegistrationOption,
     User,
     Membership,
-    Invoice,
+    Payment,
 )
 
 # Default registrations (without modifications)
@@ -107,7 +104,6 @@ class MembershipAdmin(admin.ModelAdmin):
         "user",
         "started",
         "until",
-        "honorary",
         #  "paid",
         "active",
         "membership_type",
@@ -133,7 +129,7 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     list_display = [
         "user_column",
-        "invoice",
+        "payment",
         "event",
         "option",
         "status",
@@ -173,7 +169,7 @@ class EventAdmin(admin.ModelAdmin):
     # TODO: Show linked options (in columns and in the form)?
     readonly_fields = [
         "registration_open",
-        "new_registration_full_url",
+        "url",
     ]
     search_fields = [
         "title",
@@ -187,58 +183,38 @@ class EventAdmin(admin.ModelAdmin):
         "registration_open",
         "registration_close",
         "public",
-        "new_registration_full_url",
+        "url",
     ]
 
 
 admin.site.register(Event, EventAdmin)
 
 
-@admin.action(description="Mark selected invoices as paid")
+@admin.action(description="Mark selected invoices paid")
 def mark_invoice_paid(modeladmin, request, queryset):
-    for inv in queryset:
-        inv.mark_paid()
+    for obj in queryset:
+        obj.mark_paid()
 
 
-class InvoiceAdmin(admin.ModelAdmin):
-    form = InvoiceAdminForm
-    # TODO: Show related objects: registration, membership etc?
+class PaymentAdmin(admin.ModelAdmin):
+    form = PaymentAdminForm
+    # TODO: Improve
     readonly_fields = [
         "invoice_no",
         "created",
-        "registrations_column",
-        "memberships_column",
+        "updated",
+        "data",
     ]
     list_display = [
         "invoice_no",
         "status",
-        "currency_id",
-        "registrations_column",
-        "memberships_column",
         "created",
+        "updated",
     ]
     actions = [mark_invoice_paid]
 
-    def currency_id(self, invoice):
-        return invoice.currency
 
-    currency_id.short_description = "Currency"
-    currency_id.admin_order_field = "currency"
-
-    def registrations_column(self, invoice):
-        registrations = invoice.registrations.all()
-        return "; ".join(filter(None, map(str, registrations)))
-
-    registrations_column.short_description = "Registrations"
-
-    def memberships_column(self, invoice):
-        memberships = invoice.memberships.all()
-        return "; ".join(filter(None, map(str, memberships)))
-
-    memberships_column.short_description = "Memberships"
-
-
-admin.site.register(Invoice, InvoiceAdmin)
+admin.site.register(Payment, PaymentAdmin)
 
 
 # Issue #63: Temporarily unused

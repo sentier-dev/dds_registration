@@ -29,7 +29,7 @@
       {# TODO: Make this node full-height? #}
     </div>
     <div class="common-actions">
-      <input id="submit" class="btn btn-primary" type="submit" value="Pay now" />
+      <input id="submit" class="btn btn-primary" type="submit" value="Submit" />
       {% include "assets/back-button/back-button.django" %}
     </div>
   </form>

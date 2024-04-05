@@ -17,8 +17,6 @@ from ..core.helpers.create_invoice_pdf import create_invoice_pdf
 
 from ..models import Membership
 
-from .get_invoice_context import get_membership_invoice_context
-
 
 LOG = logging.getLogger(__name__)
 

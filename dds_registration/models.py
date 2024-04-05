@@ -10,6 +10,7 @@ import requests
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import QuerySet
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, Q
 from django.urls import reverse
@@ -30,6 +31,8 @@ from dds_registration.core.constants.payments import (
 )
 
 from .core.constants.date_time_formats import dateFormat
+from .core.constants.payments import payment_details_by_currency
+from .core.helpers.create_invoice_pdf import create_invoice_pdf
 from .core.helpers.dates import this_year
 from .money import get_stripe_amount_for_currency, get_stripe_basic_unit
 
@@ -132,6 +135,7 @@ class User(AbstractUser):
         self,
         subject: str,
         message: str,
+        html_content: bool = False,
         attachment_content: FPDF | None = None,
         attachment_name: str | None = None,
         from_email: str | None = settings.DEFAULT_FROM_EMAIL,
@@ -170,7 +174,7 @@ class Payment(Model):
         ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
-    DEFAULT_PAYMENT_METHOD = "INVOICE"
+    DEFAULT_METHOD = "INVOICE"
 
     # # User name and address, initialized by user's ones, by default
     # name = models.TextField(blank=False, default="")
@@ -210,8 +214,47 @@ class Payment(Model):
             return "NOT-CREATED-YET"
         return "#{}{:0>4}".format(self.created.strftime("%y"), self.id)
 
+    @property
+    def account(self):
+        return payment_details_by_currency[self.data['option']['currency']]
+
+    @property
+    def has_unpaid_invoice(self):
+        return self.data['method'] == 'INVOICE' and self.status != "PAID"
+
+    def items(self):
+        """Adapt items format for events and membership"""
+        pass
+
+    @property
+    def title(self):
+        if self.data['kind'] == 'membership':
+            return ""
+
     def __str__(self):
         return f"Payment {self.id} ({self.get_status_display()})"
+
+    def invoice_pdf(self):
+        return create_invoice_pdf(
+            client_name=self.data['user']['name'],
+            client_address=self.data['user']['address'],
+            invoice_number=self.invoice_no,
+            items=[],
+            recipient_account=self.account,
+            extra=self.data['extra'],
+        )
+
+    def email_invoice(self):
+        user = User.objects.get(id=self.data['user']['id'])
+        user.email_user(
+            subject="TODO",
+            message="TODO",
+            attachment_content=self.invoice_pdf(),
+            attachment_name="TODO.pdf",
+        )
+
+    def email_receipt(self):
+        pass
 
 
 class MembershipData:
@@ -273,9 +316,11 @@ class Event(Model):
     code = models.TextField(unique=True, default=random_code)  # Show as an input
     title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
     description = models.TextField(blank=False, null=False)
+    success_email = models.TextField(blank=False, null=False)
     public = models.BooleanField(default=True)
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
+    refund_window_days = models.IntegerField(default=14, help_text="Number of days before an event that a registration fee can be refunded")
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text="Maximum number of participants (0 = no limit)",
@@ -293,18 +338,13 @@ class Event(Model):
     @property
     def can_register(self):
         today = date.today()
-        return today >= self.registration_open and today <= self.registration_close
+        return today >= self.registration_open and today <= self.registration_close and (not self.max_participants or self.active_registration_count < self.max_participants)
 
-    def get_active_registrations(self):
-        """
-        Return the active registrations
-        """
-        return self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY)
+    @property
+    def active_registration_count(self):
+        return self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY).count()
 
-    def get_active_registration_for_user(self, user: User):
-        """
-        Get the user registration for this event
-        """
+    def get_active_event_registration_for_user(self, user: User):
         active_user_registrations = list(self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY, user=user))
         if active_user_registrations:
             return active_user_registrations[0]
@@ -312,9 +352,7 @@ class Event(Model):
 
     @property
     def url(self):
-        return reverse("event_registration_new", args=(self.code,))
-
-    url.short_description = "Event registration URL"
+        return reverse("event_registration", args=(self.code,))
 
     def __str__(self):
         name_items = [
@@ -325,7 +363,7 @@ class Event(Model):
 
 
 class RegistrationOption(Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, related_name="options", on_delete=models.CASCADE)
     item = models.TextField(null=False, blank=False)  # Show as an input
     price = models.FloatField(default=0, null=False)
 
@@ -352,21 +390,21 @@ class RegistrationOption(Model):
         return info
 
 
-# class Message(Model):
-#     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-#     message = models.TextField()
-#     emailed = models.BooleanField(default=False)
+class Message(Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    message = models.TextField()
+    emailed = models.BooleanField(default=False)
 
-#     created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-#     def __str__(self):
-#         items = [
-#             self.event,
-#             self.created_at.strftime(dateFormat) if self.created_at else None,
-#             "emailed" if self.emailed else None,
-#         ]
-#         info = ", ".join(filter(None, map(str, items)))
-#         return info
+    def __str__(self):
+        items = [
+            self.event,
+            self.created_at.strftime(dateFormat) if self.created_at else None,
+            "emailed" if self.emailed else None,
+        ]
+        info = ", ".join(filter(None, map(str, items)))
+        return info
 
 
 class Registration(Model):
@@ -399,6 +437,18 @@ class Registration(Model):
                 name="Single active registration per verified user account",
             )
         ]
+
+    @classmethod
+    def active_for_user(cls, user: User) -> QuerySet:
+        return cls.objects.filter(REGISTRATION_ACTIVE_QUERY, user=user)
+
+    def complete_registration(self):
+        self.status = "REGISTERED"
+        self.save()
+        self.user.email_user(
+            subject=f"Registration for {self.event.title}",
+            message=self.event.success_email,
+        )
 
     def __str__(self):
         items = [

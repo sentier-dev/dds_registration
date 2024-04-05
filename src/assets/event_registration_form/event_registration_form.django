@@ -27,9 +27,9 @@
   {% endfor %}
 </fieldset>
 
-<fieldset id="options_basic" class="mb3 form-group">
+<fieldset id="registration_option_radio" class="mb3 form-group">
   <legend class="mb-3 primary-color">Registration options for this event</legend>
-  {% for index, option in enumerate(event.options) %}
+  {% for option in options %}
     <div class="mb-2 form-check">
       <input
         type="radio"
@@ -37,7 +37,7 @@
         id="option-{{ option.id }}"
         name="checked_option_ids"
         value="{{ option.id }}"
-        {% if index == 0 %}checked{% endif %}
+        {% if forloop.counter == 0 %}checked{% endif %}
       >
       <label class="form-check-label" for="option-{{ option.id }}">
         {{ option.item }} ({{ option.currency }} {{ option.price }})

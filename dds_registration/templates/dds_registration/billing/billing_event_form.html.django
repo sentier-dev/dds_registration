@@ -43,8 +43,7 @@
   {{ form|crispy }}
 
   <div class="common-actions">
-    {# Issue #71: Change the submit button dynamically by payment method control: 'Save' for 'INVOICE' and 'Pay now' for 'STRIPE' #}
-    <input class="btn btn-primary" type="submit" value="Pay now" />
+    <input class="btn btn-primary" type="submit" value="Submit" />
     {% include "assets/back-button/back-button.django" %}
   </div>
 
