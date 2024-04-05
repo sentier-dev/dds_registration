@@ -1,6 +1,6 @@
-from bs4 import BeautifulSoup
 import re
 
+from bs4 import BeautifulSoup
 
 # Single- and multi-line comments
 re_comments = re.compile("<!--(.*?|(?:\n.*?)*?)-->", re.MULTILINE)

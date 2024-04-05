@@ -4,9 +4,8 @@
 from django.urls import include, path
 
 from .. import views
-from ..views import registration as registration_views
-
 from ..forms import DdsRegistrationForm
+from ..views import registration as registration_views
 
 urlpatterns = [
     # Accounts...

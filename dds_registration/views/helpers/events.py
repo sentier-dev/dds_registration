@@ -16,7 +16,6 @@ from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 
 from ...core.helpers.errors import errorToString
-
 from ...models import (
     REGISTRATION_ACTIVE_QUERY,
     Event,

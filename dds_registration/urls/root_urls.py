@@ -3,11 +3,10 @@
 
 from django.conf import settings
 from django.contrib import admin
-from django.views.decorators.cache import cache_page
 from django.urls import path
+from django.views.decorators.cache import cache_page
 
 from .. import views
-
 
 cache_timeout = 0 if settings.DEV or settings.DEBUG else 15 * 60  # in seconds: {min}*60
 

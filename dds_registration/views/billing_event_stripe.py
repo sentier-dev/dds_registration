@@ -1,13 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpRequest
-from django.contrib.sites.shortcuts import get_current_site
+from django.shortcuts import redirect, render
 
 from ..models import Payment, Registration
-from ..money import get_stripe_amount_for_currency, convert_from_stripe_units
-
+from ..money import convert_from_stripe_units, get_stripe_amount_for_currency
 from .helpers.stripe_payments import get_stripe_client_secret
 
 

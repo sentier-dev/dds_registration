@@ -5,7 +5,6 @@ from django.urls import path
 
 from ..views import event_registration as event_registration_views
 
-
 urlpatterns = [
     path(
         "event/<str:event_code>/registration",

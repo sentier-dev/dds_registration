@@ -1,10 +1,16 @@
 from django.urls import path
 
-from ..views.payment_utils import invoice_download, receipt_download
 from ..views.billing_event import event_payment_view
-from ..views.billing_event_stripe import event_payment_stripe, event_payment_stripe_success
+from ..views.billing_event_stripe import (
+    event_payment_stripe,
+    event_payment_stripe_success,
+)
 from ..views.billing_membership import membership_payment_view
-from ..views.billing_membership_stripe import membership_payment_stripe, membership_payment_stripe_success
+from ..views.billing_membership_stripe import (
+    membership_payment_stripe,
+    membership_payment_stripe_success,
+)
+from ..views.payment_utils import invoice_download, receipt_download
 
 urlpatterns = [
     path(

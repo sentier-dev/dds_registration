@@ -3,11 +3,11 @@
 
 import logging
 
-
-from django_registration.backends.activation.views import RegistrationView as BackendRegistrationView
+from django_registration.backends.activation.views import (
+    RegistrationView as BackendRegistrationView,
+)
 
 from ..forms import DdsRegistrationForm
-
 
 LOG = logging.getLogger(__name__)
 

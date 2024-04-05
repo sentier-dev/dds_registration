@@ -9,10 +9,9 @@ from datetime import date
 import requests
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.db import models
-from django.db.models import QuerySet
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Model, Q
+from django.db import models
+from django.db.models import Model, Q, QuerySet
 from django.urls import reverse
 from fpdf import FPDF
 from sendgrid import SendGridAPIClient
@@ -31,11 +30,10 @@ from dds_registration.core.constants.payments import (
 )
 
 from .core.constants.date_time_formats import dateFormat
-from .core.constants.payments import payment_details_by_currency
-from .core.helpers.create_receipt_pdf import create_receipt_pdf_from_payment
+from .core.constants.payments import currency_emojis, payment_details_by_currency
 from .core.helpers.create_invoice_pdf import create_invoice_pdf_from_payment
+from .core.helpers.create_receipt_pdf import create_receipt_pdf_from_payment
 from .core.helpers.dates import this_year
-from .core.constants.payments import currency_emojis
 from .money import get_stripe_amount_for_currency, get_stripe_basic_unit
 
 alphabet = string.ascii_lowercase + string.digits

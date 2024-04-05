@@ -1,11 +1,10 @@
 import logging
 
-from django.forms import ModelForm
 from django.contrib import messages
+from django.forms import ModelForm
 from django.http import HttpRequest
 
 from .utils import capitalize_id
-
 
 __all__ = [
     "pass_form_errors_to_messages",

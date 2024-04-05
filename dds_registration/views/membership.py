@@ -1,11 +1,11 @@
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest
 from django.shortcuts import redirect, render
-from django.core.exceptions import ObjectDoesNotExist
 
-from ..models import Membership, Payment, MEMBERSHIP_DATA
-from ..forms import MembershipForm
 from ..core.helpers.dates import this_year
+from ..forms import MembershipForm
+from ..models import MEMBERSHIP_DATA, Membership, Payment
 
 
 def membership_application(request: HttpRequest):

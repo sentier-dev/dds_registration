@@ -2,13 +2,10 @@
 from datetime import date
 from pathlib import Path
 
+from django.db.models import Model
 from fpdf import FPDF, Align
 
-from django.db.models import Model
-from ..constants.payments import (
-    payment_recipient_address,
-    payment_recipient_name,
-)
+from ..constants.payments import payment_recipient_address, payment_recipient_name
 
 BASE_DIR = Path(__file__).resolve().parent
 DDS_LOGO = BASE_DIR / "images" / "pdf-template-logo.svg"

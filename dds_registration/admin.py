@@ -1,22 +1,22 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.admin import SimpleListFilter
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Q
 
 from .forms import (
     EventAdminForm,
-    RegistrationOptionAdminForm,
     PaymentAdminForm,
+    RegistrationOptionAdminForm,
     UserAdminForm,
 )
 from .models import (
     Event,
+    Membership,
     Message,
+    Payment,
     Registration,
     RegistrationOption,
     User,
-    Membership,
-    Payment,
 )
 
 # Default registrations (without modifications)

@@ -5,6 +5,7 @@ from django.http import Http404, HttpRequest
 from django.shortcuts import redirect, render
 
 from ..models import Event, Payment, Registration, RegistrationOption
+
 # from .event_registration_cancel import (
 #     event_registration_cancel_confirm_form,
 #     event_registration_cancel_process_action,

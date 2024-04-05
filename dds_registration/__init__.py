@@ -1,7 +1,6 @@
 import stripe
 from django.conf import settings
 
-
 # Initalize stripe api
 stripe.api_key = settings.STRIPE_SECRET_KEY  # 'sk_...'
 

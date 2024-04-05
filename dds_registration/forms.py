@@ -2,16 +2,9 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.forms.models import ModelForm
-
 from django_registration.forms import RegistrationForm as BaseRegistrationForm
 
-from .models import (
-    Event,
-    RegistrationOption,
-    User,
-    Payment,
-    MEMBERSHIP_DATA
-)
+from .models import MEMBERSHIP_DATA, Event, Payment, RegistrationOption, User
 
 # A text field to use in those TextField's which don't require large texts, but can use one-line text inputs
 textInputWidget = forms.TextInput(attrs={"class": "vLargeTextField"})

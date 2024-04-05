@@ -2,9 +2,9 @@
 from datetime import date
 from pathlib import Path
 
+from django.db.models import Model
 from fpdf import FPDF, Align
 
-from django.db.models import Model
 from ..constants.payments import (
     default_payment_deadline_days,
     payment_recipient_address,

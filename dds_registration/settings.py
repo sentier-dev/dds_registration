@@ -1,11 +1,12 @@
 # -*- coding:utf-8 -*-
-from pathlib import Path
-import environ
 import os
 import posixpath
+import random
 import re
 import string
-import random
+from pathlib import Path
+
+import environ
 
 # Working folder
 

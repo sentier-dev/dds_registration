@@ -7,7 +7,6 @@ from django.http import HttpRequest
 from django.shortcuts import redirect, render
 
 from ..core.helpers.errors import errorToString
-
 from ..forms import UpdateUserForm
 from .helpers.events import send_re_actvation_email
 
