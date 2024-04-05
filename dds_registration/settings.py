@@ -160,6 +160,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    APP_NAME + ".middleware.BeautifulMiddleware.BeautifulMiddleware",  # Html content prettifier
 ]
 
 # Add livereload app...
