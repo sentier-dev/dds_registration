@@ -10,11 +10,17 @@ from .models import (
     RegistrationOption,
     User,
     Payment,
+    MEMBERSHIP_DATA
 )
 
 # A text field to use in those TextField's which don't require large texts, but can use one-line text inputs
 textInputWidget = forms.TextInput(attrs={"class": "vLargeTextField"})
 textAreaWidget = forms.Textarea(attrs={"class": "vLargeTextField", "rows": 5})
+
+
+class MembershipForm(forms.Form):
+    membership_type = forms.ChoiceField(choices=MEMBERSHIP_DATA.public_choice_field_with_prices, widget=forms.RadioSelect, required=True)
+    payment_method = forms.ChoiceField(choices=Payment.METHODS, required=True, widget=forms.RadioSelect)
 
 
 class PaymentForm(forms.Form):
@@ -139,13 +145,3 @@ class UpdateUserForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["first_name"].required = True
         self.fields["last_name"].required = True
-
-
-# Issue #63: Temporarily unused
-#  class DiscountCodeAdminForm(ModelForm):
-#      class Meta:
-#          model = DiscountCode
-#          widgets = {
-#              "code": textInputWidget,
-#          }
-#          fields = "__all__"

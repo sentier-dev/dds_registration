@@ -4,7 +4,6 @@
 # from .billing_event_urls import urlpatterns as billing_event_urlpatterns
 # from .billing_event_invoice_urls import urlpatterns as billing_event_invoice_urlpatterns
 # from .billing_event_stripe_urls import urlpatterns as billing_event_stripe_urlpatterns
-# from .billing_membership_urls import urlpatterns as billing_membership_urlpatterns
 # from .billing_membership_invoice_urls import urlpatterns as billing_membership_invoice_urlpatterns
 # from .billing_membership_stripe_urls import urlpatterns as billing_membership_stripe_urlpatterns
 from .membership_urls import urlpatterns as membership_urlpatterns

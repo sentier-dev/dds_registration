@@ -140,16 +140,16 @@ def create_receipt_pdf(
 def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
     if payment.data['kind'] == 'event':
         items = [
-            ("Quantity", "Event", "Registration", f"Price ({payment.data['option']['currency']})"),
-            (1, payment.data['event']['title'], payment.data['option']['item'], payment.data['option']['price']),
-            ('', '**Total**', '', payment.data['option']['price']),
+            ("Quantity", "Event", "Registration", f"Price ({payment.data['currency']})"),
+            (1, payment.data['event']['title'], payment.data['option']['item'], payment.data['price']),
+            ('', '**Total**', '', payment.data['price']),
         ]
         column_layout = (15, 45, 20, 20)
     else:
         items = [
-            ("Quantity", "Membership type", f"Price ({payment.data['option']['currency']})"),
-            (1, payment.data['membersip']['type'], payment.data['option']['price']),
-            ('', '**Total**', payment.data['option']['price']),
+            ("Quantity", "Membership type", f"Price ({payment.data['currency']})"),
+            (1, payment.data['membersip']['type'], payment.data['price']),
+            ('', '**Total**', payment.data['price']),
         ]
         column_layout = (15, 55, 30)
 

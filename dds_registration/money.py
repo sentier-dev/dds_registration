@@ -1,7 +1,9 @@
-def get_stripe_amount_for_currency(amount: int, currency: str) -> int:
+def get_stripe_amount_for_currency(amount: int, currency: str, convert_basic_unit: bool = True) -> int:
     """Stripe fees vary by country.
 
     Note: Assumes amount in stripe basic unit!!!"""
+    if convert_basic_unit:
+        amount = get_stripe_basic_unit(amount=amount, currency=currency)
     if currency == "USD":
         # Stripe fee is 2.9%, currency conversion loss is 1%
         return round(30 + (1 + 0.029 + 0.01) * amount)

@@ -24,14 +24,6 @@ Switzerland
 VAT CHE-329.638.515
 """
 
-# UNUSED? Used `payment_details_by_currency` dict instead (below)
-default_payment_details = """
-Account Holder: Départ de Sentier, Dorfsteig 8, 5223 Riniken AG, Switzerland
-Bank: Wise, Avenue Louise 54, Room S52, 1050 Brussels, Belgium
-IBAN: BE31 9673 6729 9455
-SWIFT-BIC: TRWIBEB1XXX
-"""
-
 payment_details_by_currency = {
     "USD": """
 Account holder: Départ de Sentier

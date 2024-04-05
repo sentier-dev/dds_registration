@@ -172,7 +172,7 @@ class Payment(Model):
     DEFAULT_STATUS = STATUS[0][0]
 
     METHODS = [
-        ("STRIPE", "Credit Card (Stripe)"),
+        ("STRIPE", "Credit Card (Stripe - extra fees apply)"),
         ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
@@ -219,7 +219,7 @@ class Payment(Model):
 
     @property
     def account(self):
-        return payment_details_by_currency[self.data['option']['currency']]
+        return payment_details_by_currency[self.data['currency']]
 
     @property
     def has_unpaid_invoice(self):
@@ -289,9 +289,17 @@ class MembershipData:
     default = 'NORMAL'
     available = {'NORMAL', 'ACADEMIC'}
 
+    def __getitem__(self, key: str) -> dict:
+        dct = {o['tag']: o for o in self.data}
+        return dct[key]
+
     @property
     def choices(self):
         return [(o['tag'], o['label']) for o in self.data]
+
+    @property
+    def public_choice_field_with_prices(self):
+        return [(obj['tag'], "{} ({} {})".format(obj['label'], obj['price'], obj['currency'])) for obj in self.data if obj['tag'] in self.available]
 
 
 MEMBERSHIP_DATA = MembershipData()
@@ -377,11 +385,6 @@ class RegistrationOption(Model):
     SUPPORTED_CURRENCIES = site_supported_currencies
     DEFAULT_CURRENCY = site_default_currency
     currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
-
-    @property
-    def stripe_price(self):
-        converted = get_stripe_basic_unit(amount=self.price, currency=self.currency)
-        return get_stripe_amount_for_currency(amount=converted, currency=self.currency)
 
     def __str__(self):
         price_items = [

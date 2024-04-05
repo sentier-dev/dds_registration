@@ -1,8 +1,3 @@
-# @module dds_registration/views/event_registration.py
-# @changed 2024.03.19, 01:40
-
-import logging
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
@@ -19,8 +14,6 @@ from ..models import Event, Payment, Registration, RegistrationOption
 #     get_event_registration_context,
 #     show_registration_form_success,
 # )
-
-LOG = logging.getLogger(__name__)
 
 
 @login_required
@@ -110,7 +103,7 @@ def event_registration(request: HttpRequest, event_code: str):
         registration.payment = payment
         registration.save()
 
-        return redirect("payment_details", payment_id=payment.id)
+        return redirect("event_payment_details", payment_id=payment.id)
 
 
 # @login_required

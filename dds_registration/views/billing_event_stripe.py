@@ -1,5 +1,3 @@
-import logging
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -8,10 +6,9 @@ from django.http import Http404, HttpRequest
 from django.contrib.sites.shortcuts import get_current_site
 
 from ..models import Payment, Registration
+from ..money import get_stripe_amount_for_currency, convert_from_stripe_units
 
 from .helpers.stripe_payments import get_stripe_client_secret
-
-LOG = logging.getLogger(__name__)
 
 
 @login_required
@@ -29,9 +26,22 @@ def event_payment_stripe(request: HttpRequest, payment_id: int):
         messages.error(request, "Can't pay for someone else's items")
         return redirect("profile")
 
+    # Stripe is in cents or centimes
+    stripe_amount = get_stripe_amount_for_currency(
+        amount=payment.data['price'],
+        currency=payment.data['currency'],
+    )
+    actual_amount = convert_from_stripe_units(
+        amount=stripe_amount,
+        currency=payment.data['currency'],
+    )
+
+    payment.data['stripe_charge_in_progress'] = actual_amount
+    payment.save()
+
     stripe_intent = get_stripe_client_secret(
         payment.data['currency'],
-        payment.data['price'],
+        stripe_amount,
         request.user.email,
         {'payment_id': payment.id}
     )
@@ -66,6 +76,7 @@ def event_payment_stripe_success(request: HttpRequest, payment_id: int):
 
     messages.success(request, f"Awesome, your registration for {payment.data['event']['title']} is paid, and you are good to go!")
 
+    payment.data['price'] = payment.data.pop('stripe_charge_in_progress')
     payment.mark_paid()
 
     reg = Registration.objects.get(id=payment.data['registration']['id'])

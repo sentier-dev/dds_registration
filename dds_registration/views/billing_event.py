@@ -1,25 +1,14 @@
-# @module dds_registration/views/billing.py
-# @changed 2024.03.29, 18:16
-
-import logging
-# import traceback
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
-# from ..core.helpers.errors import errorToString
-
 from ..forms import PaymentForm
 from ..models import Payment, Registration
 
 
-LOG = logging.getLogger(__name__)
-
-
 @login_required
-def payment_view(request: HttpRequest, payment_id: int) -> HttpResponse:
+def event_payment_view(request: HttpRequest, payment_id: int) -> HttpResponse:
     payment = Payment.objects.get(id=payment_id)
     if payment.data['user']['id'] != request.user.id:
         messages.error(request, "Can't pay for someone else's items")
@@ -39,6 +28,5 @@ def payment_view(request: HttpRequest, payment_id: int) -> HttpResponse:
                 return redirect("event_payment_stripe", payment_id=payment.id)
     else:
         form = PaymentForm(data={'name': payment.data['user']['name'], 'address': payment.data['user']['address'], 'extra': payment.data['extra']})
-        print(form)
         template = "dds_registration/billing/billing_event_form.html.django"
     return render(request=request, template_name=template, context={'form': form, 'payment': payment})
