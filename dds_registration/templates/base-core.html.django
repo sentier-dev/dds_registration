@@ -27,7 +27,13 @@
   <link href="{% static 'favicon.ico' %}" rel="icon" type="image/x-icon" />
 
   {% block meta_og %}
-  {# Opengrap tags #}
+    {# Opengrap tags #}
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="{{ site.name }}" />
+    <meta property="og:description" content="{{ settings.SITE_DESCRIPTION }}" />
+    <meta property="og:url" content="{{ settings.DEFAULT_HOST }}" />
+    <meta property="og:image" content="https://{{ settings.DEFAULT_HOST }}/static/images/dds-logo/svg/Green Logo.svg" />
   {% endblock %}
 
   <!-- {{{ CSS -->
