@@ -5,14 +5,14 @@ from django.urls import include, path
 
 from .. import views
 from ..forms import DdsRegistrationForm
-from ..views import registration as registration_views
+from ..views.user_registration import DdsRegistrationView
 
 urlpatterns = [
     # Accounts...
     path(
         # Overrided registration form using updated one
         "accounts/register/",
-        registration_views.DdsRegistrationView.as_view(form_class=DdsRegistrationForm),
+        DdsRegistrationView.as_view(form_class=DdsRegistrationForm),
         name="django_registration_register",
     ),
     path("", views.index, name="index"),

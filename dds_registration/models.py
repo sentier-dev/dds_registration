@@ -415,6 +415,10 @@ class RegistrationOption(Model):
     DEFAULT_CURRENCY = site_default_currency
     currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
+    @property
+    def form_label(self):
+        return f"{self.item}: {self.price} {self.get_currency_display()}"
+
     def __str__(self):
         price_items = [
             self.currency,
@@ -464,6 +468,7 @@ class Registration(Model):
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
     option = models.OneToOneField(RegistrationOption, on_delete=models.CASCADE)
     status = models.TextField(choices=REGISTRATION_STATUS)
+    send_update_emails = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

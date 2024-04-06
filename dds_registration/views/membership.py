@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from django.shortcuts import redirect, render
 
 from ..core.helpers.dates import this_year
-from ..forms import MembershipForm, PaymentForm
+from ..forms import MembershipForm
 from ..models import MEMBERSHIP_DATA, Membership, Payment
 
 
@@ -69,7 +69,7 @@ def membership_application(request: HttpRequest):
                 )
                 return redirect("profile")
             elif payment.data["method"] == "STRIPE":
-                return redirect("membership_payment_stripe", payment_id=payment.id)
+                return redirect("payment_stripe", payment_id=payment.id)
 
             # return redirect("membership_payment_details", payment_id=payment.id)
     else:
