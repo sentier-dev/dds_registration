@@ -23,6 +23,7 @@ from sendgrid.helpers.mail import (
     FileType,
     Mail,
 )
+import json
 
 from dds_registration.core.constants.payments import (
     site_default_currency,
@@ -175,6 +176,7 @@ class Payment(Model):
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
     DEFAULT_METHOD = "INVOICE"
+    # Use `get_method_name` helper (below) to get method name
 
     # # User name and address, initialized by user's ones, by default
     # name = models.TextField(blank=False, default="")
@@ -192,6 +194,33 @@ class Payment(Model):
     # Includes the information needed to generate an
     # invoice or a receipt
     data = models.JSONField(help_text="Read-only JSON object", default=dict)
+
+    def get_data(self):
+        data = self.data
+        if isinstance(data, str):
+            # Parse json...
+            try:
+                data = json.loads(data)
+            except:
+                # TODO: Throw an exception?
+                data = {}
+        return data
+
+
+    def get_method_name(self):
+        data = self.get_data()
+        method = data['method']
+        methods = dict(Payment.METHODS)
+        if not method in methods:
+            # TODO: To throw an error?
+            return None
+        return methods[method]
+
+
+    @property
+    def method_name(self):
+        return self.get_method_name()
+
 
     def mark_paid(self):
         if self.status == "PAID":
@@ -344,13 +373,12 @@ class Event(Model):
     code = models.TextField(unique=True, default=random_code)  # Show as an input
     title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
     description = models.TextField(blank=False, null=False)
+    # `success_email`: Can't see a description for this field. Can't see its usage anywhere in the app. Why is it required? Which email(s) should be here?
     success_email = models.TextField(blank=False, null=False)
     public = models.BooleanField(default=True)
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
-    refund_last_day = models.DateField(
-        null=True, help_text="Last day that a fee refund can be offered"
-    )
+    refund_last_day = models.DateField(null=True, help_text="Last day that a fee refund can be offered")
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text="Maximum number of participants (0 = no limit)",

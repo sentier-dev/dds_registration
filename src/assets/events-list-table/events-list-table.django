@@ -51,7 +51,7 @@
         </td>
         <td class="col-payment">
           {% if payment %}
-            {{ payment.get_payment_method_display }}
+            {{ payment.get_method_name }}
           {% endif %}
         </td>
         <td class="col-paid">
