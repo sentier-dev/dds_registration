@@ -3,7 +3,7 @@
 To install test data (for local testting), use:
 
 ```
-python manage.py loaddata site-local test-users
+python manage.py loaddata site-local test-users test-event test-options
 ```
 
 To add test registration and payment objects:

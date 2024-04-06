@@ -23,6 +23,7 @@ from sendgrid.helpers.mail import (
     FileType,
     Mail,
 )
+import json
 
 from dds_registration.core.constants.payments import (
     site_default_currency,
@@ -175,8 +176,7 @@ class Payment(Model):
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
     DEFAULT_METHOD = "INVOICE"
-
-    method = models.TextField(choices=METHODS, default=DEFAULT_METHOD)
+    # Use `get_method_name` helper (below) to get method name
 
     # # User name and address, initialized by user's ones, by default
     # name = models.TextField(blank=False, default="")
@@ -194,6 +194,33 @@ class Payment(Model):
     # Includes the information needed to generate an
     # invoice or a receipt
     data = models.JSONField(help_text="Read-only JSON object", default=dict)
+
+    def get_data(self):
+        data = self.data
+        if isinstance(data, str):
+            # Parse json...
+            try:
+                data = json.loads(data)
+            except:
+                # TODO: Throw an exception?
+                data = {}
+        return data
+
+
+    def get_method_name(self):
+        data = self.get_data()
+        method = data['method']
+        methods = dict(Payment.METHODS)
+        if not method in methods:
+            # TODO: To throw an error?
+            return None
+        return methods[method]
+
+
+    @property
+    def method_name(self):
+        return self.get_method_name()
+
 
     def mark_paid(self):
         if self.status == "PAID":
