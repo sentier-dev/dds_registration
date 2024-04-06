@@ -1,0 +1,10 @@
+# @changed 2024.04.06, 20:05
+
+- model: dds_registration.payment
+  pk: 1
+  fields:
+    id: 1
+    created: '2024-04-06'
+    updated: '2024-04-06'
+    status: 'CREATED'
+    data: '{"user": {"id": 2, "name": "John Lennon", "address": "251 Menlove Avenue, Liverpool, Merseyside L25 7SA, UK"}, "extra": "", "kind": "event", "method": "STRIPE", "event": {"id": 1, "title": "The first event"}, "registration": {"id": 1}, "option": {"id": 1, "item": "Registration"}, "price": 100.0, "currency": "CHF"}'

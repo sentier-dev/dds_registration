@@ -1,4 +1,4 @@
-# @changed 2024.03.28, 15:18
+# @changed 2024.04.06, 19:59
 
 - model: dds_registration.registrationoption
   pk: 1
@@ -6,7 +6,7 @@
     id: 1
     item: 'Registration'
     price: 100
-    currency: 'USD'
+    currency: 'CHF'
     event_id: 1
 
 - model: dds_registration.registrationoption
@@ -14,6 +14,6 @@
   fields:
     id: 2
     item: 'T-Shirt'
-    price: 10
+    price: 19
     currency: 'USD'
     event_id: 1
