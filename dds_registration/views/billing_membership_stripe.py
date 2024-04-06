@@ -54,6 +54,9 @@ def membership_payment_stripe(request: HttpRequest, payment_id: int):
             'payment': payment,
             'site': get_current_site(request),
             'scheme': "https" if request.is_secure() else "http",
+            'price': '{:.2f}'.format(actual_amount),
+            'currency': payment.data['currency'],
+            'year': request.user.membership.until,
         }
     )
 

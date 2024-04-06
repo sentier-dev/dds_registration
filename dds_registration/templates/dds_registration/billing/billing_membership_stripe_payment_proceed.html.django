@@ -24,6 +24,8 @@
 
   {% include "assets/render-messages/render-messages.django" %}
 
+  <p>Payment of {{ price }} {{ currency }} for Départ de Sentier membership valid until {{ year }}.</p>
+
   <form id="payment-form" data-secret="{{ client_secret }}">
     <div id="error-message" class="optional-message alert alert-warning" role="alert"></div>
     <div id="payment-element" class="mb-3">

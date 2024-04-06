@@ -172,7 +172,7 @@ class Payment(Model):
     DEFAULT_STATUS = STATUS[0][0]
 
     METHODS = [
-        ("STRIPE", "Credit Card (Stripe - costs around 4% more)"),
+        ("STRIPE", "Credit Card (Stripe - costs 2-4% more due to credit card fees)"),
         ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
