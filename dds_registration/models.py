@@ -348,8 +348,8 @@ class Event(Model):
     public = models.BooleanField(default=True)
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
-    refund_window_days = models.IntegerField(
-        default=14, help_text="Number of days before an event that a registration fee can be refunded"
+    refund_last_day = models.DateField(
+        null=True, help_text="Last day that a fee refund can be offered"
     )
     max_participants = models.PositiveIntegerField(
         default=0,
