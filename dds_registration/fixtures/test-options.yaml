@@ -14,6 +14,6 @@
   fields:
     id: 2
     item: 'T-Shirt'
-    price: 19
+    price: 10
     currency: 'USD'
     event_id: 1
