@@ -145,7 +145,7 @@ def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
     else:
         items = [
             ("Quantity", "Membership type", f"Price ({payment.data['currency']})"),
-            (1, payment.data['membersip']['type'], payment.data['price']),
+            (1, payment.data['membership']['type'], payment.data['price']),
             ('', '**Total**', payment.data['price']),
         ]
         column_layout = (15, 55, 30)
