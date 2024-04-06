@@ -174,6 +174,10 @@ class Payment(Model):
         ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
+    METHOD_LABELS = {
+        "STRIPE": "Credit Card via Stripe",
+        "INVOICE": "Bank Transfer"
+    }
     DEFAULT_METHOD = "INVOICE"
 
     # # User name and address, initialized by user's ones, by default
@@ -231,6 +235,13 @@ class Payment(Model):
     def items(self):
         """Adapt items format for events and membership"""
         pass
+
+    @property
+    def payment_label(self):
+        try:
+            return self.METHOD_LABELS[self.data['method']]
+        except KeyError:
+            return "No payment needed"
 
     @property
     def title(self):
