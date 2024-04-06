@@ -21,28 +21,25 @@ def event_payment_stripe(request: HttpRequest, payment_id: int):
         messages.error("This payment has already been paid or refunded")
         redirect("profile")
 
-    if payment.data['user']['id'] != request.user.id:
+    if payment.data["user"]["id"] != request.user.id:
         messages.error(request, "Can't pay for someone else's items")
         return redirect("profile")
 
     # Stripe is in cents or centimes
     stripe_amount = get_stripe_amount_for_currency(
-        amount=payment.data['price'],
-        currency=payment.data['currency'],
+        amount=payment.data["price"],
+        currency=payment.data["currency"],
     )
     actual_amount = convert_from_stripe_units(
         amount=stripe_amount,
-        currency=payment.data['currency'],
+        currency=payment.data["currency"],
     )
 
-    payment.data['stripe_charge_in_progress'] = actual_amount
+    payment.data["stripe_charge_in_progress"] = actual_amount
     payment.save()
 
     stripe_intent = get_stripe_client_secret(
-        payment.data['currency'],
-        stripe_amount,
-        request.user.email,
-        {'payment_id': payment.id}
+        payment.data["currency"], stripe_amount, request.user.email, {"payment_id": payment.id}
     )
 
     template = "dds_registration/billing/billing_event_stripe_payment_proceed.html.django"
@@ -50,11 +47,11 @@ def event_payment_stripe(request: HttpRequest, payment_id: int):
         request=request,
         template_name=template,
         context={
-            'client_secret': stripe_intent.client_secret,
-            'payment': payment,
-            'site': get_current_site(request),
-            'scheme': "https" if request.is_secure() else "http",
-        }
+            "client_secret": stripe_intent.client_secret,
+            "payment": payment,
+            "site": get_current_site(request),
+            "scheme": "https" if request.is_secure() else "http",
+        },
     )
 
 
@@ -69,16 +66,18 @@ def event_payment_stripe_success(request: HttpRequest, payment_id: int):
         messages.error("This payment has already been paid or refunded")
         redirect("profile")
 
-    if payment.data['user']['id'] != request.user.id:
+    if payment.data["user"]["id"] != request.user.id:
         messages.error(request, "Can't pay for someone else's items")
         return redirect("profile")
 
-    messages.success(request, f"Awesome, your registration for {payment.data['event']['title']} is paid, and you are good to go!")
+    messages.success(
+        request, f"Awesome, your registration for {payment.data['event']['title']} is paid, and you are good to go!"
+    )
 
-    payment.data['price'] = payment.data.pop('stripe_charge_in_progress')
+    payment.data["price"] = payment.data.pop("stripe_charge_in_progress")
     payment.mark_paid()
 
-    reg = Registration.objects.get(id=payment.data['registration']['id'])
+    reg = Registration.objects.get(id=payment.data["registration"]["id"])
     reg.status = "REGISTERED"
     reg.save()
     return redirect("profile")

@@ -116,7 +116,12 @@ def create_receipt_pdf(
     # Put bottom texts...
     pdf.set_y(pdf.get_y() + small_vertical_space)
     pdf.multi_cell(
-        text="Receipt date: " + invoice_date.strftime("%Y-%m-%d"), w=page_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
+        text="Receipt date: " + invoice_date.strftime("%Y-%m-%d"),
+        w=page_width,
+        align=Align.L,
+        new_x="LEFT",
+        new_y="NEXT",
+        h=line_height,
     )
 
     if extra:
@@ -135,26 +140,26 @@ def create_receipt_pdf(
 
 
 def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
-    if payment.data['kind'] == 'event':
+    if payment.data["kind"] == "event":
         items = [
             ("Quantity", "Event", "Registration", f"Price ({payment.data['currency']})"),
-            (1, payment.data['event']['title'], payment.data['option']['item'], payment.data['price']),
-            ('', '**Total**', '', payment.data['price']),
+            (1, payment.data["event"]["title"], payment.data["option"]["item"], payment.data["price"]),
+            ("", "**Total**", "", payment.data["price"]),
         ]
         column_layout = (15, 45, 20, 20)
     else:
         items = [
             ("Quantity", "Membership type", f"Price ({payment.data['currency']})"),
-            (1, payment.data['membership']['type'], payment.data['price']),
-            ('', '**Total**', payment.data['price']),
+            (1, payment.data["membership"]["type"], payment.data["price"]),
+            ("", "**Total**", payment.data["price"]),
         ]
         column_layout = (15, 55, 30)
 
     return create_receipt_pdf(
-        client_name=payment.data['user']['name'],
-        client_address=payment.data['user']['address'],
+        client_name=payment.data["user"]["name"],
+        client_address=payment.data["user"]["address"],
         invoice_number=payment.invoice_no,
         items=items,
         column_layout=column_layout,
-        extra=payment.data['extra'],
+        extra=payment.data["extra"],
     )

@@ -12,17 +12,44 @@ textAreaWidget = forms.Textarea(attrs={"class": "vLargeTextField", "rows": 5})
 
 
 class MembershipForm(forms.Form):
-    name = forms.CharField(label="Name on invoice", max_length=100, widget=textInputWidget, help_text="In case it needs to be different on the invoice or receipt.", required=True)
+    name = forms.CharField(
+        label="Name on invoice",
+        max_length=100,
+        widget=textInputWidget,
+        help_text="In case it needs to be different on the invoice or receipt.",
+        required=True,
+    )
     address = forms.CharField(label="Address on invoice", widget=textAreaWidget, required=True)
-    extra = forms.CharField(label="Extra invoice text details, like reference or purchase order numbers", widget=textAreaWidget, required=False)
-    membership_type = forms.ChoiceField(choices=MEMBERSHIP_DATA.public_choice_field_with_prices, widget=forms.RadioSelect, required=True, label="Membership type")
-    payment_method = forms.ChoiceField(choices=Payment.METHODS, required=True, widget=forms.RadioSelect, label="Payment method")
+    extra = forms.CharField(
+        label="Extra invoice text details, like reference or purchase order numbers",
+        widget=textAreaWidget,
+        required=False,
+    )
+    membership_type = forms.ChoiceField(
+        choices=MEMBERSHIP_DATA.public_choice_field_with_prices,
+        widget=forms.RadioSelect,
+        required=True,
+        label="Membership type",
+    )
+    payment_method = forms.ChoiceField(
+        choices=Payment.METHODS, required=True, widget=forms.RadioSelect, label="Payment method"
+    )
 
 
 class PaymentForm(forms.Form):
-    name = forms.CharField(label="Name on invoice", max_length=100, widget=textInputWidget, help_text="In case it needs to be different on the invoice or receipt.", required=True)
+    name = forms.CharField(
+        label="Name on invoice",
+        max_length=100,
+        widget=textInputWidget,
+        help_text="In case it needs to be different on the invoice or receipt.",
+        required=True,
+    )
     address = forms.CharField(label="Address on invoice", widget=textAreaWidget, required=True)
-    extra = forms.CharField(label="Extra invoice text details, like reference or purchase order numbers", widget=textAreaWidget, required=False)
+    extra = forms.CharField(
+        label="Extra invoice text details, like reference or purchase order numbers",
+        widget=textAreaWidget,
+        required=False,
+    )
 
 
 class DdsRegistrationForm(BaseRegistrationForm):

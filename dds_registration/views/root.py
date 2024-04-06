@@ -18,17 +18,22 @@ def index(request: HttpRequest):
         for event in events:
             event.registration = event.get_active_event_registration_for_user(request.user)
 
-    return render(request=request, template_name="dds_registration/index.html.django", context={
-            'user': request.user,
-            'events': events
-        })
+    return render(
+        request=request,
+        template_name="dds_registration/index.html.django",
+        context={"user": request.user, "events": events},
+    )
 
-  
+
 @login_required
 def profile(request: HttpRequest):
     if not request.user.is_authenticated:
         return redirect("index")
-    return render(request=request, template_name="dds_registration/profile.html.django", context={'active_regs': Registration.active_for_user(request.user), 'user': request.user})
+    return render(
+        request=request,
+        template_name="dds_registration/profile.html.django",
+        context={"active_regs": Registration.active_for_user(request.user), "user": request.user},
+    )
 
 
 def components_demo(request: HttpRequest):

@@ -33,10 +33,10 @@ def membership_application(request: HttpRequest):
                 data={
                     "user": {
                         "id": request.user.id,
-                        "name": form.cleaned_data['name'],
-                        "address": form.cleaned_data['address'],
+                        "name": form.cleaned_data["name"],
+                        "address": form.cleaned_data["address"],
                     },
-                    "extra": form.cleaned_data['extra'],
+                    "extra": form.cleaned_data["extra"],
                     "kind": "membership",
                     "membership": {
                         "type": form.cleaned_data["membership_type"],
@@ -59,13 +59,16 @@ def membership_application(request: HttpRequest):
                     user=request.user, membership_type=form.cleaned_data["membership_type"], payment=payment
                 ).save()
 
-            if payment.data['method'] == 'INVOICE':
+            if payment.data["method"] == "INVOICE":
                 payment.email_invoice()
                 payment.status = "ISSUED"
                 payment.save()
-                messages.success(request, "Your membership has been created! An invoice has been sent to your email address; it can also be downloaded from your profile. Please note your membership is not in force until the invoice is paid.")
+                messages.success(
+                    request,
+                    "Your membership has been created! An invoice has been sent to your email address; it can also be downloaded from your profile. Please note your membership is not in force until the invoice is paid.",
+                )
                 return redirect("profile")
-            elif payment.data['method'] == 'STRIPE':
+            elif payment.data["method"] == "STRIPE":
                 return redirect("membership_payment_stripe", payment_id=payment.id)
 
             # return redirect("membership_payment_details", payment_id=payment.id)
@@ -74,7 +77,7 @@ def membership_application(request: HttpRequest):
             initial={
                 "name": request.user.get_full_name(),
                 "address": request.user.address,
-                "extra": '',
+                "extra": "",
             }
         )
 

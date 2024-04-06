@@ -9,10 +9,9 @@ from datetime import date
 import requests
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.db import models
-from django.db.models import QuerySet
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Model, Q
+from django.db import models
+from django.db.models import Model, Q, QuerySet
 from django.urls import reverse
 from fpdf import FPDF
 from sendgrid import SendGridAPIClient
@@ -31,11 +30,10 @@ from dds_registration.core.constants.payments import (
 )
 
 from .core.constants.date_time_formats import dateFormat
-from .core.constants.payments import payment_details_by_currency
-from .core.helpers.create_receipt_pdf import create_receipt_pdf_from_payment
+from .core.constants.payments import currency_emojis, payment_details_by_currency
 from .core.helpers.create_invoice_pdf import create_invoice_pdf_from_payment
+from .core.helpers.create_receipt_pdf import create_receipt_pdf_from_payment
 from .core.helpers.dates import this_year
-from .core.constants.payments import currency_emojis
 from .money import get_stripe_amount_for_currency, get_stripe_basic_unit
 
 alphabet = string.ascii_lowercase + string.digits
@@ -200,10 +198,14 @@ class Payment(Model):
             return
         self.status = "PAID"
         if settings.SLACK_WEBHOOK:
-            title = self.data['event']['title'] if self.data['kind'] == 'event' else 'membership'
+            title = self.data["event"]["title"] if self.data["kind"] == "event" else "membership"
             requests.post(
                 url=settings.SLACK_WEBHOOK,
-                json={"text": "Payment by {} of {}{} for {}".format(self.data['user']['name'], currency_emojis[self.data['currency']], self.data['price'], title)},
+                json={
+                    "text": "Payment by {} of {}{} for {}".format(
+                        self.data["user"]["name"], currency_emojis[self.data["currency"]], self.data["price"], title
+                    )
+                },
             )
         self.email_receipt()
         self.save()
@@ -220,11 +222,11 @@ class Payment(Model):
 
     @property
     def account(self):
-        return payment_details_by_currency[self.data['currency']]
+        return payment_details_by_currency[self.data["currency"]]
 
     @property
     def has_unpaid_invoice(self):
-        return self.data['method'] == 'INVOICE' and self.status != "PAID"
+        return self.data["method"] == "INVOICE" and self.status != "PAID"
 
     def items(self):
         """Adapt items format for events and membership"""
@@ -232,7 +234,7 @@ class Payment(Model):
 
     @property
     def title(self):
-        if self.data['kind'] == 'membership':
+        if self.data["kind"] == "membership":
             return ""
 
     def __str__(self):
@@ -245,14 +247,14 @@ class Payment(Model):
         return create_receipt_pdf_from_payment(self)
 
     def email_invoice(self):
-        user = User.objects.get(id=self.data['user']['id'])
-        if self.data['kind'] == 'membership':
-            subject=f"DdS Membership Invoice {self.invoice_no}"
-            message=f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
+        user = User.objects.get(id=self.data["user"]["id"])
+        if self.data["kind"] == "membership":
+            subject = f"DdS Membership Invoice {self.invoice_no}"
+            message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
         else:
-            event = Event.objects.get(id=self.data['event']['id'])
-            subject=f"DdS Event {event.title} Registration Invoice {self.invoice_no}"
-            message=f"Thanks for registering for {event.title}! We look forward to seeing your, in person or virtually.\nDépart de Sentier runs its events and schools on a cost-neutral basis - i.e. we don't make a profit off the registration fees. They are used for catering, room, hotel, and equipment rental, AV hosting and technician fees, and guest speaker costs. We literally could not run this event without your support.\nYou can view your registration status and apply for membership at https://events.d-d-s.ch/profile.\nPlease find attached the registration invoice. Your registration is not finalized until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
+            event = Event.objects.get(id=self.data["event"]["id"])
+            subject = f"DdS Event {event.title} Registration Invoice {self.invoice_no}"
+            message = f"Thanks for registering for {event.title}! We look forward to seeing your, in person or virtually.\nDépart de Sentier runs its events and schools on a cost-neutral basis - i.e. we don't make a profit off the registration fees. They are used for catering, room, hotel, and equipment rental, AV hosting and technician fees, and guest speaker costs. We literally could not run this event without your support.\nYou can view your registration status and apply for membership at https://events.d-d-s.ch/profile.\nPlease find attached the registration invoice. Your registration is not finalized until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
         user.email_user(
             subject=subject,
             message=message,
@@ -261,8 +263,8 @@ class Payment(Model):
         )
 
     def email_receipt(self):
-        user = User.objects.get(id=self.data['user']['id'])
-        kind = "Membership" if self.data['kind'] == 'membership' else 'Event'
+        user = User.objects.get(id=self.data["user"]["id"])
+        kind = "Membership" if self.data["kind"] == "membership" else "Event"
         user.email_user(
             subject=f"DdS {kind} Receipt {self.invoice_no}",
             message="Thanks! A receipt for your event or membership payment is attached. You can always find more information about your item at your your profile: https://events.d-d-s.ch/profile.\nWe really appreciate your support. If you have any questions, please contact events@d-d-s.ch.",
@@ -274,39 +276,43 @@ class Payment(Model):
 class MembershipData:
     data = [
         {
-            'tag': 'ACADEMIC',
-            'label': 'Academic',
-            'price': 25,
-            'currency': 'EUR',
+            "tag": "ACADEMIC",
+            "label": "Academic",
+            "price": 25,
+            "currency": "EUR",
         },
         {
-            'tag': 'NORMAL',
-            'label': 'Normal',
-            'price': 50,
-            'currency': 'EUR',
-            'default': True,
+            "tag": "NORMAL",
+            "label": "Normal",
+            "price": 50,
+            "currency": "EUR",
+            "default": True,
         },
         {
-            'tag': 'HONORARY',
-            'label': 'Honorary',
-            'price': 0,
-            'currency': 'EUR',
+            "tag": "HONORARY",
+            "label": "Honorary",
+            "price": 0,
+            "currency": "EUR",
         },
     ]
-    default = 'NORMAL'
-    available = {'NORMAL', 'ACADEMIC'}
+    default = "NORMAL"
+    available = {"NORMAL", "ACADEMIC"}
 
     def __getitem__(self, key: str) -> dict:
-        dct = {o['tag']: o for o in self.data}
+        dct = {o["tag"]: o for o in self.data}
         return dct[key]
 
     @property
     def choices(self):
-        return [(o['tag'], o['label']) for o in self.data]
+        return [(o["tag"], o["label"]) for o in self.data]
 
     @property
     def public_choice_field_with_prices(self):
-        return [(obj['tag'], "{} ({} {})".format(obj['label'], obj['price'], obj['currency'])) for obj in self.data if obj['tag'] in self.available]
+        return [
+            (obj["tag"], "{} ({} {})".format(obj["label"], obj["price"], obj["currency"]))
+            for obj in self.data
+            if obj["tag"] in self.available
+        ]
 
 
 MEMBERSHIP_DATA = MembershipData()
@@ -342,7 +348,9 @@ class Event(Model):
     public = models.BooleanField(default=True)
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
-    refund_window_days = models.IntegerField(default=14, help_text="Number of days before an event that a registration fee can be refunded")
+    refund_window_days = models.IntegerField(
+        default=14, help_text="Number of days before an event that a registration fee can be refunded"
+    )
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text="Maximum number of participants (0 = no limit)",
@@ -350,9 +358,8 @@ class Event(Model):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(check=models.Q(
-                registration_close__gte=models.F("registration_open")
-                ),
+            models.CheckConstraint(
+                check=models.Q(registration_close__gte=models.F("registration_open")),
                 name="registration_close_after_open",
             )
         ]
@@ -360,7 +367,11 @@ class Event(Model):
     @property
     def can_register(self):
         today = date.today()
-        return today >= self.registration_open and today <= self.registration_close and (not self.max_participants or self.active_registration_count < self.max_participants)
+        return (
+            today >= self.registration_open
+            and today <= self.registration_close
+            and (not self.max_participants or self.active_registration_count < self.max_participants)
+        )
 
     @property
     def active_registration_count(self):
