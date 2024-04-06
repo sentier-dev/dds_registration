@@ -28,6 +28,7 @@ def membership_application(request: HttpRequest):
         form = MembershipForm(request.POST)
 
         if form.is_valid():
+            payment_method = form.cleaned_data["payment_method"]
             payment = Payment(
                 status="CREATED",
                 data={
@@ -41,7 +42,7 @@ def membership_application(request: HttpRequest):
                     "membership": {
                         "type": form.cleaned_data["membership_type"],
                     },
-                    "method": form.cleaned_data["payment_method"],
+                    "method": payment_method,
                     "price": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["price"],
                     "currency": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["currency"],
                 },

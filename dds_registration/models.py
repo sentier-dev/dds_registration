@@ -176,6 +176,8 @@ class Payment(Model):
     ]
     DEFAULT_METHOD = "INVOICE"
 
+    method = models.TextField(choices=METHODS, default=DEFAULT_METHOD)
+
     # # User name and address, initialized by user's ones, by default
     # name = models.TextField(blank=False, default="")
     # address = models.TextField(blank=False, default="")
@@ -344,13 +346,12 @@ class Event(Model):
     code = models.TextField(unique=True, default=random_code)  # Show as an input
     title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
     description = models.TextField(blank=False, null=False)
+    # `success_email`: Can't see a description for this field. Can't see its usage anywhere in the app. Why is it required? Which email(s) should be here?
     success_email = models.TextField(blank=False, null=False)
     public = models.BooleanField(default=True)
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
-    refund_last_day = models.DateField(
-        null=True, help_text="Last day that a fee refund can be offered"
-    )
+    refund_last_day = models.DateField(null=True, help_text="Last day that a fee refund can be offered")
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text="Maximum number of participants (0 = no limit)",

@@ -75,6 +75,7 @@ def event_registration(request: HttpRequest, event_code: str):
         payment_method = request.POST["payment_method"]
         payment = Payment(
             status="CREATED",
+            method=payment_method,
             data={
                 "user": {
                     "id": request.user.id,
