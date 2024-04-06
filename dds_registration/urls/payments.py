@@ -5,7 +5,6 @@ from ..views.billing_event_stripe import (
     event_payment_stripe,
     event_payment_stripe_success,
 )
-from ..views.billing_membership import membership_payment_view
 from ..views.billing_membership_stripe import (
     membership_payment_stripe,
     membership_payment_stripe_success,
@@ -37,11 +36,6 @@ urlpatterns = [
         "payments/<int:payment_id>/event",
         event_payment_view,
         name="event_payment_details",
-    ),
-    path(
-        "payments/<int:payment_id>/membership",
-        membership_payment_view,
-        name="membership_payment_details",
     ),
     path(
         "payments/<int:payment_id>/membership/stripe",

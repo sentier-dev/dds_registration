@@ -205,6 +205,7 @@ class Payment(Model):
                 url=settings.SLACK_WEBHOOK,
                 json={"text": "Payment by {} of {}{} for {}".format(self.data['user']['name'], currency_emojis[self.data['currency']], self.data['price'], title)},
             )
+        self.email_receipt()
         self.save()
 
     @property
@@ -245,12 +246,18 @@ class Payment(Model):
 
     def email_invoice(self):
         user = User.objects.get(id=self.data['user']['id'])
-        kind = "Membership" if self.data['kind'] == 'membership' else 'Event'
+        if self.data['kind'] == 'membership':
+            subject=f"DdS Membership Invoice {self.invoice_no}"
+            message=f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
+        else:
+            event = Event.objects.get(id=self.data['event']['id'])
+            subject=f"DdS Event {event.title} Registration Invoice {self.invoice_no}"
+            message=f"Thanks for registering for {event.title}! We look forward to seeing your, in person or virtually.\nDépart de Sentier runs its events and schools on a cost-neutral basis - i.e. we don't make a profit off the registration fees. They are used for catering, room, hotel, and equipment rental, AV hosting and technician fees, and guest speaker costs. We literally could not run this event without your support.\nYou can view your registration status and apply for membership at https://events.d-d-s.ch/profile.\nPlease find attached the registration invoice. Your registration is not finalized until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
         user.email_user(
-            subject=f"DdS {kind} Invoice {self.invoice_no}",
-            message=f"Please find attached the requested invoice for {kind.lower()}. Please note that your purchase is not complete until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch.",
+            subject=subject,
+            message=message,
             attachment_content=self.invoice_pdf(),
-            attachment_name=f"DdS invoice {self.invoice_no}.pdf",
+            attachment_name=f"DdS Invoice {self.invoice_no}.pdf",
         )
 
     def email_receipt(self):
@@ -258,7 +265,7 @@ class Payment(Model):
         kind = "Membership" if self.data['kind'] == 'membership' else 'Event'
         user.email_user(
             subject=f"DdS {kind} Receipt {self.invoice_no}",
-            message=f"Thanks! A receipt for your event or membership payment is attached.\nIf you have any questions, please contact events@d-d-s.ch.",
+            message="Thanks! A receipt for your event or membership payment is attached. You can always find more information about your item at your your profile: https://events.d-d-s.ch/profile.\nWe really appreciate your support. If you have any questions, please contact events@d-d-s.ch.",
             attachment_content=self.receipt_pdf(),
             attachment_name=f"DdS receipt {self.invoice_no}.pdf",
         )

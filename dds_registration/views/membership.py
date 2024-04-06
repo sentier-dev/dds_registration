@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from django.shortcuts import redirect, render
 
 from ..core.helpers.dates import this_year
-from ..forms import MembershipForm
+from ..forms import MembershipForm, PaymentForm
 from ..models import MEMBERSHIP_DATA, Membership, Payment
 
 
@@ -26,43 +26,63 @@ def membership_application(request: HttpRequest):
 
     if request.method == "POST":
         form = MembershipForm(request.POST)
+
         if form.is_valid():
             payment = Payment(
                 status="CREATED",
                 data={
                     "user": {
                         "id": request.user.id,
-                        "name": request.user.get_full_name(),
-                        "address": request.user.address,
+                        "name": form.cleaned_data['name'],
+                        "address": form.cleaned_data['address'],
                     },
-                    "extra": "",
+                    "extra": form.cleaned_data['extra'],
                     "kind": "membership",
                     "membership": {
-                        "type": form.cleaned_data['membership_type'],
+                        "type": form.cleaned_data["membership_type"],
                     },
-                    "method": form.cleaned_data['payment_method'],
-                    "price": MEMBERSHIP_DATA[form.cleaned_data['membership_type']]['price'],
-                    "currency": MEMBERSHIP_DATA[form.cleaned_data['membership_type']]['currency'],
+                    "method": form.cleaned_data["payment_method"],
+                    "price": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["price"],
+                    "currency": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["currency"],
                 },
             )
             payment.save()
 
             try:
                 membership = Membership.objects.get(user=request.user)
-                membership.membership_type = form.cleaned_data['membership_type']
+                membership.membership_type = form.cleaned_data["membership_type"]
                 membership.until = this_year()
                 membership.payment = payment
                 membership.save()
             except ObjectDoesNotExist:
                 Membership(
-                    user=request.user,
-                    membership_type=form.cleaned_data['membership_type'],
-                    payment=payment
+                    user=request.user, membership_type=form.cleaned_data["membership_type"], payment=payment
                 ).save()
-            return redirect("membership_payment_details", payment_id=payment.id)
+
+            if payment.data['method'] == 'INVOICE':
+                payment.email_invoice()
+                payment.status = "ISSUED"
+                payment.save()
+                messages.success(request, "Your membership has been created! An invoice has been sent to your email address; it can also be downloaded from your profile. Please note your membership is not in force until the invoice is paid.")
+                return redirect("profile")
+            elif payment.data['method'] == 'STRIPE':
+                return redirect("membership_payment_stripe", payment_id=payment.id)
+
+            # return redirect("membership_payment_details", payment_id=payment.id)
     else:
-        form = MembershipForm()
-    return render(request=request, template_name="dds_registration/membership_start.html.django", context={'form': form})
+        form = MembershipForm(
+            initial={
+                "name": request.user.get_full_name(),
+                "address": request.user.address,
+                "extra": '',
+            }
+        )
+
+    return render(
+        request=request,
+        template_name="dds_registration/membership_start.html.django",
+        context={"form": form},
+    )
 
 
 # @login_required
