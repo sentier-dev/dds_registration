@@ -205,6 +205,7 @@ class Payment(Model):
                 url=settings.SLACK_WEBHOOK,
                 json={"text": "Payment by {} of {}{} for {}".format(self.data['user']['name'], currency_emojis[self.data['currency']], self.data['price'], title)},
             )
+        self.email_receipt()
         self.save()
 
     @property
@@ -258,7 +259,7 @@ class Payment(Model):
         kind = "Membership" if self.data['kind'] == 'membership' else 'Event'
         user.email_user(
             subject=f"DdS {kind} Receipt {self.invoice_no}",
-            message=f"Thanks! A receipt for your event or membership payment is attached.\nIf you have any questions, please contact events@d-d-s.ch.",
+            message="Thanks! A receipt for your event or membership payment is attached. You can always find more information about your item at your your profile: https://events.d-d-s.ch/profile.\nWe really appreciate your support. If you have any questions, please contact events@d-d-s.ch.",
             attachment_content=self.receipt_pdf(),
             attachment_name=f"DdS receipt {self.invoice_no}.pdf",
         )
