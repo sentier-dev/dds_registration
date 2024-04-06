@@ -1,9 +1,6 @@
 from django.urls import path
 
-from ..views.billing_stripe import (
-    payment_stripe,
-    payment_stripe_success,
-)
+from ..views.billing_stripe import payment_stripe, payment_stripe_success
 from ..views.payment_utils import invoice_download, receipt_download
 
 urlpatterns = [

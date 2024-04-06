@@ -174,10 +174,7 @@ class Payment(Model):
         ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
-    METHOD_LABELS = {
-        "STRIPE": "Credit Card via Stripe",
-        "INVOICE": "Bank Transfer"
-    }
+    METHOD_LABELS = {"STRIPE": "Credit Card via Stripe", "INVOICE": "Bank Transfer"}
     DEFAULT_METHOD = "INVOICE"
 
     # # User name and address, initialized by user's ones, by default
@@ -239,7 +236,7 @@ class Payment(Model):
     @property
     def payment_label(self):
         try:
-            return self.METHOD_LABELS[self.data['method']]
+            return self.METHOD_LABELS[self.data["method"]]
         except KeyError:
             return "No payment needed"
 
@@ -359,9 +356,7 @@ class Event(Model):
     public = models.BooleanField(default=True)
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
-    refund_last_day = models.DateField(
-        null=True, help_text="Last day that a fee refund can be offered"
-    )
+    refund_last_day = models.DateField(null=True, help_text="Last day that a fee refund can be offered")
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text="Maximum number of participants (0 = no limit)",

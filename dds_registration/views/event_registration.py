@@ -4,8 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpRequest
 from django.shortcuts import redirect, render
 
-from ..models import Event, Payment, Registration, RegistrationOption
 from ..forms import RegistrationForm
+from ..models import Event, Payment, Registration, RegistrationOption
 
 # from .event_registration_cancel import (
 #     event_registration_cancel_confirm_form,
@@ -31,11 +31,16 @@ def event_registration(request: HttpRequest, event_code: str):
 
     registration = event.get_active_event_registration_for_user(request.user)
     if registration and registration.payment.status == "PAID":
-        messages.error("Paid event registration can't be edited manually; please either cancel and start again, or contact events@d-d-s.ch. Sorry for the inconvenience.")
+        messages.error(
+            "Paid event registration can't be edited manually; please either cancel and start again, or contact events@d-d-s.ch. Sorry for the inconvenience."
+        )
         redirect("profile")
 
     if request.method == "POST":
-        form = RegistrationForm(data=request.POST, option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],)
+        form = RegistrationForm(
+            data=request.POST,
+            option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
+        )
 
         print(request.POST)
         print(form.is_valid())
@@ -44,21 +49,21 @@ def event_registration(request: HttpRequest, event_code: str):
         print(form.data)
 
         if form.is_valid():
-            option = RegistrationOption.objects.get(id=form.cleaned_data['option'])
+            option = RegistrationOption.objects.get(id=form.cleaned_data["option"])
             if registration:
                 # Set up new payment
                 if registration.payment:
                     registration.payment.status = "OBSOLETE"
                     registration.payment.save()
                 registration.option = option
-                registration.send_update_emails = form.cleaned_data['send_update_emails']
+                registration.send_update_emails = form.cleaned_data["send_update_emails"]
                 registration.status = "SUBMITTED"
             else:
                 registration = Registration(
                     event=event,
                     status="SUBMITTED",
                     user=request.user,
-                    send_update_emails=form.cleaned_data['send_update_emails'],
+                    send_update_emails=form.cleaned_data["send_update_emails"],
                     option=option,
                 )
             registration.save()
@@ -73,12 +78,12 @@ def event_registration(request: HttpRequest, event_code: str):
                 data={
                     "user": {
                         "id": request.user.id,
-                        "name": form.cleaned_data['name'],
-                        "address": form.cleaned_data['address'],
+                        "name": form.cleaned_data["name"],
+                        "address": form.cleaned_data["address"],
                     },
-                    "extra": form.cleaned_data['extra'],
+                    "extra": form.cleaned_data["extra"],
                     "kind": "event",
-                    "method": form.cleaned_data['payment_method'],
+                    "method": form.cleaned_data["payment_method"],
                     "event": {
                         "id": event.id,
                         "title": event.title,
@@ -114,16 +119,19 @@ def event_registration(request: HttpRequest, event_code: str):
         # TODO: Populate template with existing choices instead of defaults
         if registration:
             print("existing registration")
-            messages.success(request, "You are now editing an existing registration application. Please be careful not to make unwanted changes.")
+            messages.success(
+                request,
+                "You are now editing an existing registration application. Please be careful not to make unwanted changes.",
+            )
             form = RegistrationForm(
                 option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
                 initial={
-                    'name': registration.payment.data['user']['name'],
-                    'address': registration.payment.data['user']['name'],
-                    'extra': registration.payment.data['extra'],
-                    'option': registration.option.id,
-                    'send_update_emails': registration.send_update_emails,
-                }
+                    "name": registration.payment.data["user"]["name"],
+                    "address": registration.payment.data["user"]["name"],
+                    "extra": registration.payment.data["extra"],
+                    "option": registration.option.id,
+                    "send_update_emails": registration.send_update_emails,
+                },
             )
         else:
             print("new registration")
@@ -135,8 +143,8 @@ def event_registration(request: HttpRequest, event_code: str):
                     "name": request.user.get_full_name(),
                     "address": request.user.address,
                     "extra": "",
-                    'send_update_emails': True,
-                }
+                    "send_update_emails": True,
+                },
             )
     return render(
         request=request,
@@ -146,7 +154,6 @@ def event_registration(request: HttpRequest, event_code: str):
             "event": event,
         },
     )
-
 
 
 # @login_required

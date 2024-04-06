@@ -58,12 +58,16 @@ class RegistrationForm(forms.Form):
         required=False,
     )
     payment_method = forms.ChoiceField(
-        choices=Payment.METHODS, required=True, widget=forms.RadioSelect, label="Payment method", help_text="Choose something even if the event is free"
+        choices=Payment.METHODS,
+        required=True,
+        widget=forms.RadioSelect,
+        label="Payment method",
+        help_text="Choose something even if the event is free",
     )
 
     def __init__(self, option_choices, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['option'].choices = option_choices
+        self.fields["option"].choices = option_choices
 
 
 class DdsRegistrationForm(BaseRegistrationForm):
