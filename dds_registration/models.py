@@ -174,6 +174,8 @@ class Payment(Model):
         ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
+    #  # I'd suggest using this, at least (or smth similar):
+    #  METHOD_LABELS = dict(METHODS)
     METHOD_LABELS = {
         "STRIPE": "Credit Card via Stripe",
         "INVOICE": "Bank Transfer"

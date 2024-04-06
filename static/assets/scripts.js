@@ -1,24 +1,12 @@
 /**
  * @desc Main js entry point module (scripts)
  * @module src/assets/scripts.ts
- * @changed 2024.04.04, 16:06
+ * @changed 2024.04.06, 22:00
  */
-/* NOTE: These modules are unused. Used only
- * `src/assets/stripe-init/stripe_payment_intents_support.ts`, via requirejs,
- * without exposing to global scope.
- *
- * import { billing_event_stripe_payment_proceed } from './stripe-init/billing_event_stripe_payment_proceed';
- * import { billing_membership_stripe_payment_proceed } from './stripe-init/billing_membership_stripe_payment_proceed';
- *
- * // Expose functions to global scope...
- * window.billing_event_stripe_payment_proceed = billing_event_stripe_payment_proceed;
- * window.billing_membership_stripe_payment_proceed = billing_membership_stripe_payment_proceed;
- *
- * console.log('[scripts] Main client code entry point', {
- *   billing_event_stripe_payment_proceed,
- *   billing_membership_stripe_payment_proceed,
- * });
- */
+define("scripts", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
 /**
  * @module stripe_payment_intents_support.ts
  * @changed 2024.04.04, 00:21
@@ -32,7 +20,7 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
         var success_url = params.success_url;
         event.preventDefault();
         // @see https://docs.stripe.com/payments/accept-a-payment?platform=web&ui=elements#web-submit-payment
-        // const result = await
+        // TODO: Show 'busy' spinner at stripe interaction begin? (It could take some time.)
         stripe
             .confirmPayment({
             elements: elements,
@@ -43,7 +31,6 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
             .then(function (result) {
             var error = result.error;
             if (error) {
-                // debugger;
                 console.error('[stripe_payment_intents_support:startStripeElementsForm:submitStripeForm] error', {
                     error: error,
                     event: event,
@@ -64,7 +51,6 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
                     params: params,
                     stripe: stripe,
                 });
-                debugger;
                 window.location.href = success_url;
             }
         })
@@ -100,7 +86,7 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
         if (!form) {
             var errorText = 'Form node could not be found!';
             var error = new Error(errorText);
-            console.log('[stripe_payment_intents_support:startStripeElementsForm] error', errorText, {
+            console.error('[stripe_payment_intents_support:startStripeElementsForm] error', errorText, {
                 error: error,
                 params: params,
                 stripe: stripe,
@@ -109,6 +95,7 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
                 paymentElement: paymentElement,
                 form: form,
             });
+            // eslint-disable-next-line no-debugger
             debugger;
             return;
         }
