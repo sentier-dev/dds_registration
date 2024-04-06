@@ -5,8 +5,8 @@
   fields:
     id: 1
     status: 'SUBMITTED'
-    created_at: '2024-04-06 19:59:46.154852'
-    updated_at: '2024-04-06 19:59:46.167242'
+    created_at: '2024-04-06 20:00:00.000000'
+    updated_at: '2024-04-06 20:00:00.000000'
     event_id: 1
     payment_id: 1
     user_id: 2
