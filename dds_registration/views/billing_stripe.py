@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpRequest
 from django.shortcuts import redirect, render
 
-from ..models import Payment, Registration, Membership
+from ..models import Membership, Payment, Registration
 from ..money import convert_from_stripe_units, get_stripe_amount_for_currency
 from .helpers.stripe_payments import get_stripe_client_secret
 
@@ -55,7 +55,7 @@ def payment_stripe(request: HttpRequest, payment_id: int):
         context={
             "client_secret": stripe_intent.client_secret,
             "payment": payment,
-            "year": membership.until if membership else ""
+            "year": membership.until if membership else "",
         },
     )
 

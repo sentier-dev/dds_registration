@@ -14,18 +14,17 @@ from django.db.models import Model, Q, QuerySet
 from django.urls import reverse
 from fpdf import FPDF
 
-
 from dds_registration.core.constants.payments import (
     site_default_currency,
     site_supported_currencies,
 )
 
-from .email import send_email
 from .core.constants.date_time_formats import dateFormat
 from .core.constants.payments import currency_emojis, payment_details_by_currency
 from .core.helpers.create_invoice_pdf import create_invoice_pdf_from_payment
 from .core.helpers.create_receipt_pdf import create_receipt_pdf_from_payment
 from .core.helpers.dates import this_year
+from .email import send_email
 
 alphabet = string.ascii_lowercase + string.digits
 random_code_length = 8
@@ -155,10 +154,7 @@ class Payment(Model):
         ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
-    METHOD_LABELS = {
-        "STRIPE": "Credit Card via Stripe",
-        "INVOICE": "Bank Transfer"
-    }
+    METHOD_LABELS = {"STRIPE": "Credit Card via Stripe", "INVOICE": "Bank Transfer"}
     DEFAULT_METHOD = "INVOICE"
 
     created = models.DateField(auto_now_add=True)
@@ -214,7 +210,7 @@ class Payment(Model):
         if self.status == "OBSOLETE":
             return
         self.status == "OBSOLETE"
-        user = User.objects.get(id=self.data['user']['id'])
+        user = User.objects.get(id=self.data["user"]["id"])
         send_email(
             recipient_address=user.email,
             subject=f"Invoice #{self.invoice_no} is obsolete - please do not pay",
@@ -270,7 +266,7 @@ class Payment(Model):
 
     @property
     def currency_label(self):
-        return dict(site_supported_currencies).get(self.data['currency'], "")
+        return dict(site_supported_currencies).get(self.data["currency"], "")
 
     @property
     def title(self):

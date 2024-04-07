@@ -1,4 +1,7 @@
+import base64
+
 from django.conf import settings
+from fpdf import FPDF
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import (
     Attachment,
@@ -8,19 +11,17 @@ from sendgrid.helpers.mail import (
     FileType,
     Mail,
 )
-from fpdf import FPDF
-import base64
 
 
 def send_email(
-        recipient_address: str,
-        subject: str,
-        message: str,
-        is_html: bool = False,
-        from_email: str = settings.DEFAULT_FROM_EMAIL,
-        pdf: FPDF | None = None,
-        pdf_name: str | None = None,
-    ) -> None:
+    recipient_address: str,
+    subject: str,
+    message: str,
+    is_html: bool = False,
+    from_email: str = settings.DEFAULT_FROM_EMAIL,
+    pdf: FPDF | None = None,
+    pdf_name: str | None = None,
+) -> None:
     sg = SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
     message = Mail(
         from_email=from_email,
