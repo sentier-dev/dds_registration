@@ -32,7 +32,8 @@ def event_registration(request: HttpRequest, event_code: str):
     registration = event.get_active_event_registration_for_user(request.user)
     if registration and registration.payment.status == "PAID":
         messages.error(
-            "Paid event registration can't be edited manually; please either cancel and start again, or contact events@d-d-s.ch. Sorry for the inconvenience."
+            request,
+            "Paid event registrations can't be edited manually; please either cancel and start again, or contact events@d-d-s.ch. Sorry for the inconvenience."
         )
         redirect("profile")
 
