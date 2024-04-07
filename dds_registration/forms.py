@@ -34,6 +34,9 @@ class MembershipForm(forms.Form):
     payment_method = forms.ChoiceField(
         choices=Payment.METHODS, required=True, widget=forms.RadioSelect, label="Payment method"
     )
+    mailing_list = forms.BooleanField(
+        initial=True, label="Send me the DdS newsletter, and emails about DdS events, courses, and online seminars"
+    )
 
 
 class RegistrationForm(forms.Form):

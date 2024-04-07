@@ -50,13 +50,14 @@ def membership_application(request: HttpRequest):
 
             try:
                 membership = Membership.objects.get(user=request.user)
+                membership.mailing_list = form.cleaned_data["mailing_list"]
                 membership.membership_type = form.cleaned_data["membership_type"]
                 membership.until = this_year()
                 membership.payment = payment
                 membership.save()
             except ObjectDoesNotExist:
                 Membership(
-                    user=request.user, membership_type=form.cleaned_data["membership_type"], payment=payment
+                    user=request.user, membership_type=form.cleaned_data["membership_type"], payment=payment, mailing_list=form.cleaned_data["mailing_list"]
                 ).save()
 
             if payment.data["method"] == "INVOICE":

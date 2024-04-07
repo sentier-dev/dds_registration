@@ -363,6 +363,7 @@ class Membership(Model):
     started = models.IntegerField(default=this_year)
     until = models.IntegerField(default=this_year)
     payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True)
+    mailing_list = models.BooleanField(default=False)
 
     @property
     def active(self) -> bool:
