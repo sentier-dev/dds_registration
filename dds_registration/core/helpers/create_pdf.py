@@ -12,7 +12,8 @@ from ..constants.payments import (
 )
 
 __all__ = [
-    "create_invoice_pdf",
+    "create_invoice_pdf_from_payment",
+    "create_receipt_pdf_from_payment",
 ]
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -30,15 +31,16 @@ top_offset = 30  # Top offset should exceed the logo height
 font_size = 12
 
 
-def create_invoice_pdf(
+def create_pdf(
+    kind: str,
     client_name: str,
     client_address: str,
     invoice_number: int,
     items: list,
-    recipient_account: str,
     column_layout: tuple,
     invoice_date: date | None = None,
     extra: str = "",
+    recipient_account: str | None = None,
     recipient_name: str = payment_recipient_name,
     recipient_address: str = payment_recipient_address,
     payment_days: int = default_payment_deadline_days,
@@ -50,7 +52,7 @@ def create_invoice_pdf(
 
     # Create pdf...
     pdf = FPDF(unit="mm", format="A4")
-    pdf.set_title("Invoice {} ({})".format(invoice_number, client_name))
+    pdf.set_title("{} {} ({})".format(kind.title(), invoice_number, client_name))
     pdf.set_margins(left=margin_size, top=margin_size, right=margin_size)
 
     # Get full page width (mm)...
@@ -97,10 +99,15 @@ def create_invoice_pdf(
     # Choose the most bottom position of two top columns...
     max_right_top = max(left_stop_pos, right_stop_pos)
 
-    # Put the title (invoice no), with an extra offset...
+    # Put the title, with an extra offset...
     pdf.set_xy(left_column_pos, max_right_top + large_vertical_space)
     pdf.multi_cell(
-        text="Invoice " + invoice_number, w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
+        text=f"{kind.title()} #" + invoice_number,
+        w=left_column_width,
+        align=Align.L,
+        new_x="LEFT",
+        new_y="NEXT",
+        h=line_height,
     )
 
     pdf.set_y(pdf.get_y() + vertical_space)
@@ -128,7 +135,7 @@ def create_invoice_pdf(
     # Put bottom texts...
     pdf.set_y(pdf.get_y() + small_vertical_space)
     pdf.multi_cell(
-        text="Invoice date: " + invoice_date.strftime("%Y-%m-%d"),
+        text=f"{kind.title()} date: " + invoice_date.strftime("%Y-%m-%d"),
         w=page_width,
         align=Align.L,
         new_x="LEFT",
@@ -148,26 +155,27 @@ def create_invoice_pdf(
             h=line_height,
         )
 
-    pdf.set_y(pdf.get_y() + small_vertical_space)
-    pdf.multi_cell(
-        text="**Bank account details:**",
-        markdown=True,
-        w=page_width,
-        align=Align.L,
-        new_x="LEFT",
-        new_y="NEXT",
-        h=line_height,
-    )
-    pdf.set_y(pdf.get_y() + tiny_vertical_space)
-    pdf.multi_cell(
-        text=recipient_account.strip(),
-        markdown=True,
-        w=page_width,
-        align=Align.L,
-        new_x="LEFT",
-        new_y="NEXT",
-        h=line_height,
-    )
+    if recipient_account:
+        pdf.set_y(pdf.get_y() + small_vertical_space)
+        pdf.multi_cell(
+            text="**Bank account details:**",
+            markdown=True,
+            w=page_width,
+            align=Align.L,
+            new_x="LEFT",
+            new_y="NEXT",
+            h=line_height,
+        )
+        pdf.set_y(pdf.get_y() + tiny_vertical_space)
+        pdf.multi_cell(
+            text=recipient_account.strip(),
+            markdown=True,
+            w=page_width,
+            align=Align.L,
+            new_x="LEFT",
+            new_y="NEXT",
+            h=line_height,
+        )
 
     if extra:
         pdf.set_y(pdf.get_y() + large_vertical_space)
@@ -200,12 +208,41 @@ def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
         ]
         column_layout = (15, 55, 30)
 
-    return create_invoice_pdf(
+    return create_pdf(
+        kind="invoice",
         client_name=payment.data["user"]["name"],
         client_address=payment.data["user"]["address"],
         invoice_number=payment.invoice_no,
         items=items,
         column_layout=column_layout,
         recipient_account=payment.account,
+        extra=payment.data["extra"],
+    )
+
+
+def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
+    if payment.data["kind"] == "event":
+        items = [
+            ("Quantity", "Event", "Registration", f"Price ({payment.data['currency']})"),
+            (1, payment.data["event"]["title"], payment.data["option"]["item"], payment.data["price"]),
+            ("", "**Total**", "", payment.data["price"]),
+        ]
+        column_layout = (15, 45, 20, 20)
+    else:
+        items = [
+            ("Quantity", "Membership type", f"Price ({payment.data['currency']})"),
+            (1, payment.data["membership"]["type"], payment.data["price"]),
+            ("", "**Total**", payment.data["price"]),
+        ]
+        column_layout = (15, 55, 30)
+
+    return create_pdf(
+        kind="receipt",
+        client_name=payment.data["user"]["name"],
+        client_address=payment.data["user"]["address"],
+        invoice_number=payment.invoice_no,
+        items=items,
+        payment_days=0,
+        column_layout=column_layout,
         extra=payment.data["extra"],
     )
