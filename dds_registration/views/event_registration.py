@@ -69,8 +69,9 @@ def event_registration(request: HttpRequest, event_code: str):
 
             if not registration.option.price:
                 messages.success(request, f"You have successfully registered for {event.title}.")
-                registration.complete_registration()
                 return redirect("profile")
+
+            registration.complete_registration()
 
             payment = Payment(
                 status="CREATED",
