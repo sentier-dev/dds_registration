@@ -1,4 +1,4 @@
-# @changed 2024.03.28, 15:18
+# @changed 2024.04.06, 19:55
 
 - model: dds_registration.event
   pk: 1
@@ -6,10 +6,10 @@
     id: 1
     code: 'first'
     title: 'The first event'
-    description: 'First event description'
+    description: 'The first event description'
+    success_email: 'dmia@yandex.ru'
     public: 1
-    registration_open: '2024-03-25'
-    registration_close: '2024-04-20'
+    registration_open: '2024-04-06'
+    registration_close: '2024-04-25'
     max_participants: 5
-    payment_deadline_days: 30
-    payment_details: ''
+    refund_last_day: '2024-04-30'

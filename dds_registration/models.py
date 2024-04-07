@@ -174,7 +174,10 @@ class Payment(Model):
         ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
-    METHOD_LABELS = {"STRIPE": "Credit Card via Stripe", "INVOICE": "Bank Transfer"}
+    METHOD_LABELS = {
+        "STRIPE": "Credit Card via Stripe",
+        "INVOICE": "Bank Transfer"
+    }
     DEFAULT_METHOD = "INVOICE"
 
     # # User name and address, initialized by user's ones, by default
