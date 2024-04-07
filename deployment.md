@@ -190,3 +190,7 @@ Then you can start the service:
 ```bash
 sudo systemctl start dds-registration
 ```
+
+## Configure the Django `site`
+
+You **must** login to the admin portal and configure the `Site` or the URLs will break!
