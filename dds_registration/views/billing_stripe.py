@@ -11,7 +11,7 @@ from .helpers.stripe_payments import get_stripe_client_secret
 
 
 @login_required
-def event_payment_stripe(request: HttpRequest, payment_id: int):
+def payment_stripe(request: HttpRequest, payment_id: int):
     try:
         payment = Payment.objects.get(id=payment_id)
     except ObjectDoesNotExist:
@@ -42,7 +42,7 @@ def event_payment_stripe(request: HttpRequest, payment_id: int):
         payment.data["currency"], stripe_amount, request.user.email, {"payment_id": payment.id}
     )
 
-    template = "dds_registration/billing/billing_event_stripe_payment_proceed.html.django"
+    template = "dds_registration/billing/stripe_payment.html.django"
     return render(
         request=request,
         template_name=template,
@@ -56,7 +56,7 @@ def event_payment_stripe(request: HttpRequest, payment_id: int):
 
 
 @login_required
-def event_payment_stripe_success(request: HttpRequest, payment_id: int):
+def payment_stripe_success(request: HttpRequest, payment_id: int):
     try:
         payment = Payment.objects.get(id=payment_id)
     except ObjectDoesNotExist:
@@ -70,14 +70,16 @@ def event_payment_stripe_success(request: HttpRequest, payment_id: int):
         messages.error(request, "Can't pay for someone else's items")
         return redirect("profile")
 
-    messages.success(
-        request, f"Awesome, your registration for {payment.data['event']['title']} is paid, and you are good to go!"
-    )
-
     payment.data["price"] = payment.data.pop("stripe_charge_in_progress")
     payment.mark_paid()
 
-    reg = Registration.objects.get(id=payment.data["registration"]["id"])
-    reg.status = "REGISTERED"
-    reg.save()
+    if payment.data["kind"] == "membership":
+        messages.success(request, "Awesome, your membership is paid, and you are good to go!")
+        reg = Registration.objects.get(id=payment.data["registration"]["id"])
+        reg.status = "REGISTERED"
+        reg.save()
+    else:
+        messages.success(
+            request, f"Awesome, your registration for {payment.data['event']['title']} is paid, and you are good to go!"
+        )
     return redirect("profile")

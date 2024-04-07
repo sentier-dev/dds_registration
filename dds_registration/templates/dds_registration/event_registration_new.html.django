@@ -17,13 +17,8 @@
   <legend>
     <h1 class="page-title primary-color">Register for {{ event.title }}</h1>
   </legend>
+
   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-</fieldset>
-
-{% include "assets/render-messages/render-messages.django" %}
-
-<form class="data-form" method="post">
-  {% csrf_token %}
 
   <div class="event-info mb-3">
     {% if event.description %}
@@ -39,14 +34,17 @@
         <p>Registration closes after {{ event.registration_close }}.</p>
     {% endif %}
   </div>
+</fieldset>
 
-  <input type="hidden" name="event_code" value="{{ event.code }}" />
+{% include "assets/render-messages/render-messages.django" %}
 
-  {% include "assets/event_registration_form/event_registration_form.django" %}
+<form class="data-form" method="post">
+  {% csrf_token %}
+  {{ form|crispy }}
 
-  <fieldset class="mb3 form-group">
+  <div class="common-actions">
     <input class="btn btn-primary" type="submit" value="Submit" />
     {% include "assets/back-button/back-button.django" %}
-  </fieldset>
+  </div>
 </form>
 {% endblock content %}

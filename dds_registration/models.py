@@ -174,8 +174,6 @@ class Payment(Model):
         ("INVOICE", "Bank Transfer (Invoice)"),
         #  ("WISE", "Wise"),  # Not yet implemented
     ]
-    #  # I'd suggest using this, at least (or smth similar):
-    #  METHOD_LABELS = dict(METHODS)
     METHOD_LABELS = {
         "STRIPE": "Credit Card via Stripe",
         "INVOICE": "Bank Transfer"
@@ -241,7 +239,7 @@ class Payment(Model):
     @property
     def payment_label(self):
         try:
-            return self.METHOD_LABELS[self.data['method']]
+            return self.METHOD_LABELS[self.data["method"]]
         except KeyError:
             return "No payment needed"
 
@@ -361,9 +359,7 @@ class Event(Model):
     public = models.BooleanField(default=True)
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
-    refund_last_day = models.DateField(
-        null=True, help_text="Last day that a fee refund can be offered"
-    )
+    refund_last_day = models.DateField(null=True, help_text="Last day that a fee refund can be offered")
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text="Maximum number of participants (0 = no limit)",
@@ -417,6 +413,10 @@ class RegistrationOption(Model):
     DEFAULT_CURRENCY = site_default_currency
     currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
+    @property
+    def form_label(self):
+        return f"{self.item}: {self.price} {self.get_currency_display()}"
+
     def __str__(self):
         price_items = [
             self.currency,
@@ -466,6 +466,7 @@ class Registration(Model):
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
     option = models.OneToOneField(RegistrationOption, on_delete=models.CASCADE)
     status = models.TextField(choices=REGISTRATION_STATUS)
+    send_update_emails = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

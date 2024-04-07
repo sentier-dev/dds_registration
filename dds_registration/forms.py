@@ -36,7 +36,14 @@ class MembershipForm(forms.Form):
     )
 
 
-class PaymentForm(forms.Form):
+class RegistrationForm(forms.Form):
+    option = forms.ChoiceField(
+        choices=[],
+        widget=forms.RadioSelect,
+        required=True,
+        label="Registration option",
+    )
+    send_update_emails = forms.BooleanField(label="Send me emails about this event", required=False, initial=True)
     name = forms.CharField(
         label="Name on invoice",
         max_length=100,
@@ -50,6 +57,17 @@ class PaymentForm(forms.Form):
         widget=textAreaWidget,
         required=False,
     )
+    payment_method = forms.ChoiceField(
+        choices=Payment.METHODS,
+        required=True,
+        widget=forms.RadioSelect,
+        label="Payment method",
+        help_text="Choose something even if the event is free",
+    )
+
+    def __init__(self, option_choices, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["option"].choices = option_choices
 
 
 class DdsRegistrationForm(BaseRegistrationForm):
