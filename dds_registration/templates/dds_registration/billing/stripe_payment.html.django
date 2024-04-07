@@ -28,7 +28,6 @@
   {% include "assets/render-messages/render-messages.django" %}
 
   <form id="payment-form" data-secret="{{ client_secret }}">
-    <div id="error-message" class="optional-message alert alert-warning" role="alert"></div>
     <div id="payment-element" class="mb-3">
       <!-- Elements will create form elements here -->
       {# TODO: Make this node full-height? #}
