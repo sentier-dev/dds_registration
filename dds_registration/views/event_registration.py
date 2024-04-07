@@ -35,7 +35,7 @@ def event_registration(request: HttpRequest, event_code: str):
             request,
             "Paid event registrations can't be edited manually; please either cancel and start again, or contact events@d-d-s.ch. Sorry for the inconvenience."
         )
-        redirect("profile")
+        return redirect("profile")
 
     if request.method == "POST":
         form = RegistrationForm(

@@ -19,7 +19,7 @@ def payment_stripe(request: HttpRequest, payment_id: int):
 
     if payment.status != "CREATED":
         messages.error("This payment has already been paid or refunded")
-        redirect("profile")
+        return redirect("profile")
 
     if payment.data["user"]["id"] != request.user.id:
         messages.error(request, "Can't pay for someone else's items")
@@ -71,7 +71,7 @@ def payment_stripe_success(request: HttpRequest, payment_id: int):
 
     if payment.status != "CREATED":
         messages.error("This payment has already been paid or refunded")
-        redirect("profile")
+        return redirect("profile")
 
     if payment.data["user"]["id"] != request.user.id:
         messages.error(request, "Can't pay for someone else's items")
