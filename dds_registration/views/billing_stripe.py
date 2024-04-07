@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpRequest
 from django.shortcuts import redirect, render
 
-from ..models import Payment, Registration
+from ..models import Payment, Registration, Membership
 from ..money import convert_from_stripe_units, get_stripe_amount_for_currency
 from .helpers.stripe_payments import get_stripe_client_secret
 
@@ -43,14 +43,19 @@ def payment_stripe(request: HttpRequest, payment_id: int):
     )
 
     template = "dds_registration/billing/stripe_payment.html.django"
+
+    try:
+        membership = Membership.objects.get(user=request.user)
+    except ObjectDoesNotExist:
+        membership = None
+
     return render(
         request=request,
         template_name=template,
         context={
             "client_secret": stripe_intent.client_secret,
             "payment": payment,
-            "site": get_current_site(request),
-            "scheme": "https" if request.is_secure() else "http",
+            "year": membership.until if membership else ""
         },
     )
 

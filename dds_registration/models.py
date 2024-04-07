@@ -34,7 +34,6 @@ from .core.constants.payments import currency_emojis, payment_details_by_currenc
 from .core.helpers.create_invoice_pdf import create_invoice_pdf_from_payment
 from .core.helpers.create_receipt_pdf import create_receipt_pdf_from_payment
 from .core.helpers.dates import this_year
-from .money import get_stripe_amount_for_currency, get_stripe_basic_unit
 
 alphabet = string.ascii_lowercase + string.digits
 random_code_length = 8
@@ -180,21 +179,50 @@ class Payment(Model):
     }
     DEFAULT_METHOD = "INVOICE"
 
-    # # User name and address, initialized by user's ones, by default
-    # name = models.TextField(blank=False, default="")
-    # address = models.TextField(blank=False, default="")
-    # extra_invoice_text = models.TextField(blank=True, default="")
-    # payment_method = models.TextField(choices=PAYMENT_METHODS, default=DEFAULT_PAYMENT_METHOD)
-    # SUPPORTED_CURRENCIES = site_supported_currencies
-    # DEFAULT_CURRENCY = site_default_currency
-    # currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
-
     created = models.DateField(auto_now_add=True)
     updated = models.DateField(auto_now=True)
     status = models.TextField(choices=STATUS, default=DEFAULT_STATUS)
 
-    # Includes the information needed to generate an
-    # invoice or a receipt
+    # Format for memberships:
+    # {
+    #     "user": {
+    #         "id": request.user.id,
+    #         "name": form.cleaned_data["name"],
+    #         "address": form.cleaned_data["address"],
+    #     },
+    #     "extra": form.cleaned_data["extra"],
+    #     "kind": "membership",
+    #     "membership": {
+    #         "type": form.cleaned_data["membership_type"],
+    #     },
+    #     "method": form.cleaned_data["payment_method"],
+    #     "price": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["price"],
+    #     "currency": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["currency"],
+    # }
+    # Format for event registration
+    # {
+    #     "user": {
+    #         "id": request.user.id,
+    #         "name": form.cleaned_data["name"],
+    #         "address": form.cleaned_data["address"],
+    #     },
+    #     "extra": form.cleaned_data["extra"],
+    #     "kind": "event",
+    #     "method": form.cleaned_data["payment_method"],
+    #     "event": {
+    #         "id": event.id,
+    #         "title": event.title,
+    #     },
+    #     "registration": {
+    #         "id": registration.id,
+    #     },
+    #     "option": {
+    #         "id": option.id,
+    #         "item": option.item,
+    #     },
+    #     "price": option.price,
+    #     "currency": option.currency,
+    # }
     data = models.JSONField(help_text="Read-only JSON object", default=dict)
 
     def mark_paid(self):
@@ -243,6 +271,9 @@ class Payment(Model):
         except KeyError:
             return "No payment needed"
 
+    @property
+    def currency_label(self):
+        return dict(site_supported_currencies).get(self.data['currency'], "")
     @property
     def title(self):
         if self.data["kind"] == "membership":
@@ -330,12 +361,11 @@ MEMBERSHIP_DATA = MembershipData()
 
 
 class Membership(Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='membership')
     membership_type = models.TextField(choices=MEMBERSHIP_DATA.choices, default=MEMBERSHIP_DATA.default)
 
     started = models.IntegerField(default=this_year)
     until = models.IntegerField(default=this_year)
-    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True)
 
     @property
     def active(self) -> bool:
@@ -461,10 +491,10 @@ class Registration(Model):
         ("CANCELLED", "Cancelled"),  # Cancelled by DdS
     ]
 
-    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True)
+    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, related_name="registration")
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
-    option = models.OneToOneField(RegistrationOption, on_delete=models.CASCADE)
+    option = models.OneToOneField(RegistrationOption, on_delete=models.CASCADE, related_name="registration")
     status = models.TextField(choices=REGISTRATION_STATUS)
     send_update_emails = models.BooleanField(default=False)
 
