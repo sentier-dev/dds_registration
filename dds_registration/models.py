@@ -415,7 +415,10 @@ class Event(Model):
         return self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY).count()
 
     def get_active_event_registration_for_user(self, user: User):
-        active_user_registrations = list(self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY, user=user))
+        if not user.is_anonymous:
+            active_user_registrations = list(self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY, user=user))
+        else:
+            active_user_registrations = []
         if active_user_registrations:
             return active_user_registrations[0]
         return None
