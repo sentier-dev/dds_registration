@@ -12,13 +12,18 @@
     {% include "assets/membership-splash/membership-splash-user.django" %}
 {% endif %}
 
+<h2>Départ de Sentier Events and Membership Portal</h2>
+<p>This web application allows you to sign up for membership in the <a href="https://www.d-d-s.ch/">Départ de Sentier (DdS)</a> association. DdS hosts conferences, schools, and online seminars; the list of public events is given below. If you have questions, you can reach us at <a href="mailto:events@d-d-s.ch">events@d-d-s.ch</a>.</p>
+<p>We wrote this portal ourselves, and it is far from perfect. Feel free to suggest changes at <a href="https://github.com/Depart-de-Sentier/dds_registration/issues">our issue tracker</a>.</p>
+
 {# TODO: To show smth if there aren't any available public events? #}
 
 {% if events %}
   <fieldset>
     <legend>
-      <h2 class="primary-color">DdS events open for registration</h2>
+      <h2 class="primary-color">Open Events</h2>
     </legend>
+    {% if user.is_anonymous %}<p>You need to <a href="/accounts/register/">have a user account</a> and be <a href="/accounts/login/">logged in</a> to register for events.</p>{% endif %}
   </fieldset>
 
   {% include "assets/events-list-block/events-list-block.django" %}
