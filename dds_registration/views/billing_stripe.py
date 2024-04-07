@@ -56,6 +56,8 @@ def payment_stripe(request: HttpRequest, payment_id: int):
             "client_secret": stripe_intent.client_secret,
             "payment": payment,
             "year": membership.until if membership else "",
+            "site": get_current_site(request),
+            "scheme": "https" if request.is_secure() else "http",
         },
     )
 

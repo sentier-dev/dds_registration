@@ -51,7 +51,7 @@
   // @ts-check
 
   // Using link with event code, amount and currency
-  const success_url = '{% url "payment_stripe_success" payment_id=payment.id %}';
+  const success_url = '{{ scheme }}://{{ site.domain }}{% url "payment_stripe_success" payment_id=payment.id %}';
 
   /** @type {TCreateCheckoutSessionParams} */
   const createCheckoutSessionParams = {
