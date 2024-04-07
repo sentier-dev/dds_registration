@@ -274,6 +274,7 @@ class Payment(Model):
     @property
     def currency_label(self):
         return dict(site_supported_currencies).get(self.data['currency'], "")
+
     @property
     def title(self):
         if self.data["kind"] == "membership":
@@ -361,11 +362,12 @@ MEMBERSHIP_DATA = MembershipData()
 
 
 class Membership(Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='membership')
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     membership_type = models.TextField(choices=MEMBERSHIP_DATA.choices, default=MEMBERSHIP_DATA.default)
 
     started = models.IntegerField(default=this_year)
     until = models.IntegerField(default=this_year)
+    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True)
 
     @property
     def active(self) -> bool:
@@ -491,10 +493,10 @@ class Registration(Model):
         ("CANCELLED", "Cancelled"),  # Cancelled by DdS
     ]
 
-    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, related_name="registration")
+    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
-    option = models.OneToOneField(RegistrationOption, on_delete=models.CASCADE, related_name="registration")
+    option = models.OneToOneField(RegistrationOption, on_delete=models.CASCADE)
     status = models.TextField(choices=REGISTRATION_STATUS)
     send_update_emails = models.BooleanField(default=False)
 
