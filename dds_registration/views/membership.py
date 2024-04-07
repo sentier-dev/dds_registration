@@ -45,6 +45,7 @@ def membership_application(request: HttpRequest):
                     "method": form.cleaned_data["payment_method"],
                     "price": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["price"],
                     "currency": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["currency"],
+                    "until": this_year(),
                 },
             )
             payment.save()
@@ -64,7 +65,6 @@ def membership_application(request: HttpRequest):
 
             if payment.data["method"] == "INVOICE":
                 payment.status = "ISSUED"
-                payment.data['until'] = membership.until
                 payment.save()
                 payment.email_invoice()
                 messages.success(
