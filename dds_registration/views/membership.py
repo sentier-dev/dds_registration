@@ -40,6 +40,7 @@ def membership_application(request: HttpRequest):
                     "kind": "membership",
                     "membership": {
                         "type": form.cleaned_data["membership_type"],
+                        "label": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["label"]
                     },
                     "method": form.cleaned_data["payment_method"],
                     "price": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["price"],
@@ -56,23 +57,23 @@ def membership_application(request: HttpRequest):
                 membership.payment = payment
                 membership.save()
             except ObjectDoesNotExist:
-                Membership(
+                membership = Membership(
                     user=request.user, membership_type=form.cleaned_data["membership_type"], payment=payment, mailing_list=form.cleaned_data["mailing_list"]
-                ).save()
+                )
+                membership.save()
 
             if payment.data["method"] == "INVOICE":
-                payment.email_invoice()
                 payment.status = "ISSUED"
+                payment.data['until'] = membership.until
                 payment.save()
+                payment.email_invoice()
                 messages.success(
                     request,
-                    "Your membership has been created! An invoice has been sent to your email address; it can also be downloaded from your profile. Please note your membership is not in force until the invoice is paid.",
+                    f"Your membership has been created! An invoice has been sent to {request.user.email} from events@d-d-s.ch. The invoice can also be downloaded from your profile. Please note your membership is not in force until the invoice is paid.",
                 )
                 return redirect("profile")
             elif payment.data["method"] == "STRIPE":
                 return redirect("payment_stripe", payment_id=payment.id)
-
-            # return redirect("membership_payment_details", payment_id=payment.id)
     else:
         form = MembershipForm(
             initial={

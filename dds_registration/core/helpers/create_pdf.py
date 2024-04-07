@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 from django.db.models import Model
@@ -45,6 +45,7 @@ def create_pdf(
     recipient_address: str = payment_recipient_address,
     payment_days: int = default_payment_deadline_days,
     logo_svg_path: Path = DDS_LOGO,
+    paid_date: str | None = None,
 ) -> FPDF:
 
     if invoice_date is None:
@@ -144,9 +145,21 @@ def create_pdf(
     )
 
     if payment_days:
+        due_date = (invoice_date + timedelta(days=payment_days)).strftime("%Y-%m-%d")
         pdf.set_y(pdf.get_y() + small_vertical_space)
         pdf.multi_cell(
-            text=f"Payment terms: {payment_days} calendar days",
+            text=f"Payment terms {payment_days} calendar days: {due_date}",
+            markdown=True,
+            w=page_width,
+            align=Align.L,
+            new_x="LEFT",
+            new_y="NEXT",
+            h=line_height,
+        )
+    if paid_date:
+        pdf.set_y(pdf.get_y() + small_vertical_space)
+        pdf.multi_cell(
+            text=f"Payment made: {paid_date}",
             markdown=True,
             w=page_width,
             align=Align.L,
@@ -193,6 +206,8 @@ def create_pdf(
 
 
 def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
+    from ...models import User
+
     if payment.data["kind"] == "event":
         items = [
             ("Quantity", "Event", "Registration", f"Price ({payment.data['currency']})"),
@@ -201,12 +216,13 @@ def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
         ]
         column_layout = (15, 45, 20, 20)
     else:
+        user = User.objects.get(id=payment.data['user']['id'])
         items = [
-            ("Quantity", "Membership type", f"Price ({payment.data['currency']})"),
-            (1, payment.data["membership"]["type"], payment.data["price"]),
-            ("", "**Total**", payment.data["price"]),
+            ("Member name", "Membership", "Valid until", f"Price ({payment.data['currency']})"),
+            (user.get_full_name(), payment.data["membership"]["label"], str(payment.data['until']) + "-12-31", payment.data["price"]),
+            ("", "", "**Total**", payment.data["price"]),
         ]
-        column_layout = (15, 55, 30)
+        column_layout = (40, 20, 20, 20)
 
     return create_pdf(
         kind="invoice",
@@ -217,10 +233,13 @@ def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
         column_layout=column_layout,
         recipient_account=payment.account,
         extra=payment.data["extra"],
+        invoice_date=payment.updated,
     )
 
 
 def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
+    from ...models import User
+
     if payment.data["kind"] == "event":
         items = [
             ("Quantity", "Event", "Registration", f"Price ({payment.data['currency']})"),
@@ -229,12 +248,13 @@ def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
         ]
         column_layout = (15, 45, 20, 20)
     else:
+        user = User.objects.get(id=payment.data['user']['id'])
         items = [
-            ("Quantity", "Membership type", f"Price ({payment.data['currency']})"),
-            (1, payment.data["membership"]["type"], payment.data["price"]),
-            ("", "**Total**", payment.data["price"]),
+            ("Member name", "Membership", "Valid until", f"Price ({payment.data['currency']})"),
+            (user.get_full_name(), payment.data["membership"]["label"], str(payment.data['until']) + "-12-31", payment.data["price"]),
+            ("", "", "**Total**", payment.data["price"]),
         ]
-        column_layout = (15, 55, 30)
+        column_layout = (40, 20, 20, 20)
 
     return create_pdf(
         kind="receipt",
@@ -245,4 +265,5 @@ def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
         payment_days=0,
         column_layout=column_layout,
         extra=payment.data["extra"],
+        paid_date=payment.data['paid_date']
     )

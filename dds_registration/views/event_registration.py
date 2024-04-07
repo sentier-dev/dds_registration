@@ -43,12 +43,6 @@ def event_registration(request: HttpRequest, event_code: str):
             option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
         )
 
-        print(request.POST)
-        print(form.is_valid())
-        if not form.is_valid():
-            print(form.errors)
-        print(form.data)
-
         if form.is_valid():
             option = RegistrationOption.objects.get(id=form.cleaned_data["option"])
             if registration:
@@ -111,7 +105,7 @@ def event_registration(request: HttpRequest, event_code: str):
                 payment.save()
                 messages.success(
                     request,
-                    f"Your registration for {event.title} has been created! An invoice has been sent to your email address; it can also be downloaded from your profile. Please note your registration is not in force until the invoice is paid.",
+                    f"Your registration for {event.title} has been created! An invoice has been sent to {request.user.email} from events@d-d-s.ch. The invoice can also be downloaded from your profile. Please note your registration is not in force until the invoice is paid.",
                 )
                 return redirect("profile")
             elif payment.data["method"] == "STRIPE":
@@ -119,7 +113,6 @@ def event_registration(request: HttpRequest, event_code: str):
     else:
         # TODO: Populate template with existing choices instead of defaults
         if registration:
-            print("existing registration")
             messages.success(
                 request,
                 "You are now editing an existing registration application. Please be careful not to make unwanted changes.",
@@ -135,9 +128,6 @@ def event_registration(request: HttpRequest, event_code: str):
                 },
             )
         else:
-            print("new registration")
-            for option in event.options.all():
-                print(option.form_label)
             form = RegistrationForm(
                 option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
                 initial={

@@ -224,6 +224,7 @@ class Payment(Model):
         if self.status == "PAID":
             return
         self.status = "PAID"
+        self.data['paid_date'] = date.today().strftime("%Y-%m-%d")
         if settings.SLACK_WEBHOOK:
             title = self.data["event"]["title"] if self.data["kind"] == "event" else "membership"
             requests.post(
