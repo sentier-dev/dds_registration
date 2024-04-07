@@ -1,7 +1,6 @@
 # @module models.py
 # @changed 2024.03.28, 19:28
 
-import base64
 import random
 import string
 from datetime import date
@@ -14,21 +13,14 @@ from django.db import models
 from django.db.models import Model, Q, QuerySet
 from django.urls import reverse
 from fpdf import FPDF
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import (
-    Attachment,
-    Disposition,
-    FileContent,
-    FileName,
-    FileType,
-    Mail,
-)
+
 
 from dds_registration.core.constants.payments import (
     site_default_currency,
     site_supported_currencies,
 )
 
+from .email import send_email
 from .core.constants.date_time_formats import dateFormat
 from .core.constants.payments import currency_emojis, payment_details_by_currency
 from .core.helpers.create_invoice_pdf import create_invoice_pdf_from_payment
@@ -139,23 +131,13 @@ class User(AbstractUser):
         attachment_name: str | None = None,
         from_email: str | None = settings.DEFAULT_FROM_EMAIL,
     ) -> None:
-        sg = SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
-        message = Mail(
-            from_email=from_email,
-            to_emails=self.email,
+        send_email(
+            recipient_address=self.email,
             subject=subject,
-            plain_text_content=message,
+            message=message,
+            pdf=attachment_content,
+            pdf_name=attachment_name,
         )
-        if attachment_content is None or attachment_name is None:
-            pass
-        else:
-            attachment = Attachment()
-            attachment.file_content = FileContent(base64.b64encode(attachment_content.output()).decode())
-            attachment.file_type = FileType("application/pdf")
-            attachment.file_name = FileName(attachment_name)
-            attachment.disposition = Disposition("attachment")
-            message.attachment = attachment
-        sg.send(message)
 
 
 class Payment(Model):
@@ -225,6 +207,21 @@ class Payment(Model):
     # }
     data = models.JSONField(help_text="Read-only JSON object", default=dict)
 
+    def mark_obsolete(self):
+        """Mark a payment obsolete.
+
+        Normally for when they change their mind on event registration options."""
+        if self.status == "OBSOLETE":
+            return
+        self.status == "OBSOLETE"
+        user = User.objects.get(id=self.data['user']['id'])
+        send_email(
+            recipient_address=user.email,
+            subject=f"Invoice #{self.invoice_no} is obsolete - please do not pay",
+            message=f"Invoice {self.invoice_no} is obsolete - {self.data['user']['name']} changed their mind and chose a different item with a different price. An updated invoice will be sent. Please do not pay invoice {self.invoice_no}.\nIf you have questions, please contact events@d-d-s.ch. Thanks!",
+        )
+        self.save()
+
     def mark_paid(self):
         if self.status == "PAID":
             return
@@ -250,7 +247,7 @@ class Payment(Model):
         """
         if not self.id:
             return "NOT-CREATED-YET"
-        return "#{}{:0>4}".format(self.created.strftime("%y"), self.id)
+        return "{}{:0>4}".format(self.created.strftime("%y"), self.id)
 
     @property
     def account(self):

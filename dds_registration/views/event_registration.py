@@ -53,8 +53,7 @@ def event_registration(request: HttpRequest, event_code: str):
             if registration:
                 # Set up new payment
                 if registration.payment:
-                    registration.payment.status = "OBSOLETE"
-                    registration.payment.save()
+                    registration.payment.mark_obsolete()
                 registration.option = option
                 registration.send_update_emails = form.cleaned_data["send_update_emails"]
                 registration.status = "SUBMITTED"
