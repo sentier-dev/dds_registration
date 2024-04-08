@@ -52,6 +52,14 @@
   <p>Not yet a DdS member. <a href="{% url 'membership_application' %}">Apply for membership</a>.</p>
 {% endif %}
 
+{% if user.membership.payment.status == 'ISSUED' %}
+  <p class="alert alert-warning" role="alert">
+  <strong>You have unpaid membership invoice.</strong>
+    Your membership isn't valid yet.
+    You can <a target="_blank" href="{% url 'invoice_download' payment_id=user.membership.payment.id %}">download an ivoice</a> to pay for it now.
+  </p>
+{% endif %}
+
 <div>
   {# TODO: Put common actions toolbar here #}
   <a class="btn btn-primary" href="{% url 'profile_edit' %}">Edit profile</a>
