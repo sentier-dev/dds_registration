@@ -363,7 +363,7 @@ class Membership(Model):
 
     started = models.IntegerField(default=this_year)
     until = models.IntegerField(default=this_year)
-    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True)
+    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
     mailing_list = models.BooleanField(default=False)
 
     @property
@@ -388,7 +388,7 @@ class Event(Model):
     public = models.BooleanField(default=True)
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
-    refund_last_day = models.DateField(null=True, help_text="Last day that a fee refund can be offered")
+    refund_last_day = models.DateField(null=True, blank=True, help_text="Last day that a fee refund can be offered")
     max_participants = models.PositiveIntegerField(
         default=0,
         help_text="Maximum number of participants (0 = no limit)",
@@ -493,7 +493,7 @@ class Registration(Model):
         ("CANCELLED", "Cancelled"),  # Cancelled by DdS
     ]
 
-    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True)
+    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
     option = models.OneToOneField(RegistrationOption, on_delete=models.CASCADE)
