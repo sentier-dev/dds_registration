@@ -44,21 +44,25 @@
 
 <h3 class="primary-color">Membership:</h3>
 
-{% if user.is_member %}
 {% with membership=user.membership %}
+
+{% if user.is_member %}
   <p>Member since {{ membership.started }}. Membership type: {{ membership.get_membership_type_display }}.</p>
-{% endwith %}
 {% else %}
   <p>Not yet a DdS member. <a href="{% url 'membership_application' %}">Apply for membership</a>.</p>
 {% endif %}
 
-{% if user.membership.payment.status == 'ISSUED' %}
-  <p class="alert alert-warning" role="alert">
-  <strong>You have unpaid membership invoice.</strong>
-    Your membership isn't valid yet.
-    You can <a target="_blank" href="{% url 'invoice_download' payment_id=user.membership.payment.id %}">download an ivoice</a> to pay for it now.
-  </p>
-{% endif %}
+{% with payment=membership.payment %}
+  {% if payment and payment.status == 'ISSUED' %}
+    <p class="alert alert-warning" role="alert">
+    <strong>You have unpaid membership invoice.</strong>
+      Your membership isn't valid yet.
+      You can <a target="_blank" href="{% url 'invoice_download' payment_id=user.membership.payment.id %}">download an invoice</a> to pay for it now.
+    </p>
+  {% endif %}
+{% endwith %}
+
+{% endwith %}
 
 <div>
   {# TODO: Put common actions toolbar here #}
