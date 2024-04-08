@@ -1,6 +1,6 @@
 {# ex: set ft=htmldjango : #}
 <!--
-  @module dds_registration/templates/dds_registration/event_registration_cancel_confirm.html.django
+  @module dds_registration/templates/dds_registration/event/event_registration_cancel_confirm.html.django
   @changed 2024.03.20, 12:26
 -->
 
@@ -30,4 +30,4 @@
   </div>
 </form>
 
-{% endblock %}
+{% endblock content %}
