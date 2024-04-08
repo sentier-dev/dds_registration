@@ -498,7 +498,7 @@ class Registration(Model):
     payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
-    option = models.OneToOneField(RegistrationOption, on_delete=models.CASCADE)
+    option = models.ForeignKey(RegistrationOption, on_delete=models.CASCADE, related_name="registrations")
     status = models.TextField(choices=REGISTRATION_STATUS)
     send_update_emails = models.BooleanField(default=False)
 
