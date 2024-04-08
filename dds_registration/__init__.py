@@ -6,7 +6,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY  # 'sk_...'
 
 
 # Project version properties
-__version__ = "1.0.3"
+__version__ = "1.0.7"
 __timestamp__ = "2024.04.08 13:55 +0700"
 __timetag__ = "240408-1355"
 
