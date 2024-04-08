@@ -26,7 +26,7 @@ from .core.helpers.create_pdf import (
     create_receipt_pdf_from_payment,
 )
 from .core.helpers.dates import this_year
-from .email import send_email
+from .core.helpers.email import send_email
 
 alphabet = string.ascii_lowercase + string.digits
 random_code_length = 8
@@ -224,7 +224,7 @@ class Payment(Model):
         if self.status == "PAID":
             return
         self.status = "PAID"
-        self.data['paid_date'] = date.today().strftime("%Y-%m-%d")
+        self.data["paid_date"] = date.today().strftime("%Y-%m-%d")
         if settings.SLACK_WEBHOOK:
             title = self.data["event"]["title"] if self.data["kind"] == "event" else "membership"
             requests.post(

@@ -201,7 +201,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                APP_NAME + ".context_processors.common_values",
+                APP_NAME + ".core.app.context_processors.common_values",
             ],
         },
         "DIRS": TEMPLATE_DIRS,
@@ -242,7 +242,7 @@ REGISTRATION_SALT = env("REGISTRATION_SALT")
 # @see https://django-registration.readthedocs.io
 
 AUTH_USER_MODEL = APP_NAME + ".User"
-AUTHENTICATION_BACKENDS = [APP_NAME + ".backends.EmailBackend"]
+AUTHENTICATION_BACKENDS = [APP_NAME + ".core.app.backends.EmailBackend"]
 
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
 
