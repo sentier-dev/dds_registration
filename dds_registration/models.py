@@ -227,12 +227,12 @@ class Payment(Model):
         self.status = "PAID"
         self.data["paid_date"] = date.today().strftime("%Y-%m-%d")
         if settings.SLACK_WEBHOOK:
-            title = data["event"]["title"] if data["kind"] == "event" else "membership"
+            title = self.data["event"]["title"] if self.data["kind"] == "event" else "membership"
             requests.post(
                 url=settings.SLACK_WEBHOOK,
                 json={
                     "text": "Payment by {} of {}{} for {}".format(
-                        data["user"]["name"], currency_emojis[data["currency"]], data["price"], title
+                        self.data["user"]["name"], currency_emojis[self.data["currency"]], self.data["price"], title
                     )
                 },
             )
@@ -288,11 +288,11 @@ class Payment(Model):
 
     def email_invoice(self):
         user = User.objects.get(id=self.data["user"]["id"])
-        if data["kind"] == "membership":
+        if self.data["kind"] == "membership":
             subject = f"DdS Membership Invoice {self.invoice_no}"
             message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
         else:
-            event = Event.objects.get(id=data["event"]["id"])
+            event = Event.objects.get(id=self.data["event"]["id"])
             subject = f"DdS Event {event.title} Registration Invoice {self.invoice_no}"
             message = f"Thanks for registering for {event.title}! We look forward to seeing your, in person or virtually.\nDépart de Sentier runs its events and schools on a cost-neutral basis - i.e. we don't make a profit off the registration fees. They are used for catering, room, hotel, and equipment rental, AV hosting and technician fees, and guest speaker costs. We literally could not run this event without your support.\nYou can view your registration status and apply for membership at https://events.d-d-s.ch/profile.\nPlease find attached the registration invoice. Your registration is not finalized until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
         user.email_user(
@@ -304,7 +304,7 @@ class Payment(Model):
 
     def email_receipt(self):
         user = User.objects.get(id=self.data["user"]["id"])
-        kind = "Membership" if data["kind"] == "membership" else "Event"
+        kind = "Membership" if self.data["kind"] == "membership" else "Event"
         user.email_user(
             subject=f"DdS {kind} Receipt {self.invoice_no}",
             message="Thanks! A receipt for your event or membership payment is attached. You can always find more information about your item at your your profile: https://events.d-d-s.ch/profile.\nWe really appreciate your support. If you have any questions, please contact events@d-d-s.ch.",
