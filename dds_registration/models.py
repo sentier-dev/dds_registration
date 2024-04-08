@@ -216,7 +216,7 @@ class Payment(Model):
         send_email(
             recipient_address=user.email,
             subject=f"Invoice #{self.invoice_no} is obsolete - please do not pay",
-            message=f"Invoice {self.invoice_no} is obsolete - {self.data['user']['name']} changed their mind and chose a different item with a different price. An updated invoice will be sent. Please do not pay invoice {self.invoice_no}.\nIf you have questions, please contact events@d-d-s.ch. Thanks!",
+            message=f"Invoice {self.invoice_no} is obsolete - {self.data['user']['name']} changed their mind and chose a different item with a different price. An updated invoice will be sent. Please do not pay invoice {self.invoice_no}.\n\nIf you have questions, please contact events@d-d-s.ch. Thanks!",
         )
         self.save()
 
@@ -287,13 +287,14 @@ class Payment(Model):
 
     def email_invoice(self):
         user = User.objects.get(id=self.data["user"]["id"])
+        # XXX: Isn't it'd better to extract these (and all other hardcoded here, in `send_email` methods?) texts to template files, with substiting names, urls and emails from settings or preferences values?
         if self.data["kind"] == "membership":
             subject = f"DdS Membership Invoice {self.invoice_no}"
-            message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
+            message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\n\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\n\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\n\nIf you have any questions, please contact events@d-d-s.ch."
         else:
             event = Event.objects.get(id=self.data["event"]["id"])
             subject = f"DdS Event {event.title} Registration Invoice {self.invoice_no}"
-            message = f"Thanks for registering for {event.title}! We look forward to seeing your, in person or virtually.\nDépart de Sentier runs its events and schools on a cost-neutral basis - i.e. we don't make a profit off the registration fees. They are used for catering, room, hotel, and equipment rental, AV hosting and technician fees, and guest speaker costs. We literally could not run this event without your support.\nYou can view your registration status and apply for membership at https://events.d-d-s.ch/profile.\nPlease find attached the registration invoice. Your registration is not finalized until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
+            message = f"Thanks for registering for {event.title}! We look forward to seeing your, in person or virtually.\n\nDépart de Sentier runs its events and schools on a cost-neutral basis - i.e. we don't make a profit off the registration fees. They are used for catering, room, hotel, and equipment rental, AV hosting and technician fees, and guest speaker costs. We literally could not run this event without your support.\n\nYou can view your registration status and apply for membership at https://events.d-d-s.ch/profile.\n\nPlease find attached the registration invoice. Your registration is not finalized until the bank transfer is received.\n\nIf you have any questions, please contact events@d-d-s.ch."
         user.email_user(
             subject=subject,
             message=message,
@@ -306,7 +307,7 @@ class Payment(Model):
         kind = "Membership" if self.data["kind"] == "membership" else "Event"
         user.email_user(
             subject=f"DdS {kind} Receipt {self.invoice_no}",
-            message="Thanks! A receipt for your event or membership payment is attached. You can always find more information about your item at your your profile: https://events.d-d-s.ch/profile.\nWe really appreciate your support. If you have any questions, please contact events@d-d-s.ch.",
+            message="Thanks! A receipt for your event or membership payment is attached. You can always find more information about your item at your your profile: https://events.d-d-s.ch/profile.\n\nWe really appreciate your support. If you have any questions, please contact events@d-d-s.ch.",
             attachment_content=self.receipt_pdf(),
             attachment_name=f"DdS receipt {self.invoice_no}.pdf",
         )
