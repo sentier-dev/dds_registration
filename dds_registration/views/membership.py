@@ -40,7 +40,7 @@ def membership_application(request: HttpRequest):
                     "kind": "membership",
                     "membership": {
                         "type": form.cleaned_data["membership_type"],
-                        "label": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["label"]
+                        "label": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["label"],
                     },
                     "method": form.cleaned_data["payment_method"],
                     "price": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["price"],
@@ -59,7 +59,10 @@ def membership_application(request: HttpRequest):
                 membership.save()
             except ObjectDoesNotExist:
                 membership = Membership(
-                    user=request.user, membership_type=form.cleaned_data["membership_type"], payment=payment, mailing_list=form.cleaned_data["mailing_list"]
+                    user=request.user,
+                    membership_type=form.cleaned_data["membership_type"],
+                    payment=payment,
+                    mailing_list=form.cleaned_data["mailing_list"],
                 )
                 membership.save()
 
