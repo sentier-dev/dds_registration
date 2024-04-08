@@ -30,14 +30,13 @@ def send_email(
         plain_text_content=message,
     )
     if is_html:
-        # TODO
-        raise ValueError
+        message.html_content = message
+        # TODO: Create and replace plain text message copy?
     else:
         message.plain_text_content = message
     if pdf:
         if not pdf_name:
             raise ValueError("Must specify `pdf_name`")
-
         attachment = Attachment()
         attachment.file_content = FileContent(base64.b64encode(pdf.output()).decode())
         attachment.file_type = FileType("application/pdf")
