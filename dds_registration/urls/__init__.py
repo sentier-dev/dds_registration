@@ -10,7 +10,7 @@ from .event_urls import urlpatterns as event_urlpatterns
 # from .billing_membership_invoice_urls import urlpatterns as billing_membership_invoice_urlpatterns
 # from .billing_membership_stripe_urls import urlpatterns as billing_membership_stripe_urlpatterns
 from .membership_urls import urlpatterns as membership_urlpatterns
-from .payments import urlpatterns as payment_urlpatterns
+from .payments_urls import urlpatterns as payment_urlpatterns
 from .root_urls import urlpatterns as root_urlpatterns
 
 urlpatterns = accounts_urlpatterns + event_urlpatterns + root_urlpatterns + payment_urlpatterns + membership_urlpatterns
