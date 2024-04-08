@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
@@ -30,10 +31,10 @@ def event_registration(request: HttpRequest, event_code: str):
         return redirect("index")
 
     registration = event.get_active_event_registration_for_user(request.user)
-    if registration and registration.payment.status == "PAID":
+    if registration and registration.payment and registration.payment.status == "PAID":
         messages.error(
             request,
-            "Paid event registrations can't be edited manually; please either cancel and start again, or contact events@d-d-s.ch. Sorry for the inconvenience.",
+            f"Paid event registrations can't be edited manually; please either cancel and start again, or contact {settings.DEFAULT_CONTACT_EMAIL}. Sorry for the inconvenience.",
         )
         return redirect("profile")
 
@@ -113,6 +114,7 @@ def event_registration(request: HttpRequest, event_code: str):
     else:
         # TODO: Populate template with existing choices instead of defaults
         if registration:
+            # TODO: What to do if there no payment property in the registration object (as a result of a incosistency)?
             messages.success(
                 request,
                 "You are now editing an existing registration application. Please be careful not to make unwanted changes.",

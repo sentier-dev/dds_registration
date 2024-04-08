@@ -248,6 +248,7 @@ ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
 
 # NOTE: It's possible to store some of these parameters (`DEFAULT_FROM_EMAIL`, definitely) in the site preferences or in the `.env*` files
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+DEFAULT_CONTACT_EMAIL = DEFAULT_FROM_EMAIL
 EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_HOST_USER = "apikey"  # this is exactly the value 'apikey'
 EMAIL_PORT = 587
@@ -364,6 +365,7 @@ PASS_VARIABLES = {
     "USE_DJANGO_PREPROCESSORS": USE_DJANGO_PREPROCESSORS,
     "STRIPE_PUBLISHABLE_KEY": STRIPE_PUBLISHABLE_KEY,
     "DEFAULT_FROM_EMAIL": DEFAULT_FROM_EMAIL,
+    "DEFAULT_CONTACT_EMAIL": DEFAULT_CONTACT_EMAIL,
     # NOTE: Site url and name could be taken from site data via `get_current_site`
     "SITE_NAME": SITE_NAME,
     "SITE_TITLE": SITE_TITLE,
