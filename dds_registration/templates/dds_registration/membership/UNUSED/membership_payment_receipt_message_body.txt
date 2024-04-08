@@ -1,0 +1,12 @@
+{# ex: set ft=htmldjango : #}
+Hi {{ user.get_full_name }}!
+
+Thanks for registering for DdS Membership!
+
+Your invoice is attached, but can also be download anytime at {{ scheme }}://{{site.domain}}{% url 'invoice_download' %}.
+
+You can change your invoice details here: {{ scheme }}://{{site.domain}}{% url 'billing_membership_invoice_download' %}
+
+If you have questions or comments, you can reach us at {{ settings.DEFAULT_FROM_EMAIL }}.
+
+Sincerely, {{ site.name }} Management
