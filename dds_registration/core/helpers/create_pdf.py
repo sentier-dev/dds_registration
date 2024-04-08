@@ -216,10 +216,15 @@ def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
         ]
         column_layout = (15, 45, 20, 20)
     else:
-        user = User.objects.get(id=payment.data['user']['id'])
+        user = User.objects.get(id=payment.data["user"]["id"])
         items = [
             ("Member name", "Membership", "Valid until", f"Price ({payment.data['currency']})"),
-            (user.get_full_name(), payment.data["membership"]["label"], str(payment.data['until']) + "-12-31", payment.data["price"]),
+            (
+                user.get_full_name(),
+                payment.data["membership"]["label"],
+                str(payment.data["until"]) + "-12-31",
+                payment.data["price"],
+            ),
             ("", "", "**Total**", payment.data["price"]),
         ]
         column_layout = (40, 20, 20, 20)
@@ -248,10 +253,15 @@ def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
         ]
         column_layout = (15, 45, 20, 20)
     else:
-        user = User.objects.get(id=payment.data['user']['id'])
+        user = User.objects.get(id=payment.data["user"]["id"])
         items = [
             ("Member name", "Membership", "Valid until", f"Price ({payment.data['currency']})"),
-            (user.get_full_name(), payment.data["membership"]["label"], str(payment.data['until']) + "-12-31", payment.data["price"]),
+            (
+                user.get_full_name(),
+                payment.data["membership"]["label"],
+                str(payment.data["until"]) + "-12-31",
+                payment.data["price"],
+            ),
             ("", "", "**Total**", payment.data["price"]),
         ]
         column_layout = (40, 20, 20, 20)
@@ -265,5 +275,5 @@ def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
         payment_days=0,
         column_layout=column_layout,
         extra=payment.data["extra"],
-        paid_date=payment.data['paid_date']
+        paid_date=payment.data["paid_date"],
     )
