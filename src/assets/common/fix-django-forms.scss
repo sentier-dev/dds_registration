@@ -1,0 +1,22 @@
+/**
+ * @module fix-django-forms.scss
+ * @changed 2024.04.08, 19:37
+ */
+
+@import '../shared';
+
+#div_id_payment_method {
+  .form-check {
+    // NOTE: Issue #113:
+    // Show this radio-group options inline.
+    // It's impossible to stylize it using class attribute in
+    // `dds_registration/forms.py`. These attrs going to the hidden inner
+    // `input`, not to the wrapper, like that:
+    // ```
+    // <input class="XXX" ... type="radio" value="INVOICE">
+    // ```
+    display: inline-block;
+    margin-right: 16px;
+    float: left;
+  }
+}

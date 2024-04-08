@@ -139,7 +139,7 @@ def event_registration(request: HttpRequest, event_code: str):
             )
     return render(
         request=request,
-        template_name="dds_registration/event_registration_new.html.django",
+        template_name="dds_registration/event/event_registration_new.html.django",
         context={
             "form": form,
             "event": event,
@@ -152,7 +152,7 @@ def event_registration(request: HttpRequest, event_code: str):
 #     return event_registration_cancel_confirm_form(
 #         request,
 #         event_code=event_code,
-#         form_template="dds_registration/event_registration_cancel_confirm.html.django",
+#         form_template="dds_registration/event/event_registration_cancel_confirm.html.django",
 #         success_redirect="profile",
 #     )
 

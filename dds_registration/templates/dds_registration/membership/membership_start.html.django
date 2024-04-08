@@ -28,12 +28,15 @@
   {% csrf_token %}
   {{ form|crispy }}
 
+  {% comment %}
+    {# UNUSED: Is it supposed to be used? %}
+    {% include "assets/membership-choose-list/membership-choose-list.django" %}
+  {% endcomment %}
+
   <div class="common-actions">
     <input class="btn btn-primary" type="submit" value="Submit" />
     {% include "assets/back-button/back-button.django" %}
   </div>
 </form>
-
-{% include "assets/membership-choose-list/membership-choose-list.django" %}
 
 {% endblock content %}

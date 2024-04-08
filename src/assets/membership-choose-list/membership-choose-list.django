@@ -3,30 +3,29 @@
   @module membership-choose-list.django
   @changed 2024.03.30, 20:16
 
+  NOTE 2024.04.08, 19:45 -- Is it unused?
+
   Expecting parameters:
 
   - MEMBERSHIP_TYPES from Membership model
 -->
-
 <div class="membership-choose-list">
-  {% for item in MEMBERSHIP_TYPES %}
-    {% with type=item.0 name=item.1 %}
-      <a
-          id="{{ type }}"
-          class="membership-choose-list-item btn btn-primary btn-lg"
-          href="{% url "billing_membership" membership_type=type %}"
-        >
-        <i class="bi
-          {% if type == 'ACADEMIC' %}bi-1-circle-fill
-          {% elif type == 'NORMAL' %}bi-2-circle-fill
-          {% elif type == 'BUSINESS' %}bi-3-circle-fill
+  {% if MEMBERSHIP_TYPES %}
+    {% for item in MEMBERSHIP_TYPES %}
+      {% with type=item.0 name=item.1 %}
+        <a id="{{ type }}"
+           class="membership-choose-list-item btn btn-primary btn-lg"
+           href="{% url "billing_membership" membership_type=type %}">
+          <i class="bi {% if type == 'ACADEMIC' %}bi-1-circle-fill {% elif type == 'NORMAL' %}bi-2-circle-fill {% elif type == 'BUSINESS' %}bi-3-circle-fill {% endif %} "></i>
+          {% if type == 'ACADEMIC' %}
+            Academic membership (€25 per year): For students, teachers, or other school or university employees
+          {% elif type == 'NORMAL' %}
+            Everyone else (€50 per year): For all other humans.
           {% endif %}
-        "></i>
-          {% if type == 'ACADEMIC' %}Academic membership (€25 per year): For students, teachers, or other school or university employees
-          {% elif type == 'NORMAL' %}Everyone else (€50 per year): For all other humans.
-          {% endif %}        
-      </a>
-    {% endwith %}
-  {% endfor %}
-<p>Business membership is not yet available, sorry.</p>
+        </a>
+      {% endwith %}
+    {% endfor %}
+  {% else %}
+    <p class="dimmed-info">Business membership is not yet available, sorry.</p>
+  {% endif %}
 </div>

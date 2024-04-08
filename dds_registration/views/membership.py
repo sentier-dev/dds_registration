@@ -85,7 +85,7 @@ def membership_application(request: HttpRequest):
 
     return render(
         request=request,
-        template_name="dds_registration/membership_start.html.django",
+        template_name="dds_registration/membership/membership_start.html.django",
         context={"form": form},
     )
 
@@ -95,7 +95,7 @@ def membership_application(request: HttpRequest):
 #     context = {
 #         "action": "membership_proceed_success",
 #     }
-#     return render(request, "dds_registration/membership_test.html.django", context)
+#     return render(request, "dds_registration/membership/membership_test.html.django", context)
 
 
 # def send_membership_registration_success_message(request: HttpRequest):
@@ -105,8 +105,8 @@ def membership_application(request: HttpRequest):
 #     TODO: Send different messages depending on the `payment_method`?
 #     """
 
-#     email_body_template = "dds_registration/membership_registration_new_success_message_body.txt"
-#     email_subject_template = "dds_registration/membership_registration_new_success_message_subject.txt"
+#     email_body_template = "dds_registration/membership/membership_registration_new_success_message_body.txt"
+#     email_subject_template = "dds_registration/membership/membership_registration_new_success_message_subject.txt"
 
 #     user = request.user
 
