@@ -28,8 +28,8 @@
 #     Send successful event registration cancellation message to the user
 #     """
 
-#     email_body_template = "dds_registration/event_registration_cancelled_message_body.txt"
-#     email_subject_template = "dds_registration/event_registration_cancelled_message_subject.txt"
+#     email_body_template = "dds_registration/event/event_registration_cancelled_message_body.txt"
+#     email_subject_template = "dds_registration/event/event_registration_cancelled_message_subject.txt"
 
 #     user = request.user
 

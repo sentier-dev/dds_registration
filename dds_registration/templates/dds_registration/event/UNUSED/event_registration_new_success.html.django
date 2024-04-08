@@ -1,6 +1,6 @@
 {# ex: set ft=htmldjango : #}
 <!--
-  @module profile.html.django
+  @module event_registration_new_success.html.django
   @changed 2024.03.12, 23:55
 -->
 
