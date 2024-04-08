@@ -213,8 +213,7 @@ class Payment(Model):
         if self.status == "OBSOLETE":
             return
         self.status == "OBSOLETE"
-        data = self.get_data()
-        user = User.objects.get(id=data["user"]["id"])
+        user = User.objects.get(id=self.data["user"]["id"])
         send_email(
             recipient_address=user.email,
             subject=f"Invoice #{self.invoice_no} is obsolete - please do not pay",
@@ -226,8 +225,7 @@ class Payment(Model):
         if self.status == "PAID":
             return
         self.status = "PAID"
-        data = self.get_data()
-        data["paid_date"] = date.today().strftime("%Y-%m-%d")
+        self.data["paid_date"] = date.today().strftime("%Y-%m-%d")
         if settings.SLACK_WEBHOOK:
             title = data["event"]["title"] if data["kind"] == "event" else "membership"
             requests.post(
@@ -253,46 +251,30 @@ class Payment(Model):
 
     @property
     def account(self):
-        data = self.get_data()
-        return payment_details_by_currency[data["currency"]]
+        return payment_details_by_currency[self.data["currency"]]
 
     @property
     def has_unpaid_invoice(self):
-        data = self.get_data()
-        return data["method"] == "INVOICE" and self.status != "PAID"
+        return self.data["method"] == "INVOICE" and self.status != "PAID"
 
     def items(self):
         """Adapt items format for events and membership"""
         pass
 
-    def get_data(self):
-        data = self.data
-        if isinstance(data, str):
-            # Parse json...
-            try:
-                data = json.loads(data)
-            except:
-                # TODO: Throw an exception?
-                data = {}
-        return data
-
     @property
     def payment_label(self):
         try:
-            data = self.get_data()
-            return self.METHOD_LABELS[data["method"]]
+            return self.METHOD_LABELS[self.data["method"]]
         except KeyError:
             return "No payment needed"
 
     @property
     def currency_label(self):
-        data = self.get_data()
-        return dict(site_supported_currencies).get(data["currency"], "")
+        return dict(site_supported_currencies).get(self.data["currency"], "")
 
     @property
     def title(self):
-        data = self.get_data()
-        if data["kind"] == "membership":
+        if self.data["kind"] == "membership":
             return ""
 
     def __str__(self):
@@ -305,8 +287,7 @@ class Payment(Model):
         return create_receipt_pdf_from_payment(self)
 
     def email_invoice(self):
-        data = self.get_data()
-        user = User.objects.get(id=data["user"]["id"])
+        user = User.objects.get(id=self.data["user"]["id"])
         if data["kind"] == "membership":
             subject = f"DdS Membership Invoice {self.invoice_no}"
             message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\nIf you have any questions, please contact events@d-d-s.ch."
@@ -322,8 +303,7 @@ class Payment(Model):
         )
 
     def email_receipt(self):
-        data = self.get_data()
-        user = User.objects.get(id=data["user"]["id"])
+        user = User.objects.get(id=self.data["user"]["id"])
         kind = "Membership" if data["kind"] == "membership" else "Event"
         user.email_user(
             subject=f"DdS {kind} Receipt {self.invoice_no}",
