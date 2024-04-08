@@ -8,7 +8,6 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dds_registration"
 authors = [
-  { name="Germain CHAZOT", email="g.chazot@gmail.com" },
   { name="Chris Mutel", email="cmutel@gmail.com" },
   { name="Igor Mikheev", email="lilliputten@gmail.com" }
 ]

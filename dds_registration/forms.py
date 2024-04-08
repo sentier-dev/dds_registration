@@ -36,8 +36,7 @@ class MembershipForm(forms.Form):
         required=True,
         label="Payment method",
         # See stylization in `src/assets/common/fix-django-forms.scss`, by option element' id.
-        widget=forms.RadioSelect(),
-        template_name="django/forms/widgets/radio3.html",
+        widget=forms.RadioSelect,
     )
     mailing_list = forms.BooleanField(
         initial=True, label="Send me the DdS newsletter, and emails about DdS events, courses, and online seminars"
@@ -69,7 +68,7 @@ class RegistrationForm(forms.Form):
         choices=Payment.METHODS,
         required=True,
         # See stylization in `src/assets/common/fix-django-forms.scss`, by option element' id.
-        widget=forms.RadioSelect(),
+        widget=forms.RadioSelect,
         label="Payment method",
         help_text="Choose something even if the event is free",
     )
