@@ -33,7 +33,7 @@ def event_registration(request: HttpRequest, event_code: str):
     if registration and registration.payment.status == "PAID":
         messages.error(
             request,
-            "Paid event registrations can't be edited manually; please either cancel and start again, or contact events@d-d-s.ch. Sorry for the inconvenience."
+            "Paid event registrations can't be edited manually; please either cancel and start again, or contact events@d-d-s.ch. Sorry for the inconvenience.",
         )
         return redirect("profile")
 
