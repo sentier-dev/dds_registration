@@ -31,7 +31,6 @@ def send_email(
     )
     if is_html:
         message.html_content = message
-        # TODO: Create and replace plain text message copy?
     else:
         message.plain_text_content = message
     if pdf:
