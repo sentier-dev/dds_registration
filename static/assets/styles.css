@@ -1,6 +1,6 @@
 /**
  * @module styles.scss
- * @changed 2024.03.30, 17:56
+ * @changed 2024.04.08, 19:38
  */
 /**
  * @module common.scss
@@ -64,6 +64,24 @@
  */
 :root {
   --bs-body-font-family: Roboto, Helvetica, Arial, sans-serif;
+}
+
+/**
+ * @module fix-django-forms.scss
+ * @changed 2024.04.08, 19:37
+ */
+/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
+ * - xs: 0
+ * - sm: 576px
+ * - md: 768px
+ * - lg: 992px
+ * - xl: 1200px
+ * - xxl: 1400px
+ */
+#div_id_payment_method .form-check {
+  display: inline-block;
+  margin-right: 16px;
+  float: left;
 }
 
 /**
@@ -557,30 +575,5 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.1rem 1rem;
-}
-
-/**
- * @module membership-choose-list.scss
- * @changed 2024.03.30, 17:55
- */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
- */
-.membership-choose-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-.membership-choose-list-item {
-  text-align: left;
-}
-.membership-choose-list-item > i {
-  display: inline-block;
-  margin-right: 8px;
 }
 /*# sourceMappingURL=styles.css.map */
