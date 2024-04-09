@@ -31,6 +31,10 @@ top_offset = 30  # Top offset should exceed the logo height
 font_size = 12
 
 
+def normalize_text(text: str) -> str:
+    return text.encode('utf-8', 'ignore').decode('utf-8').strip()
+
+
 def create_pdf(
     kind: str,
     client_name: str,
@@ -53,6 +57,12 @@ def create_pdf(
 
     # Create pdf...
     pdf = FPDF(unit="mm", format="A4")
+
+    pdf.add_font("NotoSans", style="", fname=BASE_DIR / "fonts" / "NotoSans-Regular.ttf", uni=True)
+    pdf.add_font("NotoSans", style="B", fname=BASE_DIR / "fonts" / "NotoSans-Bold.ttf", uni=True)
+    pdf.add_font("NotoSans", style="I", fname=BASE_DIR / "fonts" / "NotoSans-Italic.ttf", uni=True)
+    pdf.add_font("NotoSans", style="BI", fname=BASE_DIR / "fonts" / "NotoSans-BoldItalic.ttf", uni=True)
+
     pdf.set_title("{} {} ({})".format(kind.title(), invoice_number, client_name))
     pdf.set_margins(left=margin_size, top=margin_size, right=margin_size)
 
@@ -60,7 +70,7 @@ def create_pdf(
     page_width = pdf.epw
 
     pdf.add_page()
-    pdf.set_font("times", size=font_size)
+    pdf.set_font("NotoSans", size=font_size)
 
     # Get derived dimensions...
     pdf_font_size = pdf.font_size
@@ -77,11 +87,11 @@ def create_pdf(
 
     # Left (client) address column...
     pdf.set_xy(left_column_pos, margin_size + top_offset)
-    pdf.multi_cell(text=client_name, w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height)
+    pdf.multi_cell(text=normalize_text(client_name), w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height)
 
     pdf.set_y(pdf.get_y() + small_vertical_space)
     pdf.multi_cell(
-        text=client_address.strip(), w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
+        text=normalize_text(client_address), w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
     )
 
     left_stop_pos = pdf.get_y()
@@ -181,7 +191,7 @@ def create_pdf(
         )
         pdf.set_y(pdf.get_y() + tiny_vertical_space)
         pdf.multi_cell(
-            text=recipient_account.strip(),
+            text=recipient_account,
             markdown=True,
             w=page_width,
             align=Align.L,
@@ -193,8 +203,8 @@ def create_pdf(
     if extra:
         pdf.set_y(pdf.get_y() + large_vertical_space)
         pdf.multi_cell(
-            text="__{}__".format(extra),
-            markdown=True,
+            text=normalize_text(extra),
+            markdown=False,
             w=page_width,
             align=Align.L,
             new_x="LEFT",

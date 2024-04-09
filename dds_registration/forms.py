@@ -21,7 +21,7 @@ class MembershipForm(forms.Form):
     )
     address = forms.CharField(label="Address on invoice", widget=textAreaWidget, required=True)
     extra = forms.CharField(
-        label="Extra invoice text details, like reference or purchase order numbers",
+        label="Extra invoice text details, like reference or purchase order numbers. Support Latin, Cyrillic and Greek scripts, but not emojis.",
         widget=textAreaWidget,
         required=False,
     )
