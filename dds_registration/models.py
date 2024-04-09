@@ -4,7 +4,6 @@
 import random
 import string
 from datetime import date
-import json
 
 import requests
 from django.conf import settings
