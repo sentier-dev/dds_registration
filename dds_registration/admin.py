@@ -1,7 +1,11 @@
-from django.contrib import admin
+import zipfile
+from io import BytesIO
+
+from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Q
+from django.http import HttpResponse
 
 from .forms import (
     EventAdminForm,
@@ -190,12 +194,6 @@ class EventAdmin(admin.ModelAdmin):
 admin.site.register(Event, EventAdmin)
 
 
-@admin.action(description="Mark selected invoices paid")
-def mark_invoice_paid(modeladmin, request, queryset):
-    for obj in queryset:
-        obj.mark_paid()
-
-
 class PaymentAdmin(admin.ModelAdmin):
     form = PaymentAdminForm
     # TODO: Improve
@@ -211,21 +209,104 @@ class PaymentAdmin(admin.ModelAdmin):
         "created",
         "updated",
     ]
-    actions = [mark_invoice_paid]
+    actions = ["mark_invoice_paid", "email_invoices", "email_receipts", "download_invoices", "download_receipts"]
+
+    @admin.action(description="Mark selected invoices paid")
+    def mark_invoice_paid(self, request, queryset):
+        for obj in queryset:
+            obj.mark_paid()
+        self.message_user(
+            request,
+            f"{queryset.count()} invoices marked as paid",
+            messages.SUCCESS,
+        )
+
+    @admin.action(description="Email unpaid invoices to user")
+    def email_invoices(self, request, queryset):
+        qs = queryset.filter(status__in=("CREATED", "ISSUED"))
+        count = qs.count()
+
+        if not count:
+            self.message_user(
+                request,
+                "No unpaid invoices in queryset",
+                messages.ERROR,
+            )
+            return
+
+        for obj in qs:
+            obj.email_invoice()
+
+        self.message_user(
+            request,
+            f"{count} invoice(s) sent",
+            messages.SUCCESS,
+        )
+
+    @admin.action(description="Download unpaid invoices")
+    def download_invoices(self, request, queryset):
+        qs = queryset.filter(status__in=("CREATED", "ISSUED"))
+
+        if not qs.count():
+            self.message_user(
+                request,
+                "No unpaid invoices in queryset",
+                messages.ERROR,
+            )
+            return
+
+        outfile = BytesIO()
+
+        with zipfile.ZipFile(outfile, "w") as zf:
+            for obj in qs:
+                zf.writestr(f"DdS receipt {obj.invoice_no}.pdf", obj.invoice_pdf().output())
+
+        response = HttpResponse(outfile.getvalue(), content_type="application/octet-stream")
+        response["Content-Disposition"] = "attachment; filename=invoices.zip"
+        return response
+
+    @admin.action(description="Email receipts for completed payments to user")
+    def email_receipts(self, request, queryset):
+        qs = queryset.filter(status="PAID")
+        count = qs.count()
+
+        if not count:
+            self.message_user(
+                request,
+                "No completed payments in queryset",
+                messages.ERROR,
+            )
+            return
+
+        for obj in queryset:
+            obj.email_receipt()
+        self.message_user(
+            request,
+            f"{count} receipt(s) sent",
+            messages.SUCCESS,
+        )
+
+    @admin.action(description="Download completed payment receipts")
+    def download_receipts(self, request, queryset):
+        qs = queryset.filter(status="PAID")
+
+        if not qs.count():
+            self.message_user(
+                request,
+                "No completed payments in queryset",
+                messages.ERROR,
+            )
+            return
+
+        outfile = BytesIO()
+
+        with zipfile.ZipFile(outfile, "w") as zf:
+            for obj in qs:
+                zf.writestr(f"DdS receipt {obj.invoice_no}.pdf", obj.receipt_pdf().output())
+
+        response = HttpResponse(outfile.getvalue(), content_type="application/octet-stream")
+        response["Content-Disposition"] = "attachment; filename=invoices.zip"
+        return response
 
 
 admin.site.register(Payment, PaymentAdmin)
-
-
-# Issue #63: Temporarily unused
-#  class DiscountCodeAdmin(admin.ModelAdmin):
-#      form = DiscountCodeAdminForm
-#      list_display = [
-#          "event",
-#          "code",
-#          "percentage",
-#          "absolute",
-#      ]
-#
-#
-#  admin.site.register(DiscountCode, DiscountCodeAdmin)
