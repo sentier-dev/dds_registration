@@ -5,6 +5,7 @@ import random
 import re
 import string
 from pathlib import Path
+import sys
 
 import environ
 
@@ -67,13 +68,18 @@ SECRETS = [
     (STRIPE_SECRET_KEY, "STRIPE_SECRET_KEY"),
 ]
 
-for key, label in SECRETS:
-    if not key:
-        if DEV and key in (SECRET_KEY, REGISTRATION_SALT):
-            key = random_string()
-        else:
-            error_text = f"Error: Environment configuration variable {label} missing"
-            raise Exception(error_text)
+# Omit secrets check for if the app was run with `manage.py` (and not as `runserver`)
+RUNNING_DEVSERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
+RUNNING_MANAGE_PY = len(sys.argv) > 0 and sys.argv[0] == "manage.py"
+CHECK_SECRETS = not RUNNING_MANAGE_PY or RUNNING_DEVSERVER
+if CHECK_SECRETS:
+    for key, label in SECRETS:
+        if not key:
+            if DEV and key in (SECRET_KEY, REGISTRATION_SALT):
+                key = random_string()
+            else:
+                error_text = f"Error: Environment configuration variable {label} missing"
+                raise Exception(error_text)
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
