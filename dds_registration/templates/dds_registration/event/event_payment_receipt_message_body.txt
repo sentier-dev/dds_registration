@@ -9,7 +9,7 @@ You have registered and already paid for {{ event.title }}!
 
 {% endif %}The payment option you have chosen: {% with option=registration.option %}{{ option.item }}{% if option.price %} ({% if option.currency %}{{ option.currency }} {% endif %}{{ option.price }}){% endif %}{% endwith %}.
 
-{% endcomment %}Your invoice is attached, but can also be download anytime at {{ scheme }}://{{site.domain}}{% url 'billing_event_invoice_download' event_code=event.code %}.
+{% endcomment %}Your invoice is attached, but can also be download anytime at {{ scheme }}://{{ site.domain }}{% url 'billing_event_invoice_download' event_code=event.code %}.
 
 If you have questions or comments, you can reach us at {{ settings.DEFAULT_FROM_EMAIL }}.
 

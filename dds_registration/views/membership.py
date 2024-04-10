@@ -69,7 +69,7 @@ def membership_application(request: HttpRequest):
             if payment.data["method"] == "INVOICE":
                 payment.status = "ISSUED"
                 payment.save()
-                payment.email_invoice()
+                payment.email_invoice(request)
                 messages.success(
                     request,
                     f"Your membership has been created! An invoice has been sent to {request.user.email} from events@d-d-s.ch. The invoice can also be downloaded from your profile. Please note your membership is not in force until the invoice is paid.",

@@ -1,0 +1,14 @@
+DdS Membership Invoice {{ payment.invoice_no }}
+
+
+Thanks for signing up for Départ de Sentier membership!
+
+Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.
+
+Your membership will run until December 31st, {{ user.membership.until }} (Don't worry, you will get a reminder to renew for another year :).
+
+Please find attached the membership invoice. Your membership is not in force until the bank transfer is received.
+
+You can change your invoice details here: {{ scheme }}://{{ site.domain }}{% url 'membership_application' %}.
+
+If you have any questions, please contact {{ settings.DEFAULT_CONTACT_EMAIL }}.

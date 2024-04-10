@@ -42,7 +42,7 @@ def payment_stripe(request: HttpRequest, payment_id: int):
         payment.data["currency"], stripe_amount, request.user.email, {"payment_id": payment.id}
     )
 
-    template = "dds_registration/billing/stripe_payment.html.django"
+    template = "dds_registration/payment/stripe_payment.html.django"
 
     try:
         membership = Membership.objects.get(user=request.user)
@@ -78,7 +78,7 @@ def payment_stripe_success(request: HttpRequest, payment_id: int):
         return redirect("profile")
 
     payment.data["price"] = payment.data.pop("stripe_charge_in_progress")
-    payment.mark_paid()
+    payment.mark_paid(request)
 
     if payment.data["kind"] == "membership":
         messages.success(request, "Awesome, your membership is paid, and you are good to go!")

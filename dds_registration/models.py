@@ -4,20 +4,25 @@
 import random
 import string
 from datetime import date
-
 import requests
+
+from fpdf import FPDF
+
+from django.contrib.sites.models import Site
+from django.http import HttpRequest
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Model, Q, QuerySet
 from django.urls import reverse
-from fpdf import FPDF
+from django.template.loader import render_to_string
 
 from dds_registration.core.constants.payments import (
     site_default_currency,
     site_supported_currencies,
 )
+from .core.helpers.emails import parse_email_subject_and_content
 
 from .core.constants.date_time_formats import dateFormat
 from .core.constants.payments import currency_emojis, payment_details_by_currency
@@ -220,7 +225,7 @@ class Payment(Model):
         )
         self.save()
 
-    def mark_paid(self):
+    def mark_paid(self, request: HttpRequest):
         if self.status == "PAID":
             return
         self.status = "PAID"
@@ -235,7 +240,7 @@ class Payment(Model):
                     )
                 },
             )
-        self.email_receipt()
+        self.email_receipt(request)
         self.save()
 
     @property
@@ -285,16 +290,27 @@ class Payment(Model):
     def receipt_pdf(self):
         return create_receipt_pdf_from_payment(self)
 
-    def email_invoice(self):
+    def email_invoice(self, request: HttpRequest):
         user = User.objects.get(id=self.data["user"]["id"])
-        # TODO: Issue #149: To extract these (and all other hardcoded here, in `send_email` methods?) texts to template files, with substiting names, urls and emails from settings or preferences values?
+        context = {
+            "site": Site.objects.get_current(),
+            "scheme": "https" if request.is_secure() else "http",
+            "payment": self,
+            "user": user,
+        }
         if self.data["kind"] == "membership":
-            subject = f"DdS Membership Invoice {self.invoice_no}"
-            message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\n\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\n\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\n\nYou can change your invoice details here: https://events.d-d-s.ch{reverse('membership_application')}.\n\nIf you have any questions, please contact events@d-d-s.ch."
+            email_template = "dds_registration/payment/emails/invoice_membership.txt.django"
         else:
-            event = Event.objects.get(id=self.data["event"]["id"])
-            subject = f"DdS Event {event.title} Registration Invoice {self.invoice_no}"
-            message = f"Thanks for registering for {event.title}! We look forward to seeing your, in person or virtually.\n\nDépart de Sentier runs its events and schools on a cost-neutral basis - i.e. we don't make a profit off the registration fees. They are used for catering, room, hotel, and equipment rental, AV hosting and technician fees, and guest speaker costs. We literally could not run this event without your support.\n\nYou can view your registration status and apply for membership at https://events.d-d-s.ch/profile.\n\nPlease find attached the registration invoice. Your registration is not finalized until the bank transfer is received.\n\nYou can change your invoice details here: https://events.d-d-s.ch{reverse('event_registration', args=(event.code,))}.\n\nIf you have any questions, please contact events@d-d-s.ch."
+            context["event"] = Event.objects.get(id=self.data["event"]["id"])
+            email_template = "dds_registration/payment/emails/invoice_membership.txt.django"
+        # Parse email message template
+        text = render_to_string(
+            template_name=email_template,
+            context=context,
+            request=request,
+        )
+        # Extract a subject and a message from the template
+        [subject, message] = parse_email_subject_and_content(text)
         user.email_user(
             subject=subject,
             message=message,
@@ -302,12 +318,27 @@ class Payment(Model):
             attachment_name=f"DdS Invoice {self.invoice_no}.pdf",
         )
 
-    def email_receipt(self):
+    def email_receipt(self, request: HttpRequest):
         user = User.objects.get(id=self.data["user"]["id"])
-        kind = "Membership" if self.data["kind"] == "membership" else "Event"
+        context = {
+            "kind": "Membership" if self.data["kind"] == "membership" else "Event",
+            "site": Site.objects.get_current(),
+            "scheme": "https" if request.is_secure() else "http",
+            "payment": self,
+            "user": user,
+        }
+        email_template = "dds_registration/payment/emails/receipt.txt.django"
+        # Parse email message template
+        text = render_to_string(
+            template_name=email_template,
+            context=context,
+            request=request,
+        )
+        # Extract a subject and a message from the template
+        [subject, message] = parse_email_subject_and_content(text)
         user.email_user(
-            subject=f"DdS {kind} Receipt {self.invoice_no}",
-            message="Thanks! A receipt for your event or membership payment is attached. You can always find more information about your item at your your profile: https://events.d-d-s.ch/profile.\n\nWe really appreciate your support. If you have any questions, please contact events@d-d-s.ch.",
+            subject=subject,
+            message=message,
             attachment_content=self.receipt_pdf(),
             attachment_name=f"DdS receipt {self.invoice_no}.pdf",
         )

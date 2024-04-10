@@ -1,0 +1,12 @@
+DdS {{ kind }} Receipt {{ payment.invoice_no }}
+
+
+Thanks!
+
+A receipt for your event or membership payment is attached.
+
+You can always find more information about your item at your your profile: {{ scheme }}://{{ site.domain }}{% url 'profile' %}.
+
+We really appreciate your support.
+
+If you have any questions, please contact {{ settings.DEFAULT_CONTACT_EMAIL }}.

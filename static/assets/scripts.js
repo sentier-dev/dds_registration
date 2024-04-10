@@ -103,10 +103,5 @@ define("stripe-init/stripe_payment_intents_support", ["require", "exports"], fun
     }
     exports.startStripeElementsForm = startStripeElementsForm;
 });
-/**
- * @module test.ts
- * @changed 2024.04.04, 16:19
- */
-// console.log('Test', window);
 
 //# sourceMappingURL=scripts.js.map

@@ -6,14 +6,6 @@
  * @module common.scss
  * @changed 2024.03.08, 12:00
  */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
- */
 .item-label,
 .dimmed-info {
   opacity: 0.5;
@@ -36,14 +28,6 @@
  * @module forms.scss
  * @changed 2024.03.08, 12:00
  */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
- */
 .asteriskField {
   display: inline-block;
   margin-left: 4px;
@@ -54,47 +38,13 @@
  * @module customize.scss
  * @changed 2024.03.11, 13:52
  */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
- */
 :root {
   --bs-body-font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
 /**
- * @module fix-django-forms.scss
- * @changed 2024.04.08, 19:37
- */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
- */
-#div_id_payment_method .form-check {
-  display: inline-block;
-  margin-right: 16px;
-  float: left;
-}
-
-/**
  * @module body
  * @changed 2024.03.08, 13:30
- */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
  */
 body {
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
@@ -110,14 +60,6 @@ body {
 /**
  * @module bootstrap-theme-fixes
  * @changed 2024.04.02, 16:21
- */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
  */
 :root {
   --bs-primary-rgb: 68, 136, 102;
@@ -214,14 +156,6 @@ body {
 /**
  * @module page-header-navbar.scss
  * @changed 2024.03.08, 12:00
- */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
  */
 .page-header-navbar {
   padding: 0;
@@ -338,14 +272,6 @@ body {
  * @module main-page-splash
  * @changed 2024.03.08, 17:06
  */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
- */
 .main-page-splash {
   background-color: #375;
   color: #fff;
@@ -378,14 +304,6 @@ body {
 /**
  * @module membership-splash
  * @changed 2024.03.08, 17:06
- */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
  */
 .membership-splash {
   overflow: hidden;
@@ -498,14 +416,6 @@ body {
  * @module events-list-table.scss
  * @changed 2024.03.21, 16:50
  */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
- */
 .events-list-table {
   /*
   .col-registration
@@ -543,14 +453,6 @@ body {
 /**
  * @module events-list.scss
  * @changed 2024.03.18, 00:57
- */
-/* Breakpoints list, according to `static/bootstrap-5.3.2-src/scss/_variables.scss`:
- * - xs: 0
- * - sm: 576px
- * - md: 768px
- * - lg: 992px
- * - xl: 1200px
- * - xxl: 1400px
  */
 .events-list-block {
   display: flex;
