@@ -1,0 +1,15 @@
+DdS Event {{ event.title }} Registration Invoice {{ payment.invoice_no }}
+
+
+Thanks for registering for {{ event.title }}! We look forward to seeing your, in person or virtually.
+
+Départ de Sentier runs its events and schools on a cost-neutral basis - i.e. we don't make a profit off the registration fees. They are used for catering, room, hotel, and equipment rental, AV hosting and technician fees, and guest speaker costs. We literally could not run this event without your support.
+
+You can view your registration status and apply for membership at {{ scheme }}://{{ site.domain }}{% url 'profile' %}
+
+Please find attached the registration invoice. Your registration is not finalized until the bank transfer is received.
+
+You can change your invoice details here: {{ scheme }}://{{ site.domain }}{% url 'event_registration' event_code=event.code %}.
+
+If you have any questions, please contact {{ settings.DEFAULT_CONTACT_EMAIL }}.
+

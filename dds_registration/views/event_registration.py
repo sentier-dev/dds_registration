@@ -101,7 +101,7 @@ def event_registration(request: HttpRequest, event_code: str):
             registration.save()
 
             if payment.data["method"] == "INVOICE":
-                payment.email_invoice()
+                payment.email_invoice(request)
                 payment.status = "ISSUED"
                 payment.save()
                 messages.success(

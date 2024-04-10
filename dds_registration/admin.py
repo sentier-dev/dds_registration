@@ -4,8 +4,8 @@ from io import BytesIO
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.db.models import Q
-from django.http import HttpResponse
+from django.db.models import Q, QuerySet
+from django.http import HttpRequest, HttpResponse
 
 from .forms import (
     EventAdminForm,
@@ -42,7 +42,7 @@ class IsRegularUserFilter(SimpleListFilter):
             ("0", "No"),
         )
 
-    def queryset(self, request, queryset):
+    def queryset(self, request: HttpRequest, queryset: QuerySet):
         if self.value() == "1":
             return queryset.filter(is_staff=False, is_superuser=False)
         if self.value() == "0":
@@ -212,9 +212,9 @@ class PaymentAdmin(admin.ModelAdmin):
     actions = ["mark_invoice_paid", "email_invoices", "email_receipts", "download_invoices", "download_receipts"]
 
     @admin.action(description="Mark selected invoices paid")
-    def mark_invoice_paid(self, request, queryset):
+    def mark_invoice_paid(self, request: HttpRequest, queryset: QuerySet):
         for obj in queryset:
-            obj.mark_paid()
+            obj.mark_paid(request)
         self.message_user(
             request,
             f"{queryset.count()} invoices marked as paid",
@@ -222,7 +222,7 @@ class PaymentAdmin(admin.ModelAdmin):
         )
 
     @admin.action(description="Email unpaid invoices to user")
-    def email_invoices(self, request, queryset):
+    def email_invoices(self, request: HttpRequest, queryset: QuerySet):
         qs = queryset.filter(status__in=("CREATED", "ISSUED"))
         count = qs.count()
 
@@ -235,7 +235,7 @@ class PaymentAdmin(admin.ModelAdmin):
             return
 
         for obj in qs:
-            obj.email_invoice()
+            obj.email_invoice(request)
 
         self.message_user(
             request,
@@ -244,7 +244,7 @@ class PaymentAdmin(admin.ModelAdmin):
         )
 
     @admin.action(description="Download unpaid invoices")
-    def download_invoices(self, request, queryset):
+    def download_invoices(self, request: HttpRequest, queryset: QuerySet):
         qs = queryset.filter(status__in=("CREATED", "ISSUED"))
 
         if not qs.count():
@@ -266,7 +266,7 @@ class PaymentAdmin(admin.ModelAdmin):
         return response
 
     @admin.action(description="Email receipts for completed payments to user")
-    def email_receipts(self, request, queryset):
+    def email_receipts(self, request: HttpRequest, queryset):
         qs = queryset.filter(status="PAID")
         count = qs.count()
 
@@ -279,7 +279,7 @@ class PaymentAdmin(admin.ModelAdmin):
             return
 
         for obj in queryset:
-            obj.email_receipt()
+            obj.email_receipt(request)
         self.message_user(
             request,
             f"{count} receipt(s) sent",
@@ -287,7 +287,7 @@ class PaymentAdmin(admin.ModelAdmin):
         )
 
     @admin.action(description="Download completed payment receipts")
-    def download_receipts(self, request, queryset):
+    def download_receipts(self, request: HttpRequest, queryset: QuerySet):
         qs = queryset.filter(status="PAID")
 
         if not qs.count():
