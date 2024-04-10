@@ -292,28 +292,20 @@ class Payment(Model):
 
     def email_invoice(self, request: HttpRequest):
         user = User.objects.get(id=self.data["user"]["id"])
-        # TODO: Issue #149: To extract these (and all other hardcoded here, in `send_email` methods?) texts to template files, with substiting names, urls and emails from settings or preferences values?
-        scheme = "https" if self.request.is_secure() else "http"
+        scheme = "https" if request.is_secure() else "http"
         site = Site.objects.get_current()
         context = {
-                "site": site,
-                "scheme": scheme,
-                "payment": self,
-                "user": user,
+            "site": site,
+            "scheme": scheme,
+            "payment": self,
+            "user": user,
         }
         if self.data["kind"] == "membership":
             email_template = "dds_registration/payment/emails/invoice_membership.txt.django"
-            #  text = f"""
-            #  DdS Membership Invoice {self.invoice_no}
-            #  Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\n\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\n\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\n\nYou can change your invoice details here: https://events.d-d-s.ch{reverse('membership_application')}.\n\nIf you have any questions, please contact events@d-d-s.ch.
-            #  """
-            #  subject = f"DdS Membership Invoice {self.invoice_no}"
-            #  message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\n\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\n\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\n\nYou can change your invoice details here: https://events.d-d-s.ch{reverse('membership_application')}.\n\nIf you have any questions, please contact events@d-d-s.ch."
         else:
-            event = context["event"] = Event.objects.get(id=self.data["event"]["id"])
+            context["event"] = Event.objects.get(id=self.data["event"]["id"])
             email_template = "dds_registration/payment/emails/invoice_membership.txt.django"
-            #  subject = f"DdS Event {event.title} Registration Invoice {self.invoice_no}"
-            #  message = f"Thanks for registering for {event.title}! We look forward to seeing your, in person or virtually.\n\nDépart de Sentier runs its events and schools on a cost-neutral basis - i.e. we don't make a profit off the registration fees. They are used for catering, room, hotel, and equipment rental, AV hosting and technician fees, and guest speaker costs. We literally could not run this event without your support.\n\nYou can view your registration status and apply for membership at https://events.d-d-s.ch/profile.\n\nPlease find attached the registration invoice. Your registration is not finalized until the bank transfer is received.\n\nYou can change your invoice details here: https://events.d-d-s.ch{reverse('event_registration', args=(event.code,))}.\n\nIf you have any questions, please contact events@d-d-s.ch."
+        # Parse email message template
         text = render_to_string(
             template_name=email_template,
             context=context,

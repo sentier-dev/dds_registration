@@ -9,6 +9,6 @@ Your membership will run until December 31st, {{ user.membership.until }} (Don't
 
 Please find attached the membership invoice. Your membership is not in force until the bank transfer is received.
 
-You can change your invoice details here: {{ scheme }}://{{ site.domain }}{{ % url 'membership_application' % }}.
+You can change your invoice details here: {{ scheme }}://{{ site.domain }}{% url 'membership_application' %}.
 
 If you have any questions, please contact {{ settings.DEFAULT_CONTACT_EMAIL }}.
