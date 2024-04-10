@@ -292,11 +292,9 @@ class Payment(Model):
 
     def email_invoice(self, request: HttpRequest):
         user = User.objects.get(id=self.data["user"]["id"])
-        scheme = "https" if request.is_secure() else "http"
-        site = Site.objects.get_current()
         context = {
-            "site": site,
-            "scheme": scheme,
+            "site": Site.objects.get_current(),
+            "scheme": "https" if request.is_secure() else "http",
             "payment": self,
             "user": user,
         }
@@ -322,10 +320,25 @@ class Payment(Model):
 
     def email_receipt(self, request: HttpRequest):
         user = User.objects.get(id=self.data["user"]["id"])
-        kind = "Membership" if self.data["kind"] == "membership" else "Event"
+        context = {
+            "kind": "Membership" if self.data["kind"] == "membership" else "Event",
+            "site": Site.objects.get_current(),
+            "scheme": "https" if request.is_secure() else "http",
+            "payment": self,
+            "user": user,
+        }
+        email_template = "dds_registration/payment/emails/receipt.txt.django"
+        # Parse email message template
+        text = render_to_string(
+            template_name=email_template,
+            context=context,
+            request=request,
+        )
+        # Extract a subject and a message from the template
+        [subject, message] = parse_email_subject_and_content(text)
         user.email_user(
-            subject=f"DdS {kind} Receipt {self.invoice_no}",
-            message="Thanks! A receipt for your event or membership payment is attached. You can always find more information about your item at your your profile: https://events.d-d-s.ch/profile.\n\nWe really appreciate your support. If you have any questions, please contact events@d-d-s.ch.",
+            subject=subject,
+            message=message,
             attachment_content=self.receipt_pdf(),
             attachment_name=f"DdS receipt {self.invoice_no}.pdf",
         )
