@@ -42,7 +42,7 @@ def payment_stripe(request: HttpRequest, payment_id: int):
         payment.data["currency"], stripe_amount, request.user.email, {"payment_id": payment.id}
     )
 
-    template = "dds_registration/billing/stripe_payment.html.django"
+    template = "dds_registration/payment/stripe_payment.html.django"
 
     try:
         membership = Membership.objects.get(user=request.user)
