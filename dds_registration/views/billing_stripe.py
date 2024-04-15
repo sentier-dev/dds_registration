@@ -82,11 +82,11 @@ def payment_stripe_success(request: HttpRequest, payment_id: int):
 
     if payment.data["kind"] == "membership":
         messages.success(request, "Awesome, your membership is paid, and you are good to go!")
-        reg = Registration.objects.get(id=payment.data["registration"]["id"])
-        reg.status = "REGISTERED"
-        reg.save()
     else:
         messages.success(
             request, f"Awesome, your registration for {payment.data['event']['title']} is paid, and you are good to go!"
         )
+        reg = Registration.objects.get(id=payment.data["registration"]["id"])
+        reg.status = "REGISTERED"
+        reg.save()
     return redirect("profile")
