@@ -259,10 +259,10 @@ class PaymentAdmin(admin.ModelAdmin):
 
         with zipfile.ZipFile(outfile, "w") as zf:
             for obj in qs:
-                zf.writestr(f"DdS receipt {obj.invoice_no}.pdf", obj.invoice_pdf().output())
+                zf.writestr(f"DdS invoice {obj.invoice_no}.pdf", obj.invoice_pdf().output())
 
         response = HttpResponse(outfile.getvalue(), content_type="application/octet-stream")
-        response["Content-Disposition"] = "attachment; filename=invoices.zip"
+        response["Content-Disposition"] = "attachment; filename=dds-invoices.zip"
         return response
 
     @admin.action(description="Email receipts for completed payments to user")
@@ -305,7 +305,7 @@ class PaymentAdmin(admin.ModelAdmin):
                 zf.writestr(f"DdS receipt {obj.invoice_no}.pdf", obj.receipt_pdf().output())
 
         response = HttpResponse(outfile.getvalue(), content_type="application/octet-stream")
-        response["Content-Disposition"] = "attachment; filename=invoices.zip"
+        response["Content-Disposition"] = "attachment; filename=dds-receipts.zip"
         return response
 
 
