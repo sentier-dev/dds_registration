@@ -466,9 +466,9 @@ class RegistrationOption(Model):
 
 class Message(Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    subject = models.TextField(blank=True, null=True)
     message = models.TextField()
     emailed = models.BooleanField(default=False)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
