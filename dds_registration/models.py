@@ -480,6 +480,20 @@ class Message(Model):
         info = ", ".join(filter(None, map(str, items)))
         return info
 
+    def send_email(self):
+        if self.emailed:
+            return 0
+
+        qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, event__id=self.event_id)
+        for obj in qs:
+            obj.user.email_user(
+                subject=self.subject or f"Update for DdS Event {self.event.title}",
+                message=self.message
+            )
+        self.emailed = True
+        self.save()
+        return qs.count()
+
 
 class Registration(Model):
     REGISTRATION_STATUS = [

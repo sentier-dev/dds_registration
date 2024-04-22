@@ -103,6 +103,25 @@ class UserAdmin(BaseUserAdmin):
 admin.site.register(User, UserAdmin)
 
 
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    date_hierarchy = "created_at"
+    readonly_fields = ["emailed"]
+    list_filter = ["event"]
+    actions = ["email_registered_users"]
+
+    @admin.action(description="Email message(s) to registered users")
+    def email_registered_users(self, request, queryset):
+        count = 0
+        for obj in queryset:
+            count += obj.send_email()
+        self.message_user(
+            request,
+            f"Sent {queryset.count()} messages to {count} users",
+            messages.SUCCESS,
+        )
+
+
 class MembershipAdmin(admin.ModelAdmin):
     list_display = [
         "user",
