@@ -6,7 +6,10 @@ from django.http import Http404, HttpRequest
 from django.shortcuts import redirect, render
 
 from ..models import Membership, Payment, Registration
-from .helpers.stripe_amounts import convert_from_stripe_units, get_stripe_amount_for_currency
+from .helpers.stripe_amounts import (
+    convert_from_stripe_units,
+    get_stripe_amount_for_currency,
+)
 from .helpers.stripe_payments import get_stripe_client_secret
 
 

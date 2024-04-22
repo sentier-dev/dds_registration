@@ -137,7 +137,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         "updated_at",
     ]
     search_fields = [
-        'event',
+        "event",
     ]
     list_display = [
         "user_column",

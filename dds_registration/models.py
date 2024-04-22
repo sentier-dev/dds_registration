@@ -207,7 +207,13 @@ class Payment(Model):
     data = models.JSONField(help_text="Read-only JSON object", default=dict)
 
     def __str__(self):
-        return "Payment {} | {} {:.2f} | {} | {}".format(self.id, self.data.get("currency", ""), self.data.get("price"), self.get_status_display(), self.data.get("method", ""))
+        return "Payment {} | {} {:.2f} | {} | {}".format(
+            self.id,
+            self.data.get("currency", ""),
+            self.data.get("price"),
+            self.get_status_display(),
+            self.data.get("method", ""),
+        )
 
     def mark_obsolete(self):
         """Mark a payment obsolete.
@@ -483,8 +489,7 @@ class Message(Model):
         qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, event__id=self.event_id)
         for obj in qs:
             obj.user.email_user(
-                subject=self.subject or f"Update for DdS Event {self.event.title}",
-                message=self.message
+                subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
             )
         self.emailed = True
         self.save()

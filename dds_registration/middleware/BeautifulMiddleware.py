@@ -1,4 +1,5 @@
 import re
+
 from bs4 import BeautifulSoup
 from django.conf import settings
 

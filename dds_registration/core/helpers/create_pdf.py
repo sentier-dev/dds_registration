@@ -32,7 +32,7 @@ font_size = 12
 
 
 def normalize_text(text: str) -> str:
-    return text.encode('utf-8', 'ignore').decode('utf-8').strip()
+    return text.encode("utf-8", "ignore").decode("utf-8").strip()
 
 
 def create_pdf(
@@ -87,11 +87,18 @@ def create_pdf(
 
     # Left (client) address column...
     pdf.set_xy(left_column_pos, margin_size + top_offset)
-    pdf.multi_cell(text=normalize_text(client_name), w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height)
+    pdf.multi_cell(
+        text=normalize_text(client_name), w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
+    )
 
     pdf.set_y(pdf.get_y() + small_vertical_space)
     pdf.multi_cell(
-        text=normalize_text(client_address), w=left_column_width, align=Align.L, new_x="LEFT", new_y="NEXT", h=line_height
+        text=normalize_text(client_address),
+        w=left_column_width,
+        align=Align.L,
+        new_x="LEFT",
+        new_y="NEXT",
+        h=line_height,
     )
 
     left_stop_pos = pdf.get_y()
