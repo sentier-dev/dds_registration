@@ -474,13 +474,7 @@ class Message(Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        items = [
-            self.event,
-            self.created_at.strftime(dateFormat) if self.created_at else None,
-            "emailed" if self.emailed else None,
-        ]
-        info = ", ".join(filter(None, map(str, items)))
-        return info
+        return "{}: {} ({})".format(self.event, self.subject[:50], "sent" if self.emailed else "not sent")
 
     def send_email(self):
         if self.emailed:
