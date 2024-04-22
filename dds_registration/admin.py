@@ -23,10 +23,6 @@ from .models import (
     User,
 )
 
-# Default registrations (without modifications)
-#  admin.site.register(GroupDiscount)
-admin.site.register(Message)
-
 
 class IsRegularUserFilter(SimpleListFilter):
     """
@@ -122,6 +118,7 @@ class MessageAdmin(admin.ModelAdmin):
         )
 
 
+@admin.register(Membership)
 class MembershipAdmin(admin.ModelAdmin):
     list_display = [
         "user",
@@ -133,26 +130,18 @@ class MembershipAdmin(admin.ModelAdmin):
     ]
 
 
-admin.site.register(Membership, MembershipAdmin)
-
-
+@admin.register(Registration)
 class RegistrationAdmin(admin.ModelAdmin):
-    # NOTE: Trying to show non-editable fields (this approach doesn't work)
     readonly_fields = [
-        #  "invoice_no",
         "created_at",
         "updated_at",
     ]
     search_fields = [
-        # TODO?
-        #  'user',  # Unsupported lookup 'icontains' for ForeignKey or join on the field not permitted.
-        #  'event',
-        #  'options',  # Unsupported lookup 'icontains' for ForeignKey or join on the field not permitted.
+        'event',
     ]
-
     list_display = [
         "user_column",
-        "payment",
+        "payment_column",
         "event",
         "option",
         "status",
@@ -160,17 +149,20 @@ class RegistrationAdmin(admin.ModelAdmin):
     ]
 
     def user_column(self, reg):
-        user = reg.user
-        name = user.full_name_with_email
-        return name
+        return reg.user.full_name_with_email
 
     user_column.short_description = "User"
     user_column.admin_order_field = "user"
 
+    def payment_column(self, reg):
+        print(reg.payment)
+        return str(reg.payment) if reg.payment else "--"
 
-admin.site.register(Registration, RegistrationAdmin)
+    payment_column.short_description = "Payment"
+    payment_column.admin_order_field = "payment"
 
 
+@admin.register(RegistrationOption)
 class RegistrationOptionAdmin(admin.ModelAdmin):
     form = RegistrationOptionAdminForm
     search_fields = [
@@ -185,9 +177,7 @@ class RegistrationOptionAdmin(admin.ModelAdmin):
     ]
 
 
-admin.site.register(RegistrationOption, RegistrationOptionAdmin)
-
-
+@admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     # TODO: Show linked options (in columns and in the form)?
     readonly_fields = [
@@ -201,8 +191,8 @@ class EventAdmin(admin.ModelAdmin):
     list_display = [
         "title",
         "code",
+        "active_registration_count",
         "max_participants",
-        #  "currency",
         "registration_open",
         "registration_close",
         "public",
@@ -210,9 +200,7 @@ class EventAdmin(admin.ModelAdmin):
     ]
 
 
-admin.site.register(Event, EventAdmin)
-
-
+@admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     form = PaymentAdminForm
     # TODO: Improve
@@ -326,6 +314,3 @@ class PaymentAdmin(admin.ModelAdmin):
         response = HttpResponse(outfile.getvalue(), content_type="application/octet-stream")
         response["Content-Disposition"] = "attachment; filename=dds-receipts.zip"
         return response
-
-
-admin.site.register(Payment, PaymentAdmin)

@@ -7,6 +7,7 @@ from datetime import date
 
 import requests
 from django.conf import settings
+from django.contrib import admin
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -205,6 +206,9 @@ class Payment(Model):
     # }
     data = models.JSONField(help_text="Read-only JSON object", default=dict)
 
+    def __str__(self):
+        return "Payment {} | {} {:.2f} | {} | {}".format(self.id, self.data.get("currency", ""), self.data.get("price"), self.get_status_display(), self.data.get("method", ""))
+
     def mark_obsolete(self):
         """Mark a payment obsolete.
 
@@ -275,9 +279,6 @@ class Payment(Model):
     def title(self):
         if self.data["kind"] == "membership":
             return ""
-
-    def __str__(self):
-        return f"Payment {self.id}"
 
     def invoice_pdf(self):
         return create_invoice_pdf_from_payment(self)
@@ -413,6 +414,7 @@ class Event(Model):
         )
 
     @property
+    @admin.display(description="Registration Count")
     def active_registration_count(self):
         return self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY).count()
 
