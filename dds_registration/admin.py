@@ -147,6 +147,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         "status",
         "created_at",
     ]
+    actions = ["accept_user"]
 
     def user_column(self, reg):
         return reg.user.full_name_with_email
@@ -160,6 +161,16 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     payment_column.short_description = "Payment"
     payment_column.admin_order_field = "payment"
+
+    @admin.action(description="Accept user(s) and send acceptance email")
+    def accept_user(self, request, queryset):
+        for obj in queryset:
+            obj.complete_registration()
+        self.message_user(
+            request,
+            f"{queryset.count()} users accepted and emailed",
+            messages.SUCCESS,
+        )
 
 
 @admin.register(RegistrationOption)
