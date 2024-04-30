@@ -43,6 +43,10 @@ class MembershipForm(forms.Form):
     )
 
 
+class FreeRegistrationForm(forms.Form):
+    send_update_emails = forms.BooleanField(label="Send me emails about this event", required=False, initial=True)
+
+
 class RegistrationForm(forms.Form):
     option = forms.ChoiceField(
         choices=[],
@@ -70,7 +74,7 @@ class RegistrationForm(forms.Form):
         # See stylization in `src/assets/common/fix-django-forms.scss`, by option element' id.
         widget=forms.RadioSelect,
         label="Payment method",
-        help_text="Choose something even if the event is free",
+        help_text="Choose something even if your registration is free",
     )
 
     def __init__(self, option_choices, *args, **kwargs):

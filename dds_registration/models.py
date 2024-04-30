@@ -401,6 +401,7 @@ class Event(Model):
         default=0,
         help_text="Maximum number of participants (0 = no limit)",
     )
+    free = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
@@ -512,7 +513,7 @@ class Registration(Model):
     payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
-    option = models.ForeignKey(RegistrationOption, on_delete=models.CASCADE, related_name="registrations")
+    option = models.ForeignKey(RegistrationOption, on_delete=models.CASCADE, related_name="registrations", null=True, blank=True)
     status = models.TextField(choices=REGISTRATION_STATUS)
     send_update_emails = models.BooleanField(default=False)
 
