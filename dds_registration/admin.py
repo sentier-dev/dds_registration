@@ -147,6 +147,9 @@ class RegistrationAdmin(admin.ModelAdmin):
         "status",
         "created_at",
     ]
+    list_filter = [
+        "event", "payment__status", "status"
+    ]
     actions = ["accept_user"]
 
     def user_column(self, reg):
