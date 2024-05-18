@@ -7,6 +7,7 @@ import string
 from pathlib import Path
 
 import environ
+import sentry_sdk
 
 # Working folder
 
@@ -32,6 +33,7 @@ env = environ.Env(
     STRIPE_PUBLISHABLE_KEY=(str, ""),
     STRIPE_SECRET_KEY=(str, ""),
     SLACK_WEBHOOK=(str, ""),
+    SENTRY_DSN=(str, ""),
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
@@ -58,6 +60,7 @@ SENDGRID_API_KEY = env("SENDGRID_API_KEY")
 STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY")
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 SLACK_WEBHOOK = env("SLACK_WEBHOOK")
+SENTRY_DSN = env("SENTRY_DSN")
 
 SECRETS = [
     (SECRET_KEY, "SECRET_KEY"),
@@ -65,6 +68,7 @@ SECRETS = [
     (SENDGRID_API_KEY, "SENDGRID_API_KEY"),
     (STRIPE_PUBLISHABLE_KEY, "STRIPE_PUBLISHABLE_KEY"),
     (STRIPE_SECRET_KEY, "STRIPE_SECRET_KEY"),
+    (SENTRY_DSN, "SENTRY_DSN"),
 ]
 
 for key, label in SECRETS:
@@ -372,3 +376,14 @@ PASS_VARIABLES = {
     "SITE_DESCRIPTION": SITE_DESCRIPTION,
     "SITE_KEYWORDS": SITE_KEYWORDS,
 }
+
+sentry_sdk.init(
+    dsn=SENTRY_DSN,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
