@@ -363,6 +363,7 @@ class MembershipData:
 
 
 MEMBERSHIP_DATA = MembershipData()
+HUMANS = ("ACADEMIC", "NORMAL", "HONORARY")
 
 
 class Membership(Model):
@@ -377,6 +378,10 @@ class Membership(Model):
     @property
     def active(self) -> bool:
         return this_year() <= self.until
+
+    @classmethod
+    def mailinglist_people(cls):
+        return cls.objects.filter(until__gte=this_year(), mailing_list=True, membership_type__in=HUMANS)
 
     def __str__(self):
         items = [
@@ -474,27 +479,52 @@ class RegistrationOption(Model):
 
 
 class Message(Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, blank=True, null=True)
+    for_members = models.BooleanField(default=False)
     subject = models.TextField(blank=True, null=True)
     message = models.TextField()
     emailed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "{}: {} ({})".format(self.event, self.subject[:50], "sent" if self.emailed else "not sent")
+        return "{}: {} ({})".format(self.event or "Members", self.subject[:50], "sent" if self.emailed else "not sent")
 
     def send_email(self):
         if self.emailed:
             return 0
 
-        qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, event__id=self.event_id)
-        for obj in qs:
-            obj.user.email_user(
-                subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
-            )
+        if self.for_members:
+            qs = Membership.mailinglist_people()
+            for obj in qs:
+                obj.user.email_user(
+                    subject=self.subject or "DdS email for members", message=self.message
+                )
+        else:
+            qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, event__id=self.event_id)
+            for obj in qs:
+                obj.user.email_user(
+                    subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
+                )
         self.emailed = True
         self.save()
         return qs.count()
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name="either_event_or_for_members",
+                check=(
+                    models.Q(
+                        event__isnull=True,
+                        for_members=True,
+                    )
+                    | models.Q(
+                        event__isnull=False,
+                        for_members=False,
+                    )
+                ),
+            )
+        ]
 
 
 class Registration(Model):

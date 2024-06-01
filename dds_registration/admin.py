@@ -106,7 +106,7 @@ class MessageAdmin(admin.ModelAdmin):
     list_filter = ["event"]
     actions = ["email_registered_users"]
 
-    @admin.action(description="Email message(s) to registered users")
+    @admin.action(description="Email message(s) to registered users or members")
     def email_registered_users(self, request, queryset):
         count = 0
         for obj in queryset:
