@@ -1,0 +1,52 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module events-list-block.django
+  @changed 2024.03.11, 01:03
+-->
+
+{% if events %}
+  <div class="events-list-block mb-3">
+    {% for event in events %}{% with registration=event.registration %}
+    <div class="events-list-item {% if registration %}has-registration{% endif %}">
+
+      <h3 class="events-list-item-title">
+        {{ event.title }}
+        {% if registration %} <i class="bi bi-check"></i>{% endif %}
+      </h3>
+
+        <p class="events-list-item-description">{{ event.description }}</p>
+
+        <div class="events-list-item-details">
+          {% if registration %}
+            <div class="events-list-item-info" id="registered">
+              <span class="item-label">Registration date:</span> {{ registration.created_at }}
+            </div>
+          {% else %}
+            {% if event.registration_open %}
+              <div class="events-list-item-info" id="registration_open">
+                <span class="item-label">Registration opens:</span> {{ event.registration_open }}
+              </div>
+            {% endif %}
+            {% if event.registration_close %}
+              <div class="events-list-item-info" id="registration_close">
+                <span class="item-label">Registration closes:</span> {{ event.registration_close }}
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        {% if user.is_authenticated %}
+          <p class="events-list-item-actions">
+            {% if registration %}
+              <a href="{% url 'event_registration' event_code=event.code %}">Show your registration</a>
+            {% else %}
+              <a href="{% url 'event_registration' event_code=event.code %}">Register</a>
+            {% endif %}
+          </p>
+        {% endif %}
+
+      </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+{% endif %}

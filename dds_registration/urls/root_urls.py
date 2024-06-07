@@ -3,9 +3,10 @@
 
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.views.decorators.cache import cache_page
 
+from .application_urls import urlpatterns as application_urlpatterns
 from .. import views
 
 cache_timeout = 0 if settings.DEV or settings.DEBUG else 15 * 60  # in seconds: {min}*60
@@ -13,6 +14,7 @@ cache_timeout = 0 if settings.DEV or settings.DEBUG else 15 * 60  # in seconds: 
 urlpatterns = [
     # App-provided paths...
     path("admin/", admin.site.urls, name="admin"),
+    path('applications/', include((application_urlpatterns, 'djf_surveys'))),
     # Service pages...
     path(
         "robots.txt",

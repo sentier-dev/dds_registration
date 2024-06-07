@@ -1,0 +1,11 @@
+/**
+ * @module customize.scss
+ * @changed 2024.03.11, 13:52
+ */
+
+@import '../shared';
+
+:root {
+  // --bs-body-font-size: #{$defaultFontSize};
+  --bs-body-font-family: #{$defaultFontFamily};
+}

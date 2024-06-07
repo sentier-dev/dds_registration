@@ -1,0 +1,4 @@
+{# ex: set ft=htmldjango : #}
+
+{# Stripe initialization: Stripe.js must be loaded directly from https://js.stripe.com/v3, which places a `Stripe` object on the window. #}
+<script src="https://js.stripe.com/v3/" type="text/javascript"></script>

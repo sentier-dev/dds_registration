@@ -1,0 +1,19 @@
+/**
+ * @module membership-choose-list.scss
+ * @changed 2024.03.30, 17:55
+ */
+
+@import '../shared';
+
+.membership-choose-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  &-item {
+    text-align: left;
+    > i {
+      display: inline-block;
+      margin-right: 8px;
+    }
+  }
+}

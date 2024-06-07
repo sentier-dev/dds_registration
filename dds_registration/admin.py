@@ -159,7 +159,6 @@ class RegistrationAdmin(admin.ModelAdmin):
     user_column.admin_order_field = "user"
 
     def payment_column(self, reg):
-        print(reg.payment)
         return str(reg.payment) if reg.payment else "--"
 
     payment_column.short_description = "Payment"

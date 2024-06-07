@@ -98,14 +98,6 @@ def getTrace(appendStr=None):
     ]
     filteredList = list(filter(None, strList))
     traceResult = ":".join(filteredList)
-    #  print('@:testUtils:getTrace', {
-    #      #  'traceResult': traceResult,
-    #      #  'traces': traces,
-    #      #  'lastTrace': lastTrace,
-    #      #  'modPath': modPath,
-    #      'modName': modName,
-    #      'funcName': funcName,
-    #  })
     return traceResult
 
 

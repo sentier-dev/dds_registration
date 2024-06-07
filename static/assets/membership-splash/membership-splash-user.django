@@ -1,0 +1,13 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module membership-splash-user.django
+  @changed 2024.03.25, 18:30
+-->
+
+<div class="membership-splash membership-splash-user light mb-4 rounded-3">
+  <div class="content container">
+    <div class="row align-items-center">
+      {% include "./content-cell-default.django" %}
+    </div>
+  </div>
+</div>

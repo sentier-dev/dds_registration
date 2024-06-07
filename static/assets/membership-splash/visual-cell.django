@@ -1,0 +1,6 @@
+{# ex: set ft=htmldjango : #}
+
+{% load static %}
+
+<div class="col visual-cell"></div>
+

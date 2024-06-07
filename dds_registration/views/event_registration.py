@@ -38,6 +38,11 @@ def event_registration(request: HttpRequest, event_code: str):
         )
         return redirect("profile")
 
+    if event.application_form and not registration:
+        return redirect("djf_surveys:create", slug=event.application_form.slug)
+    if registration.application and registration.status == "SUBMITTED":
+        return redirect("djf_surveys:edit", id=registration.application.id)
+
     if request.method == "POST":
         if event.free:
             form = FreeRegistrationForm(
@@ -47,11 +52,11 @@ def event_registration(request: HttpRequest, event_code: str):
                 if registration:
                     # Set up new payment
                     registration.send_update_emails = form.cleaned_data["send_update_emails"]
-                    registration.status = "SUBMITTED"
+                    registration.status = "REGISTERED"
                 else:
                     registration = Registration(
                         event=event,
-                        status="SUBMITTED",
+                        status="REGISTERED",
                         user=request.user,
                         send_update_emails=form.cleaned_data["send_update_emails"],
                     )
@@ -73,11 +78,11 @@ def event_registration(request: HttpRequest, event_code: str):
                         registration.payment.mark_obsolete()
                     registration.option = option
                     registration.send_update_emails = form.cleaned_data["send_update_emails"]
-                    registration.status = "SUBMITTED"
+                    registration.status = "PAYMENT_PENDING"
                 else:
                     registration = Registration(
                         event=event,
-                        status="SUBMITTED",
+                        status="PAYMENT_PENDING",
                         user=request.user,
                         send_update_emails=form.cleaned_data["send_update_emails"],
                         option=option,

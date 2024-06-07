@@ -21,7 +21,6 @@ from ...models import (
     Event,
     Registration,
     RegistrationOption,
-    User,
 )
 
 # For django_registration related stuff, see:

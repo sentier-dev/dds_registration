@@ -1,0 +1,24 @@
+/**
+ * @module common.scss
+ * @changed 2024.03.08, 12:00
+ */
+
+@import '../shared';
+
+.item-label,
+.dimmed-info {
+  opacity: 0.5;
+}
+.primary-color {
+  color: $primaryColor;
+}
+.optional-message:empty {
+  display: none;
+}
+
+.common-actions {
+  a:not(.btn) {
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}

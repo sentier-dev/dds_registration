@@ -1,0 +1,14 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module main-page-splash
+  @changed 2024.02.27, 20:07
+-->
+
+<div class="main-page-splash p-4 mb-4 bg-primary rounded-3">
+  <div class="bg-dec"></div>
+  <div class="content">
+    <h1>Main page announcement title</h1>
+    <p><strong>MAIN PAGE ANNOUNCEMENT TEXT</strong></p>
+    <p>This is a template showcasing the optional theme stylesheet included in Bootstrap. Use it as a starting point to create something more unique by building on or modifying it.</p>
+  </div>
+</div>

@@ -15,13 +15,13 @@ from django.db.models import Model, Q, QuerySet
 from django.urls import reverse
 from fpdf import FPDF
 
-from dds_registration.core.constants.payments import (
+from .core.constants.payments import (
     site_default_currency,
     site_supported_currencies,
+    currency_emojis,
+    payment_details_by_currency,
 )
-
 from .core.constants.date_time_formats import dateFormat
-from .core.constants.payments import currency_emojis, payment_details_by_currency
 from .core.helpers.create_pdf import (
     create_invoice_pdf_from_payment,
     create_receipt_pdf_from_payment,
@@ -399,6 +399,8 @@ class Event(Model):
     description = models.TextField(blank=False, null=False)
     success_email = models.TextField(blank=False, null=False)
     public = models.BooleanField(default=True)
+    application_form = models.OneToOneField('djf_surveys.Survey', related_name="for_event", null=True, blank=True, on_delete=models.SET_NULL)
+    application_submitted_email = models.TextField(blank=True, null=True)
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
     refund_last_day = models.DateField(null=True, blank=True, help_text="Last day that a fee refund can be offered")
@@ -530,9 +532,9 @@ class Message(Model):
 class Registration(Model):
     REGISTRATION_STATUS = [
         # For schools
-        ("SUBMITTED", "Application submitted"),
-        ("SELECTED", "Applicant selected"),
-        ("WAITLIST", "Applicant wait listed"),
+        ("SUBMITTED", "Application submitted but not accepted"),
+        ("SELECTED", "Applicant selected but not yet registered"),
+        ("WAITLIST", "Applicant waitlisted"),
         ("DECLINED", "Applicant declined"),
         ("PAYMENT_PENDING", "Registered (payment pending)"),
         ("REGISTERED", "Registered"),
@@ -542,6 +544,7 @@ class Registration(Model):
 
     payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
+    application = models.OneToOneField('djf_surveys.UserAnswer', blank=True, null=True, related_name="registration", on_delete=models.SET_NULL)
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
     option = models.ForeignKey(RegistrationOption, on_delete=models.CASCADE, related_name="registrations", null=True, blank=True)
     status = models.TextField(choices=REGISTRATION_STATUS)

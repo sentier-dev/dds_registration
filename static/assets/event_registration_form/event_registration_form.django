@@ -1,0 +1,49 @@
+{# ex: set ft=htmldjango : #}
+<!--
+  @module event_registration_form.django
+  @changed 2024.03.28, 12:14
+-->
+
+{# TODO: Show questions? -- Issue #35 #}
+
+<fieldset id="payment_method" class="mb3 form-group">
+  <legend class="mb-3 primary-color">Payment method</legend>
+  {% for method in payment_methods %}
+    {% with id=method.0 name=method.1 %}
+        <div class="mb-2 form-check">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="payment_method"
+            id="payment_method-{{ id }}"
+            value="{{ id }}"
+            {% if id == default_payment_method %}checked{% endif %}
+          >
+          <label class="form-check-label" for="payment_method-{{ id }}">
+            {{ name }}
+          </label>
+        </div>
+    {% endwith %}
+  {% endfor %}
+</fieldset>
+
+<fieldset id="registration_option_radio" class="mb3 form-group">
+  <legend class="mb-3 primary-color">Registration options for this event</legend>
+  {% for option in options %}
+    <div class="mb-2 form-check">
+      <input
+        type="radio"
+        class="form-check-input"
+        id="option-{{ option.id }}"
+        name="checked_option_ids"
+        value="{{ option.id }}"
+        {% if forloop.counter == 0 %}checked{% endif %}
+      >
+      <label class="form-check-label" for="option-{{ option.id }}">
+        {{ option.item }} ({{ option.currency }} {{ option.price }})
+      </label>
+    </div>
+  {% endfor %}
+</fieldset>
+
+

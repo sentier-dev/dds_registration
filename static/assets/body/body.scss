@@ -1,0 +1,15 @@
+/**
+ * @module body
+ * @changed 2024.03.08, 13:30
+ */
+
+@import '../shared';
+
+$headerNavbarHeight: 60px;
+
+body {
+  font-family: $defaultFontFamily;
+  background-color: $backgroundColor;
+  // Add space for fixed navar (see `static/assets/page-header-navbar/page-header-navbar.django`)
+  margin-top: $headerNavbarHeight + 20px;
+}

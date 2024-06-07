@@ -153,6 +153,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "django_registration",
     APP_NAME,
+    "djf_surveys",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -205,6 +206,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "djf_surveys.context_processors.surveys_context",
                 APP_NAME + ".core.app.context_processors.common_values",
             ],
         },

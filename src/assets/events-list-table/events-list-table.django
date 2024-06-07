@@ -13,6 +13,7 @@
         <th class="col-participants" rowspan="2" scope="col">Participants</th>
         <th class="col-registration" colspan="2" scope="col" align="center">Registration</th>
         <th class="col-options" rowspan="2" scope="col">Option</th>
+        <th class="col-options" rowspan="2" scope="col">Status</th>
         <th class="col-payment" rowspan="2" scope="col">Payment method</th>
         <th class="col-paid" rowspan="2" scope="col">Paid</th>
         <th class="col-actions" rowspan="2" scope="col">Actions</th>
@@ -48,6 +49,9 @@
             {% else %}(free)
             {% endif %}
           </div>
+        </td>
+        <td class="col-status">
+          {{ reg.status }}
         </td>
         <td class="col-payment">
           {% if payment %}

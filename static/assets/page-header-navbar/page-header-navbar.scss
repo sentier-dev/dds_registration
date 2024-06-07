@@ -1,0 +1,53 @@
+/**
+ * @module page-header-navbar.scss
+ * @changed 2024.03.08, 12:00
+ */
+
+@import '../shared';
+
+.page-header-navbar {
+  padding: 0;
+  // Adaptive layout: trim too long title string with an ellipsis...
+  .main-bar {
+    flex: 1;
+    display: flex;
+    width: 100%;
+    align-items: center;
+  }
+  .navbar-brand {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  // Dark primary navbar with background decor...
+  &.navbar-dark.navbar-primary {
+    @include themeBackgroundBefore;
+  }
+  .dropdown-menu#user-menu {
+    // Position dropdown popup relative to the right screen side (as the menu is positioned to the right)
+    right: 0;
+    left: auto;
+  }
+  @media (max-width: 400px) {
+    .site-name {
+      display: none;
+    }
+  }
+  @media (min-width: $navbarCollapse) {
+    .navbar-brand {
+      flex: 1;
+    }
+    .collapse.navbar-collapse {
+      flex: 0;
+    }
+  }
+  .nav-link {
+    white-space: nowrap;
+    color: #fff;
+    transition: all $transitionTime;
+    opacity: 0.85;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

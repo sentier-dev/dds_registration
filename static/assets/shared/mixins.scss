@@ -1,0 +1,27 @@
+@mixin themeBackground {
+  background-image: url('/static/images/splash/curves-bg/curves-x.svg');
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+@mixin themeBackgroundBaseBefore {
+  &:before {
+    display: block;
+    content: ' ';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    opacity: 0.05;
+    @include themeBackground;
+  }
+  .container-fluid {
+    z-index: 1;
+  }
+}
+@mixin themeBackgroundBefore {
+  background-color: $primaryDarkColor;
+  color: #fff;
+  @include themeBackgroundBaseBefore;
+}
