@@ -46,7 +46,7 @@ dependencies = [
     "django-registration>=3.4", # @see https://django-registration.readthedocs.io
     "django-timezone-field>=3.1",
     "django>=5.0",
-    "djf_surveys",
+    "django-form-surveys",
     "fpdf2>=2.7.8", # @see https://github.com/py-pdf/fpdf2
     "requests",
     "sendgrid>=6.11.0", # @see https://docs.sendgrid.com/for-developers/sending-email/django
