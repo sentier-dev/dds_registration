@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpRequest
 from django.shortcuts import redirect, render
 
-from ..forms import RegistrationForm, FreeRegistrationForm
+from ..forms import FreeRegistrationForm, RegistrationForm
 from ..models import Event, Payment, Registration, RegistrationOption
 
 # from .event_registration_cancel import (

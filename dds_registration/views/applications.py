@@ -1,10 +1,9 @@
+from django.contrib import messages
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.text import capfirst
-from django.shortcuts import redirect
-from django.contrib import messages
-
-from djf_surveys.views import CreateSurveyFormView, EditSurveyFormView
 from djf_surveys.models import UserAnswer
+from djf_surveys.views import CreateSurveyFormView, EditSurveyFormView
 
 from ..models import Registration
 
@@ -22,8 +21,10 @@ class CreateApplicationFormView(CreateSurveyFormView):
 
             if not self.object.for_event:
                 # Just a survey, not an application
-                messages.success(self.request, "%(page_action_name)s succeeded." % dict(
-                    page_action_name=capfirst(self.title_page.lower())))
+                messages.success(
+                    self.request,
+                    "%(page_action_name)s succeeded." % dict(page_action_name=capfirst(self.title_page.lower())),
+                )
                 return redirect("profile")
             elif existing_application:
                 # Application already linked to registration
@@ -43,8 +44,10 @@ class CreateApplicationFormView(CreateSurveyFormView):
                 messages.success(request, f"You have successfully applied for {event.title}.")
                 if event.application_submitted_email:
                     request.user.email_user(
-                        subject=f'Application submitted for {event.title}',
-                        message=event.application_submitted_email.strip() + "\nYou can edit your answers at:\n" + request.build_absolute_uri(reverse("djf_surveys:edit", args=[created_application.id]))
+                        subject=f"Application submitted for {event.title}",
+                        message=event.application_submitted_email.strip()
+                        + "\nYou can edit your answers at:\n"
+                        + request.build_absolute_uri(reverse("djf_surveys:edit", args=[created_application.id])),
                     )
                 return redirect("profile")
         else:
@@ -61,9 +64,14 @@ class CreateApplicationFormView(CreateSurveyFormView):
             return redirect("profile")
 
         # handle if user have answer survey
-        if request.user.is_authenticated and not survey.duplicate_entry and \
-                UserAnswer.objects.filter(survey=survey, user=request.user).exists():
-            messages.warning(request, "You have submitted this application, and answers can't be edited after submission.")
+        if (
+            request.user.is_authenticated
+            and not survey.duplicate_entry
+            and UserAnswer.objects.filter(survey=survey, user=request.user).exists()
+        ):
+            messages.warning(
+                request, "You have submitted this application, and answers can't be edited after submission."
+            )
             return redirect("profile")
         return super().dispatch(request, *args, **kwargs)
 

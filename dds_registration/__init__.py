@@ -11,4 +11,4 @@ __all__ = (
 )
 
 
-default_app_config = 'dds_registration.apps.RegConfig'
+default_app_config = "dds_registration.apps.RegConfig"

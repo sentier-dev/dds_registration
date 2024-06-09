@@ -7,22 +7,22 @@ from datetime import date
 
 import requests
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.contrib import admin
 from django.contrib.auth.models import AbstractUser
+from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Model, Q, QuerySet
 from django.urls import reverse
 from fpdf import FPDF
 
+from .core.constants.date_time_formats import dateFormat
 from .core.constants.payments import (
-    site_default_currency,
-    site_supported_currencies,
     currency_emojis,
     payment_details_by_currency,
+    site_default_currency,
+    site_supported_currencies,
 )
-from .core.constants.date_time_formats import dateFormat
 from .core.helpers.create_pdf import (
     create_invoice_pdf_from_payment,
     create_receipt_pdf_from_payment,
@@ -398,12 +398,22 @@ class Event(Model):
     code = models.TextField(unique=True, default=random_code)  # Show as an input
     title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
     description = models.TextField(blank=False, null=False)
-    success_email = models.TextField(blank=False, null=False, help_text="The email sent when registration is complete and paid for")
+    success_email = models.TextField(
+        blank=False, null=False, help_text="The email sent when registration is complete and paid for"
+    )
     public = models.BooleanField(default=True)
-    application_form = models.OneToOneField('djf_surveys.Survey', related_name="for_event", null=True, blank=True, on_delete=models.SET_NULL)
-    application_submitted_email = models.TextField(blank=True, null=True, help_text="The email sent when the application is submitted")
-    application_accepted_email = models.TextField(blank=True, null=True, help_text="The email sent when an application is accepted and registration can proceed")
-    application_rejected_email = models.TextField(blank=True, null=True, help_text="The email sent when an application is rejected")
+    application_form = models.OneToOneField(
+        "djf_surveys.Survey", related_name="for_event", null=True, blank=True, on_delete=models.SET_NULL
+    )
+    application_submitted_email = models.TextField(
+        blank=True, null=True, help_text="The email sent when the application is submitted"
+    )
+    application_accepted_email = models.TextField(
+        blank=True, null=True, help_text="The email sent when an application is accepted and registration can proceed"
+    )
+    application_rejected_email = models.TextField(
+        blank=True, null=True, help_text="The email sent when an application is rejected"
+    )
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
     refund_last_day = models.DateField(null=True, blank=True, help_text="Last day that a fee refund can be offered")
@@ -446,7 +456,9 @@ class Event(Model):
 
     @property
     def edit_registration_url(self):
-        return "https://{}{}".format(Site.objects.get_current().domain, reverse("event_registration", args=(self.code,)))
+        return "https://{}{}".format(
+            Site.objects.get_current().domain, reverse("event_registration", args=(self.code,))
+        )
 
     def __str__(self):
         name_items = [
@@ -501,9 +513,7 @@ class Message(Model):
         if self.for_members:
             qs = Membership.mailinglist_people()
             for obj in qs:
-                obj.user.email_user(
-                    subject=self.subject or "DdS email for members", message=self.message
-                )
+                obj.user.email_user(subject=self.subject or "DdS email for members", message=self.message)
         else:
             qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, event__id=self.event_id)
             for obj in qs:
@@ -547,9 +557,13 @@ class Registration(Model):
 
     payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
     event = models.ForeignKey(Event, related_name="registrations", on_delete=models.CASCADE)
-    application = models.OneToOneField('djf_surveys.UserAnswer', blank=True, null=True, related_name="registration", on_delete=models.SET_NULL)
+    application = models.OneToOneField(
+        "djf_surveys.UserAnswer", blank=True, null=True, related_name="registration", on_delete=models.SET_NULL
+    )
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
-    option = models.ForeignKey(RegistrationOption, on_delete=models.CASCADE, related_name="registrations", null=True, blank=True)
+    option = models.ForeignKey(
+        RegistrationOption, on_delete=models.CASCADE, related_name="registrations", null=True, blank=True
+    )
     status = models.TextField(choices=REGISTRATION_STATUS)
     send_update_emails = models.BooleanField(default=True)
 
