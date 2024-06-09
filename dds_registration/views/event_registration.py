@@ -40,8 +40,8 @@ def event_registration(request: HttpRequest, event_code: str):
 
     if event.application_form and not registration:
         return redirect("djf_surveys:create", slug=event.application_form.slug)
-    if registration.application and registration.status == "SUBMITTED":
-        return redirect("djf_surveys:edit", id=registration.application.id)
+    elif registration and registration.application and registration.status == "SUBMITTED":
+        return redirect("djf_surveys:edit", pk=registration.application.id)
 
     if request.method == "POST":
         if event.free:
@@ -50,7 +50,6 @@ def event_registration(request: HttpRequest, event_code: str):
             )
             if form.is_valid():
                 if registration:
-                    # Set up new payment
                     registration.send_update_emails = form.cleaned_data["send_update_emails"]
                     registration.status = "REGISTERED"
                 else:
@@ -91,9 +90,8 @@ def event_registration(request: HttpRequest, event_code: str):
 
                 if not registration.option.price:
                     messages.success(request, f"You have successfully registered for {event.title}.")
+                    registration.complete_registration()
                     return redirect("profile")
-
-                registration.complete_registration()
 
                 payment = Payment(
                     status="CREATED",
@@ -147,20 +145,30 @@ def event_registration(request: HttpRequest, event_code: str):
         else:
             form = FreeRegistrationForm()
     else:
-        # TODO: Populate template with existing choices instead of defaults
         if registration:
             # TODO: What to do if there no payment property in the registration object (as a result of a inconsistency)?
-            messages.success(
-                request,
-                "You are now editing an existing registration application. Please be careful not to make unwanted changes.",
-            )
+            if registration.option:
+                messages.success(
+                    request,
+                    "You are now editing an existing registration application. Please be careful not to make unwanted changes.",
+                )
+            if registration.payment:
+                name = registration.payment.data["user"]["name"]
+                address = registration.payment.data["user"]["address"]
+                extra = registration.payment.data["extra"]
+            else:
+                name = request.user.get_full_name()
+                address = request.user.address
+                extra = ""
+            option = registration.option.id if registration.option else None
+
             form = RegistrationForm(
                 option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
                 initial={
-                    "name": registration.payment.data["user"]["name"],
-                    "address": registration.payment.data["user"]["name"],
-                    "extra": registration.payment.data["extra"],
-                    "option": registration.option.id,
+                    "name": name,
+                    "address": address,
+                    "extra": extra,
+                    "option": option,
                     "send_update_emails": registration.send_update_emails,
                 },
             )

@@ -7,6 +7,7 @@ from datetime import date
 
 import requests
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.contrib import admin
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist
@@ -397,10 +398,12 @@ class Event(Model):
     code = models.TextField(unique=True, default=random_code)  # Show as an input
     title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
     description = models.TextField(blank=False, null=False)
-    success_email = models.TextField(blank=False, null=False)
+    success_email = models.TextField(blank=False, null=False, help_text="The email sent when registration is complete and paid for")
     public = models.BooleanField(default=True)
     application_form = models.OneToOneField('djf_surveys.Survey', related_name="for_event", null=True, blank=True, on_delete=models.SET_NULL)
-    application_submitted_email = models.TextField(blank=True, null=True)
+    application_submitted_email = models.TextField(blank=True, null=True, help_text="The email sent when the application is submitted")
+    application_accepted_email = models.TextField(blank=True, null=True, help_text="The email sent when an application is accepted and registration can proceed")
+    application_rejected_email = models.TextField(blank=True, null=True, help_text="The email sent when an application is rejected")
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
     refund_last_day = models.DateField(null=True, blank=True, help_text="Last day that a fee refund can be offered")
@@ -442,8 +445,8 @@ class Event(Model):
         return None
 
     @property
-    def url(self):
-        return reverse("event_registration", args=(self.code,))
+    def edit_registration_url(self):
+        return "https://{}{}".format(Site.objects.get_current().domain, reverse("event_registration", args=(self.code,)))
 
     def __str__(self):
         name_items = [
@@ -548,7 +551,7 @@ class Registration(Model):
     user = models.ForeignKey(User, related_name="registrations", on_delete=models.CASCADE)
     option = models.ForeignKey(RegistrationOption, on_delete=models.CASCADE, related_name="registrations", null=True, blank=True)
     status = models.TextField(choices=REGISTRATION_STATUS)
-    send_update_emails = models.BooleanField(default=False)
+    send_update_emails = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -566,11 +569,30 @@ class Registration(Model):
     def active_for_user(cls, user: User) -> QuerySet:
         return cls.objects.filter(REGISTRATION_ACTIVE_QUERY, user=user)
 
+    def accept_application(self):
+        """Change status from SUBMITTED to SELECTED"""
+        self.status = "SELECTED"
+        self.save()
+        self.user.email_user(
+            subject=f"Application accepted for {self.event.title}",
+            message=self.event.application_accepted_email,
+        )
+
+    def decline_application(self):
+        """Change status from SUBMITTED to SELECTED"""
+        self.status = "DECLINED"
+        self.save()
+        self.user.email_user(
+            subject=f"Application declined for {self.event.title}",
+            message=self.event.application_rejected_email,
+        )
+
     def complete_registration(self):
+        """Change status to REGISTERED"""
         self.status = "REGISTERED"
         self.save()
         self.user.email_user(
-            subject=f"Registration for {self.event.title}",
+            subject=f"Registration complete for {self.event.title}",
             message=self.event.success_email,
         )
 

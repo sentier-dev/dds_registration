@@ -141,16 +141,16 @@ class RegistrationAdmin(admin.ModelAdmin):
     ]
     list_display = [
         "user_column",
+        "status",
         "payment_column",
         "event",
         "option",
-        "status",
         "created_at",
     ]
     list_filter = [
         "event", "payment__status", "status"
     ]
-    actions = ["accept_user"]
+    actions = ["accept_application", "decline_application"]
 
     def user_column(self, reg):
         return reg.user.full_name_with_email
@@ -164,13 +164,23 @@ class RegistrationAdmin(admin.ModelAdmin):
     payment_column.short_description = "Payment"
     payment_column.admin_order_field = "payment"
 
-    @admin.action(description="Accept user(s) and send acceptance email")
-    def accept_user(self, request, queryset):
+    @admin.action(description="Accept application(s)")
+    def accept_application(self, request, queryset):
         for obj in queryset:
-            obj.complete_registration()
+            obj.accept_application()
         self.message_user(
             request,
             f"{queryset.count()} users accepted and emailed",
+            messages.SUCCESS,
+        )
+
+    @admin.action(description="Decline application(s)")
+    def decline_application(self, request, queryset):
+        for obj in queryset:
+            obj.decline_application()
+        self.message_user(
+            request,
+            f"{queryset.count()} users declined and emailed",
             messages.SUCCESS,
         )
 
@@ -195,7 +205,7 @@ class EventAdmin(admin.ModelAdmin):
     # TODO: Show linked options (in columns and in the form)?
     readonly_fields = [
         "registration_open",
-        "url",
+        "edit_registration_url",
     ]
     search_fields = [
         "title",
@@ -209,7 +219,7 @@ class EventAdmin(admin.ModelAdmin):
         "registration_open",
         "registration_close",
         "public",
-        "url",
+        "edit_registration_url",
     ]
 
 

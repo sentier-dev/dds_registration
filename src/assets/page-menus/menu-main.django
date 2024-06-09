@@ -12,7 +12,10 @@
   {# djlint:on #}
 {% endcomment %}
 
-<li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Admin panel</a></li>
+{% if request.user.is_superuser %}
+<li class="nav-item"><a class="nav-link" href="{% url 'djf_surveys:admin_survey' %}">Applications dashboard</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Admin</a></li>
+{% endif %}
 
 <!-- Login/logon links -->
 {% if user.is_authenticated %}

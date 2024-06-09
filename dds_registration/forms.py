@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.forms.models import ModelForm
 from django_registration.forms import RegistrationForm as BaseRegistrationForm
+from django.core.exceptions import ValidationError
 
 from .models import MEMBERSHIP_DATA, Event, Payment, RegistrationOption, User
 
@@ -137,6 +138,23 @@ class EventAdminForm(ModelForm):
             "payment_details": textAreaWidget,
         }
         fields = "__all__"
+
+    def clean(self):
+        clean = super().clean()
+
+        if clean['application_form']:
+            if not clean['application_submitted_email']:
+                raise ValidationError(
+                    "`application_submitted_email` required for events with applications"
+                )
+            if not clean['application_accepted_email']:
+                raise ValidationError(
+                    "`application_accepted_email` required for events with applications"
+                )
+            if not clean['application_rejected_email']:
+                raise ValidationError(
+                    "`application_rejected_email` required for events with applications"
+                )
 
 
 class PaymentAdminForm(ModelForm):
