@@ -1,5 +1,5 @@
-from django.conf import settings
 import stripe
+from django.conf import settings
 
 
 def get_stripe_client_secret(

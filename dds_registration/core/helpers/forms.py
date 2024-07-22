@@ -1,8 +1,7 @@
-from loguru import logger
-
 from django.contrib import messages
 from django.forms import ModelForm
 from django.http import HttpRequest
+from loguru import logger
 
 from .utils import capitalize_id
 

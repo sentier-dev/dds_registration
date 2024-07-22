@@ -1,8 +1,7 @@
-from loguru import logger
-
 from django.contrib.sites.models import Site
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from loguru import logger
 
 # Misc...
 

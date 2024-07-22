@@ -1,7 +1,6 @@
 # @module dds_registration/views/helpers.py
 # @changed 2024.04.04, 20:27
 
-from loguru import logger
 import traceback
 from functools import reduce
 
@@ -14,6 +13,7 @@ from django.core import signing
 from django.http import HttpRequest
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
+from loguru import logger
 
 from ...core.helpers.errors import errorToString
 from ...models import REGISTRATION_ACTIVE_QUERY, Event, Registration, RegistrationOption

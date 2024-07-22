@@ -4,11 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpRequest
 from django.shortcuts import redirect, render
+from loguru import logger
 
 from ..forms import FreeRegistrationForm, RegistrationForm
 from ..models import Event, Payment, Registration, RegistrationOption
-
-from loguru import logger
 
 # from .event_registration_cancel import (
 #     event_registration_cancel_confirm_form,

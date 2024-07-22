@@ -1,9 +1,8 @@
 import base64
 
-from loguru import logger
-
 from django.conf import settings
 from fpdf import FPDF
+from loguru import logger
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import (
     Attachment,
