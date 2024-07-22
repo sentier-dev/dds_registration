@@ -1,3 +1,4 @@
+from django.conf import settings
 import stripe
 
 
@@ -7,6 +8,8 @@ def get_stripe_client_secret(
     email: str,
     optional_metadata: dict = {},
 ):
+    if not settings.STRIPE_SECRET_KEY:
+        raise ValueError("Missing stripe secret key in config")
     # TODO: Probably it'd be better to use old approach: to start payment and to fetch the secret via async ajax request: this operation requires a noticeable time (up to 1-2 seconds required to open the page)
     # @see https://docs.stripe.com/api/metadata
     # @see https://docs.stripe.com/api/payment_intents/create

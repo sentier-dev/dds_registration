@@ -10,7 +10,8 @@ class RegConfig(AppConfig):
         from django.conf import settings
         from djf_surveys.app_settings import SURVEY_FIELD_VALIDATORS
 
-        stripe.api_key = settings.STRIPE_SECRET_KEY
+        if settings.STRIPE_SECRET_KEY:
+            stripe.api_key = settings.STRIPE_SECRET_KEY
 
         SURVEY_FIELD_VALIDATORS["min_length"]["text_area"] = 3
         SURVEY_FIELD_VALIDATORS["max_length"] = {

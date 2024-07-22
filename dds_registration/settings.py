@@ -8,6 +8,7 @@ from pathlib import Path
 
 import environ
 import sentry_sdk
+from loguru import logger
 
 # Working folder
 
@@ -22,13 +23,19 @@ APP_NAME = "dds_registration"
 # Define default site id for `sites.models`
 SITE_ID = 1
 
+
+def random_string(length: int = 32) -> str:
+    possibles = string.ascii_letters + string.digits
+    return "".join(random.sample(possibles, length))
+
+
 env = environ.Env(
     # @see local `.dev` file and example in `.dev.SAMPLE`
     # @see https://django-environ.readthedocs.io
     DEBUG=(bool, False),  # Django debug mode
-    SECRET_KEY=(str, ""),
+    SECRET_KEY=(str, random_string()),
     SENDGRID_API_KEY=(str, ""),
-    REGISTRATION_SALT=(str, ""),
+    REGISTRATION_SALT=(str, random_string()),
     DEFAULT_FROM_EMAIL=(str, "events@d-d-s.ch"),
     STRIPE_PUBLISHABLE_KEY=(str, ""),
     STRIPE_SECRET_KEY=(str, ""),
@@ -38,12 +45,6 @@ env = environ.Env(
 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 environ.Env.read_env(os.path.join(BASE_DIR, ".env.local"))
-
-
-def random_string(length: int = 32) -> str:
-    possibles = string.ascii_letters + string.digits
-    return "".join(random.sample(possibles, length))
-
 
 # Dev-time flags
 DEBUG = env("DEBUG")
@@ -57,28 +58,10 @@ USE_DJANGO_PREPROCESSORS = False  # LOCAL
 SECRET_KEY = env("SECRET_KEY")
 REGISTRATION_SALT = env("REGISTRATION_SALT")
 SENDGRID_API_KEY = env("SENDGRID_API_KEY")
-STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY")
+STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY") or ''
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 SLACK_WEBHOOK = env("SLACK_WEBHOOK")
 SENTRY_DSN = env("SENTRY_DSN")
-
-SECRETS = [
-    (SECRET_KEY, "SECRET_KEY"),
-    (REGISTRATION_SALT, "REGISTRATION_SALT"),
-    (SENDGRID_API_KEY, "SENDGRID_API_KEY"),
-    (STRIPE_PUBLISHABLE_KEY, "STRIPE_PUBLISHABLE_KEY"),
-    (STRIPE_SECRET_KEY, "STRIPE_SECRET_KEY"),
-    (SENTRY_DSN, "SENTRY_DSN"),
-]
-
-for key, label in SECRETS:
-    if not key:
-        if DEV and key in (SECRET_KEY, REGISTRATION_SALT):
-            key = random_string()
-        else:
-            error_text = f"Error: Environment configuration variable {label} missing"
-            raise Exception(error_text)
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # Static files (CSS, JavaScript, Images)
@@ -136,7 +119,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 if LOCAL or DEBUG:
     # Allow work with local server in local dev mode
-    ALLOWED_HOSTS.append("localhost")
+    ALLOWED_HOSTS.extend(["localhost", "127.0.0.1"])
 
 # Application definition
 
@@ -379,13 +362,16 @@ PASS_VARIABLES = {
     "SITE_KEYWORDS": SITE_KEYWORDS,
 }
 
-sentry_sdk.init(
-    dsn=SENTRY_DSN,
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    traces_sample_rate=1.0,
-    # Set profiles_sample_rate to 1.0 to profile 100%
-    # of sampled transactions.
-    # We recommend adjusting this value in production.
-    profiles_sample_rate=1.0,
-)
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        traces_sample_rate=1.0,
+        # Set profiles_sample_rate to 1.0 to profile 100%
+        # of sampled transactions.
+        # We recommend adjusting this value in production.
+        profiles_sample_rate=1.0,
+    )
+else:
+    logger.info("No key for Sentry found")
