@@ -77,6 +77,11 @@ class RegistrationForm(forms.Form):
         label="Payment method",
         help_text="Choose something even if your registration is free",
     )
+    additional_email = forms.EmailField(
+        required=False,
+        label="Optional additional email address to send invoice",
+        help_text="Use this to have your invoice sent directly to accounting"
+    )
 
     def __init__(self, option_choices, *args, **kwargs):
         super().__init__(*args, **kwargs)

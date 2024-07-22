@@ -15,6 +15,7 @@ from django.db import models
 from django.db.models import Model, Q, QuerySet
 from django.urls import reverse
 from fpdf import FPDF
+from loguru import logger
 
 from .core.constants.date_time_formats import dateFormat
 from .core.constants.payments import (
@@ -293,7 +294,7 @@ class Payment(Model):
     def receipt_pdf(self):
         return create_receipt_pdf_from_payment(self)
 
-    def email_invoice(self):
+    def email_invoice(self, extra_address: str | None = None):
         user = User.objects.get(id=self.data["user"]["id"])
         # TODO: Issue #149: To extract these (and all other hardcoded here, in `send_email` methods?) texts to template files, with substiting names, urls and emails from settings or preferences values?
         if self.data["kind"] == "membership":
@@ -303,6 +304,15 @@ class Payment(Model):
             event = Event.objects.get(id=self.data["event"]["id"])
             subject = f"DdS Event {event.title} Registration Invoice {self.invoice_no}"
             message = f"Thanks for registering for {event.title}! We look forward to seeing your, in person or virtually.\n\nDépart de Sentier runs its events and schools on a cost-neutral basis - i.e. we don't make a profit off the registration fees. They are used for catering, room, hotel, and equipment rental, AV hosting and technician fees, and guest speaker costs. We literally could not run this event without your support.\n\nYou can view your registration status and apply for membership at https://events.d-d-s.ch/profile.\n\nPlease find attached the registration invoice. Your registration is not finalized until the bank transfer is received.\n\nYou can change your invoice details here: https://events.d-d-s.ch{reverse('event_registration', args=(event.code,))}.\n\nIf you have any questions, please contact events@d-d-s.ch."
+        if extra_address:
+            logger.debug(f"Sending additional email to {extra_address}")
+            send_email(
+                recipient_address=extra_address,
+                subject=subject + f" for {user.email}",
+                message=message,
+                pdf=self.invoice_pdf(),
+                pdf_name=f"DdS Invoice {self.invoice_no}.pdf",
+            )
         user.email_user(
             subject=subject,
             message=message,
