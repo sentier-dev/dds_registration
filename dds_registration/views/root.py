@@ -1,15 +1,11 @@
 # @module views
 # @changed 2024.03.25, 16:07
 
-import logging
-
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
 from django.shortcuts import redirect, render
 
 from ..models import Event, Registration
-
-LOG = logging.getLogger(__name__)
 
 
 def index(request: HttpRequest):

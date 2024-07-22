@@ -260,64 +260,21 @@ DATE_FORMAT = "Y.m.d"
 TIME_FORMAT = "H:i"
 DATETIME_FORMAT = DATE_FORMAT + TIME_FORMAT
 
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
-#
-# Logging levels:
-#
-# - DEBUG: Low level system information for debugging purposes
-# - INFO: General system information
-# - WARNING: Information describing a minor problem that has occurred.
-# - ERROR: Information describing a major problem that has occurred.
-# - CRITICAL: Information describing a critical problem that has occurred.
-#
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    # 'incremental': True,
-    "formatters": {
-        "verbose": {
-            "format": "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            "datefmt": "%Y.%m.%d %H:%M:%S",
-        },
-        "simple": {"format": "%(levelname)s %(message)s"},
-    },
-    "filters": {
-        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
-    },
-    "handlers": {
-        "mail_admins": {
-            "level": "ERROR",
-            "filters": ["require_debug_false"],
-            "class": "django.utils.log.AdminEmailHandler",
-        },
-        "django": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": posixpath.join(BASE_DIR, "log-django.log"),
-            "formatter": "verbose",
-        },
-        "apps": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": posixpath.join(BASE_DIR, "log-apps.log"),
-            "formatter": "verbose",
-        },
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["django"],
-            "propagate": True,
-            "level": "INFO",
-        },
-        APP_NAME: {
-            "handlers": ["apps"],
-            "level": "DEBUG",
-        },
-    },
-}
+(BASE_DIR / "logs").mkdir(parents=True, exist_ok=True)
+logger.add(
+    BASE_DIR / "logs" / "registration.log",
+    rotation="1 week",
+    format="[{time}] {level} [{name}:{function}:{line}] {message}",
+    filter="dds_registration",
+    level="INFO",
+)
+logger.add(
+    BASE_DIR / "logs" / "django.log",
+    rotation="1 week",
+    format="[{time}] {level} [{name}:{function}:{line}] {message}",
+    filter="django",
+    level="WARNING",
+)
 
 # @see: https://docs.djangoproject.com/en/2.0/ref/settings/#timeout
 TIMEOUT = 30 if DEBUG else 300  # Short value for debug time

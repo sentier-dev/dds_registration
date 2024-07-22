@@ -1,7 +1,7 @@
 # @module dds_registration/views/helpers.py
 # @changed 2024.04.04, 20:27
 
-import logging
+from loguru import logger
 import traceback
 from functools import reduce
 
@@ -22,9 +22,6 @@ from ...models import REGISTRATION_ACTIVE_QUERY, Event, Registration, Registrati
 # .venv/Lib/site-packages/django_registration/backends/activation/views.py
 
 REGISTRATION_SALT = getattr(settings, "REGISTRATION_SALT", "registration")
-
-
-LOG = logging.getLogger(__name__)
 
 
 def get_activation_key(user: AbstractBaseUser | AnonymousUser):
@@ -83,7 +80,7 @@ def send_re_actvation_email(request: HttpRequest, user: AbstractBaseUser | Anony
             "err": err,
             "traceback": sTraceback,
         }
-        LOG.error("Caught error %s (re-raising): %s", sError, debug_data)
+        logger.debug(f"Caught error {sError} (re-raising): {debug_data}")
         raise err
 
 
@@ -114,7 +111,7 @@ def get_events_list(request: HttpRequest, events: list[Event]):
                     "err": err,
                     "traceback": sTraceback,
                 }
-                LOG.error("Caught error %s (re-raising): %s", sError, debug_data)
+                logger.debug(f"Caught error {sError} (re-raising): {debug_data}")
     return result
 
 
@@ -149,7 +146,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             "err": err,
             "traceback": sTraceback,
         }
-        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
+        logger.debug(f"{error_text} (redirecting to profile): {debug_data}")
         # Redirect to profile page with error messages (see above)
         context["redirect"] = "profile"
         return context
@@ -169,7 +166,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
                 debug_data = {
                     "event_code": event_code,
                 }
-                LOG.info("%s (redirecting): %s", msg_text, debug_data)
+                logger.debug(f"{msg_text} (redirecting): {debug_data}")
                 messages.info(request, msg_text)
                 # TODO: Already exists redirect?
                 context["redirect"] = "profile"
@@ -181,7 +178,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             debug_data = {
                 "event_code": event_code,
             }
-            LOG.info("%s (redirecting): %s", msg_text, debug_data)
+            logger.debug(f"{msg_text} (redirecting): {debug_data}")
             messages.info(request, msg_text)
             context["redirect"] = "profile"
             return context
@@ -195,7 +192,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             "err": err,
             "traceback": sTraceback,
         }
-        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
+        logger.debug(f"{error_text} (redirecting to profile): {debug_data}")
         # Redirect to profile page with error messages (see above)
         context["redirect"] = "profile"
         return context
@@ -214,7 +211,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             "err": err,
             "traceback": sTraceback,
         }
-        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
+        logger.debug(f"{error_text} (redirecting to profile): {debug_data}")
         # Redirect to profile page with error messages (see above)
         context["redirect"] = "profile"
         return context
@@ -284,7 +281,6 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             context["redirect"] = "SUCCESS"
             context["registration_created"] = True
             return context
-        # LOG.debug("Rendering with context: %s", context)
         context["render"] = True
         return context
     except Exception as err:
@@ -295,7 +291,7 @@ def get_event_registration_form_context(request: HttpRequest, event_code: str, c
             "err": err,
             "traceback": sTraceback,
         }
-        LOG.error("Caught error %s (re-raising): %s", sError, debug_data)
+        logger.debug(f"Caught error {sError} (re-raising): {debug_data}")
         raise err
 
 
@@ -340,7 +336,7 @@ def show_registration_form_success(request: HttpRequest, event_code: str, templa
             "err": err,
             "traceback": sTraceback,
         }
-        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
+        logger.debug(f"{error_text} (redirecting to profile): {debug_data}")
         # Redirect to profile page with error messages (see above)
         return redirect("profile")
 
@@ -370,7 +366,6 @@ def get_event_registration_context(request: HttpRequest, event_code: str):
     }
     event = None
     registration = None
-    invoice = None
     # Try to get event object by code...
     try:
         event = Event.objects.get(code=event_code)
@@ -391,6 +386,6 @@ def get_event_registration_context(request: HttpRequest, event_code: str):
             "err": err,
             "traceback": sTraceback,
         }
-        LOG.error("%s (redirecting to profile): %s", error_text, debug_data)
+        logger.debug(f"{error_text} (redirecting to profile): {debug_data}")
         raise Exception(error_text)
     return context

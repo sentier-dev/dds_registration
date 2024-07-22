@@ -8,6 +8,8 @@ from django.shortcuts import redirect, render
 from ..forms import FreeRegistrationForm, RegistrationForm
 from ..models import Event, Payment, Registration, RegistrationOption
 
+from loguru import logger
+
 # from .event_registration_cancel import (
 #     event_registration_cancel_confirm_form,
 #     event_registration_cancel_process_action,
@@ -43,7 +45,10 @@ def event_registration(request: HttpRequest, event_code: str):
     elif registration and registration.application and registration.status == "SUBMITTED":
         return redirect("djf_surveys:edit", pk=registration.application.id)
 
+    logger.debug(f"Working on registration {registration}")
+
     if request.method == "POST":
+        logger.debug(f"POST response {request.POST}")
         if event.free:
             form = FreeRegistrationForm(
                 data=request.POST,
@@ -121,6 +126,8 @@ def event_registration(request: HttpRequest, event_code: str):
                 )
                 payment.save()
 
+                logger.debug(f"Created or updated payment {payment.data}")
+
                 registration.payment = payment
                 registration.save()
 
@@ -135,6 +142,9 @@ def event_registration(request: HttpRequest, event_code: str):
                     return redirect("profile")
                 elif payment.data["method"] == "STRIPE":
                     return redirect("payment_stripe", payment_id=payment.id)
+            else:
+                errors = form.errors.as_data()
+                logger.debug(f"Invalid form with POST data for paid event {event}: {errors}")
     elif event.free:
         if registration:
             form = FreeRegistrationForm(

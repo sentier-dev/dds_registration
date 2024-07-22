@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 
 from django.contrib import messages
 from django.forms import ModelForm
@@ -11,9 +11,6 @@ __all__ = [
 ]
 
 
-LOG = logging.getLogger(__name__)
-
-
 def pass_form_errors_to_messages(request: HttpRequest, form: ModelForm):
     # TODO: Process (join, sort out?) dubplicated errors?
     errors = form.errors
@@ -21,7 +18,7 @@ def pass_form_errors_to_messages(request: HttpRequest, form: ModelForm):
     if len(error_items):
         # TODO: Show errors?
         # Data example: {'name': ['This field is required.'], 'email': ['This field is required.']}
-        LOG.error("Form has errors")
+        logger.debug("Form has errors")
         # Pass messages to the client...
         for error, texts in error_items:
             msg = capitalize_id(error) + ": " + " ".join(texts)
