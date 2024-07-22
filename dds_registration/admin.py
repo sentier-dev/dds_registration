@@ -188,7 +188,7 @@ class RegistrationOptionAdmin(admin.ModelAdmin):
     form = RegistrationOptionAdminForm
     search_fields = [
         "item",
-        #  'event',  # NOTE: Unsupported lookup 'icontains' for ForeignKey or join on the field not permitted.
+         'event__title',
     ]
     list_display = [
         "item",
