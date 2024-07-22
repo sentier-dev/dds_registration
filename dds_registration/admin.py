@@ -196,6 +196,7 @@ class RegistrationOptionAdmin(admin.ModelAdmin):
         "price",
         "currency",
     ]
+    list_filter = ["event", "currency"]
 
 
 @admin.register(Event)
