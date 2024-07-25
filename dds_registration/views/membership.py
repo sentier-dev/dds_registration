@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest
@@ -28,6 +30,10 @@ def membership_application(request: HttpRequest):
         form = MembershipForm(request.POST)
 
         if form.is_valid():
+            today = date.today()
+            september = date(year=today.year, month=9, day=15)
+            until = today.year if today < september else today.year + 1
+
             payment = Payment(
                 status="CREATED",
                 data={
@@ -45,7 +51,7 @@ def membership_application(request: HttpRequest):
                     "method": form.cleaned_data["payment_method"],
                     "price": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["price"],
                     "currency": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["currency"],
-                    "until": this_year(),
+                    "until": until,
                 },
             )
             payment.save()
@@ -54,7 +60,7 @@ def membership_application(request: HttpRequest):
                 membership = Membership.objects.get(user=request.user)
                 membership.mailing_list = form.cleaned_data["mailing_list"]
                 membership.membership_type = form.cleaned_data["membership_type"]
-                membership.until = this_year()
+                membership.until = until
                 membership.payment = payment
                 membership.save()
             except ObjectDoesNotExist:
