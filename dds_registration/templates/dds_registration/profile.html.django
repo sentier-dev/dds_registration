@@ -47,7 +47,7 @@
 {% with membership=user.membership %}
 
 {% if user.is_member %}
-  <p>Member since {{ membership.started }}. Membership type: {{ membership.get_membership_type_display }}.</p>
+  <p>Member from {{ membership.started }} until December 31, {{ membership.until }}. Membership type: {{ membership.get_membership_type_display }}.</p>
 {% else %}
   <p>Not yet a DdS member. <a href="{% url 'membership_application' %}">Apply for membership</a>.</p>
 {% endif %}
