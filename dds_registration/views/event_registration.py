@@ -71,7 +71,7 @@ def event_registration(request: HttpRequest, event_code: str):
             form = RegistrationForm(
                 data=request.POST,
                 option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
-                credit_cards=event.credit_cards
+                credit_cards=event.credit_cards,
             )
 
             if form.is_valid():

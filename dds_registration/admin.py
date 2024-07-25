@@ -188,7 +188,7 @@ class RegistrationOptionAdmin(admin.ModelAdmin):
     form = RegistrationOptionAdminForm
     search_fields = [
         "item",
-         'event__title',
+        "event__title",
     ]
     list_display = [
         "item",

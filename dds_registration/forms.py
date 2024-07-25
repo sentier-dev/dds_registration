@@ -80,7 +80,7 @@ class RegistrationForm(forms.Form):
     additional_email = forms.EmailField(
         required=False,
         label="Optional additional email address to send invoice",
-        help_text="Use this to have your invoice sent directly to accounting"
+        help_text="Use this to have your invoice sent directly to accounting",
     )
 
     def __init__(self, option_choices, credit_cards, *args, **kwargs):

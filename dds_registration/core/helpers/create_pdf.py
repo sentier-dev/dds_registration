@@ -225,12 +225,17 @@ def create_pdf(
 def get_common_pdf_table_items(payment: Model) -> (list, tuple):
     if payment.data["kind"] == "event":
         if payment.data["event"].get("vat_rate"):
-            percentage = round(payment.data['event']['vat_rate'] * 100, 2)
+            percentage = round(payment.data["event"]["vat_rate"] * 100, 2)
             items = [
                 ("Quantity", "Event", "Registration", f"Price ({payment.data['currency']})"),
                 (1, payment.data["event"]["title"], payment.data["option"]["item"], payment.data["price"]),
-                ("", f"Value Added Tax ({percentage}%)", "", round(payment.data["price"] * payment.data['event']['vat_rate'], 2)),
-                ("", "**Total**", "", round(payment.data["price"] * (1 + payment.data['event']['vat_rate']), 2)),
+                (
+                    "",
+                    f"Value Added Tax ({percentage}%)",
+                    "",
+                    round(payment.data["price"] * payment.data["event"]["vat_rate"], 2),
+                ),
+                ("", "**Total**", "", round(payment.data["price"] * (1 + payment.data["event"]["vat_rate"]), 2)),
             ]
         else:
             items = [
@@ -241,6 +246,7 @@ def get_common_pdf_table_items(payment: Model) -> (list, tuple):
         column_layout = (15, 45, 20, 20)
     else:
         from ...models import User
+
         user = User.objects.get(id=payment.data["user"]["id"])
         items = [
             ("Member name", "Membership", "Valid until", f"Price ({payment.data['currency']})"),
