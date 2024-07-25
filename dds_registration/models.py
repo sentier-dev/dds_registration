@@ -440,6 +440,19 @@ class Event(Model):
             models.CheckConstraint(
                 check=models.Q(registration_close__gte=models.F("registration_open")),
                 name="registration_close_after_open",
+            ),
+            models.CheckConstraint(
+                name="no_vat_for_credit_cards",
+                check=(
+                    models.Q(
+                        vat_rate__isnull=True,
+                        credit_cards=True,
+                    )
+                    | models.Q(
+                        vat_rate__isnull=False,
+                        credit_cards=False,
+                    )
+                ),
             )
         ]
 
