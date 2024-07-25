@@ -31,6 +31,10 @@ def event_registration(request: HttpRequest, event_code: str):
         messages.error(request, f"Registration for {event.title} isn't open")
         return redirect("index")
 
+    if event.members_only and not request.user.is_member:
+        messages.error(request, f"{event.title} is only for members")
+        return redirect("index")
+
     registration = event.get_active_event_registration_for_user(request.user)
     if registration and registration.payment and registration.payment.status == "PAID":
         messages.error(

@@ -434,6 +434,7 @@ class Event(Model):
     free = models.BooleanField(default=False)
     credit_cards = models.BooleanField(default=True)
     vat_rate = models.FloatField(null=True, blank=True)
+    members_only = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
