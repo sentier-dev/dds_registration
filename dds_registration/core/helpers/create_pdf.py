@@ -222,17 +222,25 @@ def create_pdf(
     return pdf
 
 
-def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
-    from ...models import User
-
+def get_common_pdf_table_items(payment: Model) -> (list, tuple):
     if payment.data["kind"] == "event":
-        items = [
-            ("Quantity", "Event", "Registration", f"Price ({payment.data['currency']})"),
-            (1, payment.data["event"]["title"], payment.data["option"]["item"], payment.data["price"]),
-            ("", "**Total**", "", payment.data["price"]),
-        ]
+        if payment.data["event"].get("vat_rate"):
+            percentage = round(payment.data['event']['vat_rate'] * 100, 2)
+            items = [
+                ("Quantity", "Event", "Registration", f"Price ({payment.data['currency']})"),
+                (1, payment.data["event"]["title"], payment.data["option"]["item"], payment.data["price"]),
+                ("", f"Value Added Tax ({percentage}%)", "", round(payment.data["price"] * payment.data['event']['vat_rate'], 2)),
+                ("", "**Total**", "", round(payment.data["price"] * (1 + payment.data['event']['vat_rate']), 2)),
+            ]
+        else:
+            items = [
+                ("Quantity", "Event", "Registration", f"Price ({payment.data['currency']})"),
+                (1, payment.data["event"]["title"], payment.data["option"]["item"], payment.data["price"]),
+                ("", "**Total**", "", payment.data["price"]),
+            ]
         column_layout = (15, 45, 20, 20)
     else:
+        from ...models import User
         user = User.objects.get(id=payment.data["user"]["id"])
         items = [
             ("Member name", "Membership", "Valid until", f"Price ({payment.data['currency']})"),
@@ -245,6 +253,11 @@ def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
             ("", "", "**Total**", payment.data["price"]),
         ]
         column_layout = (40, 20, 20, 20)
+    return items, column_layout
+
+
+def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
+    items, column_layout = get_common_pdf_table_items(payment)
 
     return create_pdf(
         kind="invoice",
@@ -260,28 +273,7 @@ def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
 
 
 def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
-    from ...models import User
-
-    if payment.data["kind"] == "event":
-        items = [
-            ("Quantity", "Event", "Registration", f"Price ({payment.data['currency']})"),
-            (1, payment.data["event"]["title"], payment.data["option"]["item"], payment.data["price"]),
-            ("", "**Total**", "", payment.data["price"]),
-        ]
-        column_layout = (15, 45, 20, 20)
-    else:
-        user = User.objects.get(id=payment.data["user"]["id"])
-        items = [
-            ("Member name", "Membership", "Valid until", f"Price ({payment.data['currency']})"),
-            (
-                user.get_full_name(),
-                payment.data["membership"]["label"],
-                str(payment.data["until"]) + "-12-31",
-                payment.data["price"],
-            ),
-            ("", "", "**Total**", payment.data["price"]),
-        ]
-        column_layout = (40, 20, 20, 20)
+    items, column_layout = get_common_pdf_table_items(payment)
 
     return create_pdf(
         kind="receipt",

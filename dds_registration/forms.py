@@ -75,7 +75,7 @@ class RegistrationForm(forms.Form):
         # See stylization in `src/assets/common/fix-django-forms.scss`, by option element' id.
         widget=forms.RadioSelect,
         label="Payment method",
-        help_text="Choose something even if your registration is free",
+        help_text="Choose something even if your registration is free or there is only one choice",
     )
     additional_email = forms.EmailField(
         required=False,
@@ -83,9 +83,11 @@ class RegistrationForm(forms.Form):
         help_text="Use this to have your invoice sent directly to accounting"
     )
 
-    def __init__(self, option_choices, *args, **kwargs):
+    def __init__(self, option_choices, credit_cards, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["option"].choices = option_choices
+        if not credit_cards:
+            self.fields["payment_method"].choices = [(x, y) for x, y in Payment.METHODS if x != "STRIPE"]
 
 
 class DdsRegistrationForm(BaseRegistrationForm):

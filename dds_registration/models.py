@@ -432,6 +432,8 @@ class Event(Model):
         help_text="Maximum number of participants (0 = no limit)",
     )
     free = models.BooleanField(default=False)
+    credit_cards = models.BooleanField(default=True)
+    vat_rate = models.FloatField(null=True, blank=True)
 
     class Meta:
         constraints = [

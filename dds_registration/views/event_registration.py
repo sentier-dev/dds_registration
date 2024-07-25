@@ -71,6 +71,7 @@ def event_registration(request: HttpRequest, event_code: str):
             form = RegistrationForm(
                 data=request.POST,
                 option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
+                credit_cards=event.credit_cards
             )
 
             if form.is_valid():
@@ -111,6 +112,7 @@ def event_registration(request: HttpRequest, event_code: str):
                         "event": {
                             "id": event.id,
                             "title": event.title,
+                            "vat_rate": event.vat_rate,
                         },
                         "registration": {
                             "id": registration.id,
@@ -173,6 +175,7 @@ def event_registration(request: HttpRequest, event_code: str):
 
             form = RegistrationForm(
                 option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
+                credit_cards=event.credit_cards,
                 initial={
                     "name": name,
                     "address": address,
@@ -184,6 +187,7 @@ def event_registration(request: HttpRequest, event_code: str):
         else:
             form = RegistrationForm(
                 option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
+                credit_cards=event.credit_cards,
                 initial={
                     "name": request.user.get_full_name(),
                     "address": request.user.address,
