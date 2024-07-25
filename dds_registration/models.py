@@ -205,6 +205,8 @@ class Payment(Model):
     #     },
     #     "price": option.price,
     #     "currency": option.currency,
+    #     "includes_membership": option.includes_membership,
+    #     "membership_end_year": option.membership_end_year,
     # }
     data = models.JSONField(help_text="Read-only JSON object", default=dict)
 
@@ -237,6 +239,22 @@ class Payment(Model):
             return
         self.status = "PAID"
         self.data["paid_date"] = date.today().strftime("%Y-%m-%d")
+
+        if self.data["includes_membership"]:
+            user = User.objects.get(id=self.data["user"]["id"])
+            try:
+                membership = Membership.objects.get(user=user)
+                membership.until = max(membership.until, self.data["membership_end_year"])
+                membership.save()
+            except ObjectDoesNotExist:
+                Membership(
+                    user=user,
+                    membership_type="NORMAL",
+                    payment=self,
+                    mailing_list=True,
+                    until=self.data["membership_end_year"]
+                ).save()
+
         if settings.SLACK_WEBHOOK:
             title = self.data["event"]["title"] if self.data["kind"] == "event" else "membership"
             requests.post(
@@ -454,7 +472,7 @@ class Event(Model):
                         credit_cards=False,
                     )
                 ),
-            )
+            ),
         ]
 
     @property
@@ -498,6 +516,12 @@ class RegistrationOption(Model):
     event = models.ForeignKey(Event, related_name="options", on_delete=models.CASCADE)
     item = models.TextField(null=False, blank=False)  # Show as an input
     price = models.FloatField(default=0, null=False)
+    includes_membership = models.BooleanField(
+        default=False, help_text="Does this registration option include DdS membership?"
+    )
+    membership_end_year = models.IntegerField(
+        default=this_year, help_text="If membership is included, until what year is it valid?"
+    )
 
     SUPPORTED_CURRENCIES = site_supported_currencies
     DEFAULT_CURRENCY = site_default_currency
@@ -505,7 +529,11 @@ class RegistrationOption(Model):
 
     @property
     def form_label(self):
-        return f"{self.item}: {self.price} {self.get_currency_display()}"
+        if self.includes_membership:
+            membership = " (includes DdS membership through {})".format(self.membership_end_year)
+        else:
+            membership = ""
+        return f"{self.item}: {self.price} {self.get_currency_display()}{membership}"
 
     def __str__(self):
         price_items = [

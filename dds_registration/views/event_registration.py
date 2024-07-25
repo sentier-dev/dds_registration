@@ -127,6 +127,8 @@ def event_registration(request: HttpRequest, event_code: str):
                         },
                         "price": option.price,
                         "currency": option.currency,
+                        "includes_membership": option.includes_membership,
+                        "membership_end_year": option.membership_end_year,
                     },
                 )
                 payment.save()
