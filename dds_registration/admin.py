@@ -1,3 +1,4 @@
+from datetime import date
 import zipfile
 from io import BytesIO
 
@@ -29,7 +30,7 @@ class IsRegularUserFilter(SimpleListFilter):
     Regular user custom combined filter
     """
 
-    title = "is_regular_user"
+    title = "Regular user"
     parameter_name = "is_regular_user"
 
     def lookups(self, request, model_admin):
@@ -43,6 +44,27 @@ class IsRegularUserFilter(SimpleListFilter):
             return queryset.filter(is_staff=False, is_superuser=False)
         if self.value() == "0":
             return queryset.filter(~Q(is_staff=False, is_superuser=False))
+
+
+class IsActiveFilter(SimpleListFilter):
+    """
+    Regular user custom combined filter
+    """
+
+    title = "Active member"
+    parameter_name = "is_active_filter"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("1", "Yes"),
+            ("0", "No"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "1":
+            return queryset.filter(until__gte=date.today().year)
+        if self.value() == "0":
+            return queryset.filter(until__lt=date.today().year)
 
 
 class UserAdmin(BaseUserAdmin):
@@ -74,28 +96,7 @@ class UserAdmin(BaseUserAdmin):
         form.base_fields["username"].label = "Email (username)"
         return form
 
-    #  # TODO: Show only regular users by default?
-    #  def changelist_view(self, request, extra_context=None):
-    #      ref = request.META.get('HTTP_REFERER', '')
-    #      path = request.META.get('PATH_INFO', '')
-    #      query = request.META.get('QUERY_STRING', '')
-    #
-    #      # TODO: Detect if there weren't other parameters for this page
-    #      test = ref.split(path)[-1]
-    #      ref_default = test and not test.startswith('?')
-    #      is_default = not query
-    #
-    #      if is_default:
-    #          q = request.GET.copy()
-    #          q.setdefault('is_staff__exact', '0')
-    #          return redirect('%s?%s' % (request.path, q.urlencode()))
-    #
-    #      return super(UserAdmin, self).changelist_view(
-    #          request, extra_context=extra_context,
-    #      )
 
-
-#  admin.site.unregister(OriginalUser)  # It's not required here
 admin.site.register(User, UserAdmin)
 
 
@@ -118,8 +119,23 @@ class MessageAdmin(admin.ModelAdmin):
         )
 
 
+    # user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # membership_type = models.TextField(choices=MEMBERSHIP_DATA.choices, default=MEMBERSHIP_DATA.default)
+
+    # started = models.IntegerField(default=this_year)
+    # until = models.IntegerField(default=this_year)
+    # payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
+    # mailing_list = models.BooleanField(default=False)
+
+
 @admin.register(Membership)
 class MembershipAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {"fields": ("user", "membership_type")}),
+        ("Validity", {"fields": ("started", "until")}),
+        ("Communication", {"fields": ("mailing_list",)}),
+    )
+
     list_display = [
         "user",
         "started",
@@ -128,6 +144,10 @@ class MembershipAdmin(admin.ModelAdmin):
         "active",
         "membership_type",
     ]
+    search_fields = [
+        "user__username",
+    ]
+    list_filter = [IsActiveFilter, "membership_type"]
 
 
 @admin.register(Registration)
