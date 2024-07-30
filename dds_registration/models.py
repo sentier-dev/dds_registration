@@ -240,7 +240,7 @@ class Payment(Model):
         self.status = "PAID"
         self.data["paid_date"] = date.today().strftime("%Y-%m-%d")
 
-        if self.data["includes_membership"]:
+        if self.data.get("includes_membership"):
             user = User.objects.get(id=self.data["user"]["id"])
             try:
                 membership = Membership.objects.get(user=user)
