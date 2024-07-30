@@ -255,10 +255,10 @@ class Payment(Model):
                     until=self.data["membership_end_year"]
                 ).save()
 
-        if settings.SLACK_WEBHOOK:
+        if settings.SLACK_PAYMENTS_WEBHOOK:
             title = self.data["event"]["title"] if self.data["kind"] == "event" else "membership"
             requests.post(
-                url=settings.SLACK_WEBHOOK,
+                url=settings.SLACK_PAYMENTS_WEBHOOK,
                 json={
                     "text": "Payment by {} of {}{} for {}".format(
                         self.data["user"]["name"], currency_emojis[self.data["currency"]], self.data["price"], title
@@ -474,6 +474,9 @@ class Event(Model):
                 ),
             ),
         ]
+
+    def get_admin_url(self):
+        return reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name), args=(self.id,))
 
     @property
     def can_register(self):
