@@ -109,6 +109,16 @@ def event_registration(request: HttpRequest, event_code: str):
                     )
                 registration.save()
 
+                if settings.SLACK_REGISTRATIONS_WEBHOOK:
+                    requests.post(
+                        url=settings.SLACK_REGISTRATIONS_WEBHOOK,
+                        json={
+                            "text": "Registration by {} for {} ({})".format(
+                                request.user.get_full_name(), event.title, event.get_admin_url()
+                            )
+                        }
+                    )
+
                 if not registration.option.price:
                     messages.success(request, f"You have successfully registered for {event.title}.")
                     registration.complete_registration()

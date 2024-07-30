@@ -476,7 +476,13 @@ class Event(Model):
         ]
 
     def get_admin_url(self):
-        return reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name), args=(self.id,))
+        return "https://{}{}".format(
+            Site.objects.get_current().domain,
+            reverse(
+                "admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name),
+                args=(self.id,)
+            )
+        )
 
     @property
     def can_register(self):
