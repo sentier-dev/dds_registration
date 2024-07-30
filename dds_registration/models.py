@@ -527,13 +527,31 @@ class RegistrationOption(Model):
     DEFAULT_CURRENCY = site_default_currency
     currency = models.TextField(choices=SUPPORTED_CURRENCIES, null=False, default=DEFAULT_CURRENCY)
 
+    def net_price(self):
+        if not self.has_vat:
+            return self.price
+        else:
+            return round(self.price * (1 + self.event.vat_rate), 2)
+
+    @property
+    def has_vat(self):
+        return bool(self.event.vat_rate)
+
+    @property
+    def vat_percentage(self):
+        return round(self.event.vat_rate * 100, 0)
+
     @property
     def form_label(self):
         if self.includes_membership:
             membership = " (includes DdS membership through {})".format(self.membership_end_year)
         else:
             membership = ""
-        return f"{self.item}: {self.price} {self.get_currency_display()}{membership}"
+        if self.has_vat:
+            amount = f"{self.price} plus {self.vat_percentage}% VAT: {self.net_price()}"
+        else:
+            amount = self.price
+        return f"{self.item}: {amount} {self.get_currency_display()}{membership}"
 
     def __str__(self):
         price_items = [

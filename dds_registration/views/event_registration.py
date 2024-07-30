@@ -126,6 +126,7 @@ def event_registration(request: HttpRequest, event_code: str):
                             "item": option.item,
                         },
                         "price": option.price,
+                        "net_price": option.net_price(),
                         "currency": option.currency,
                         "includes_membership": option.includes_membership,
                         "membership_end_year": option.membership_end_year,

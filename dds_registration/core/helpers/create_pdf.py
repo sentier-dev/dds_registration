@@ -235,7 +235,7 @@ def get_common_pdf_table_items(payment: Model) -> (list, tuple):
                     "",
                     round(payment.data["price"] * payment.data["event"]["vat_rate"], 2),
                 ),
-                ("", "**Total**", "", round(payment.data["price"] * (1 + payment.data["event"]["vat_rate"]), 2)),
+                ("", "**Total**", "", round(payment.data.get("net_price", payment.data["price"]), 2)),
             ]
         else:
             items = [
