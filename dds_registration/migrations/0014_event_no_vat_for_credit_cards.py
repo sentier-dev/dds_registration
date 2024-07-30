@@ -7,7 +7,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('dds_registration', '0013_event_credit_cards_event_vat_rate'),
-        ('djf_surveys', '0015_termsvalidators'),
     ]
 
     operations = [
