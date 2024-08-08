@@ -254,6 +254,9 @@ class PaymentAdmin(admin.ModelAdmin):
     ]
     list_display = [
         "invoice_no",
+        "user_extract",
+        "amount_extract",
+        "currency_extract",
         "status",
         "created",
         "updated",

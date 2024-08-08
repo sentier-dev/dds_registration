@@ -290,6 +290,24 @@ class Payment(Model):
         """Adapt items format for events and membership"""
         pass
 
+    def user_extract(self):
+        return self.data.get("user", {}).get("name", "(UNKNOWN)")
+        "user_extract",
+        "amount_extract",
+        "currency_extract",
+
+    user_extract.short_description = "Username"
+
+    def amount_extract(self):
+        return self.data.get("price", 0.0)
+
+    amount_extract.short_description = "Amount"
+
+    def currency_extract(self):
+        return self.data.get("currency", "---")
+
+    currency_extract.short_description = "Cur."
+
     @property
     def payment_label(self):
         try:
