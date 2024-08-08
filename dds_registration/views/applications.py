@@ -19,7 +19,7 @@ class CreateApplicationFormView(CreateSurveyFormView):
         if form.is_valid():
             form.save()
 
-            if not self.object.for_event:
+            if not (hasattr(self.object, "for_event") and self.object.for_event):
                 # Just a survey, not an application
                 messages.success(
                     self.request,
