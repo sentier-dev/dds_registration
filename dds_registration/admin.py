@@ -268,7 +268,6 @@ class RegistrationOptionAdmin(admin.ModelAdmin):
 class EventAdmin(admin.ModelAdmin):
     # TODO: Show linked options (in columns and in the form)?
     readonly_fields = [
-        "registration_open",
         "edit_registration_url",
     ]
     search_fields = [
@@ -282,6 +281,8 @@ class EventAdmin(admin.ModelAdmin):
         "max_participants",
         "registration_open",
         "registration_close",
+        "application_open",
+        "application_close",
         "public",
         "edit_registration_url",
     ]

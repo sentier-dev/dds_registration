@@ -460,9 +460,9 @@ class Event(Model):
     application_rejected_email = models.TextField(
         blank=True, null=True, help_text="The email sent when an application is rejected"
     )
-    application_open = models.DateField(auto_now_add=True, help_text="Date applications open (inclusive)", null=True)
+    application_open = models.DateField(help_text="Date applications open (inclusive)", null=True)
     application_close = models.DateField(help_text="Date applications close (inclusive)", null=True)
-    registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
+    registration_open = models.DateField(help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
     refund_last_day = models.DateField(null=True, blank=True, help_text="Last day that a fee refund can be offered")
     max_participants = models.PositiveIntegerField(
@@ -526,7 +526,7 @@ class Event(Model):
         )
 
     def today_within_application_band(self):
-        if not self.application_open:
+        if not self.application_open or not self.application_close:
             return False
         today = date.today()
         return (
@@ -534,7 +534,6 @@ class Event(Model):
             and today <= self.application_close
         )
 
-    @property
     def can_register(self, user):
         # Only users who were selected can register after application deadline
         if self.max_participants and self.active_registration_count >= self.max_participants:
@@ -548,7 +547,7 @@ class Event(Model):
     @property
     @admin.display(description="Registration Count")
     def active_registration_count(self):
-        return self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY).count()
+        return self.registrations.filter(REGISTRATION_ACTIVE_QUERY).count()
 
     def get_active_event_registration_for_user(self, user: User):
         if not user.is_anonymous:
