@@ -1,5 +1,5 @@
 # Project version properties
-__version__ = "1.0.21"
+__version__ = "1.0.22"
 __timestamp__ = "2024.04.30 15:01 +0200"
 __timetag__ = "240430-1501"
 
