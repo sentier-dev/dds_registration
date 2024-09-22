@@ -312,7 +312,14 @@ class PaymentAdmin(admin.ModelAdmin):
         "created",
         "updated",
     ]
-    actions = ["mark_invoice_paid", "email_invoices", "email_receipts", "download_invoices", "download_receipts"]
+    actions = [
+        "mark_invoice_paid",
+        "email_invoices",
+        "email_receipts",
+        "download_selected_invoices",
+        "download_unpaid_invoices",
+        "download_receipts",
+    ]
 
     @admin.action(description="Mark selected invoices paid")
     def mark_invoice_paid(self, request, queryset):
@@ -346,8 +353,8 @@ class PaymentAdmin(admin.ModelAdmin):
             messages.SUCCESS,
         )
 
-    @admin.action(description="Download unpaid invoices")
-    def download_invoices(self, request, queryset):
+    @admin.action(description="Download unpaid from selected invoices")
+    def download_unpaid_invoices(self, request, queryset):
         qs = queryset.filter(status__in=("CREATED", "ISSUED"))
 
         if not qs.count():
@@ -362,6 +369,18 @@ class PaymentAdmin(admin.ModelAdmin):
 
         with zipfile.ZipFile(outfile, "w") as zf:
             for obj in qs:
+                zf.writestr(f"DdS invoice {obj.invoice_no}.pdf", obj.invoice_pdf().output())
+
+        response = HttpResponse(outfile.getvalue(), content_type="application/octet-stream")
+        response["Content-Disposition"] = "attachment; filename=dds-invoices.zip"
+        return response
+
+    @admin.action(description="Download all selected invoices")
+    def download_selected_invoices(self, request, queryset):
+        outfile = BytesIO()
+
+        with zipfile.ZipFile(outfile, "w") as zf:
+            for obj in queryset:
                 zf.writestr(f"DdS invoice {obj.invoice_no}.pdf", obj.invoice_pdf().output())
 
         response = HttpResponse(outfile.getvalue(), content_type="application/octet-stream")
