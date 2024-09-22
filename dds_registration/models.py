@@ -208,7 +208,7 @@ class Payment(Model):
     #     "includes_membership": option.includes_membership,
     #     "membership_end_year": option.membership_end_year,
     # }
-    data = models.JSONField(help_text="Read-only JSON object", default=dict)
+    data = models.JSONField(help_text="JSON object", default=dict)
 
     def __str__(self):
         return "Payment {} | {} {:.2f} | {} | {}".format(

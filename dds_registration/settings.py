@@ -138,6 +138,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "django_registration",
     "hijack",
+    "prettyjson",
     "hijack.contrib.admin",
     APP_NAME,
     "djf_surveys",

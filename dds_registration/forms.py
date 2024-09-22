@@ -3,7 +3,9 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.forms.models import ModelForm
+from django.utils.safestring import mark_safe
 from django_registration.forms import RegistrationForm as BaseRegistrationForm
+from prettyjson import PrettyJSONWidget
 
 from .models import MEMBERSHIP_DATA, Event, Payment, RegistrationOption, User
 
@@ -158,13 +160,18 @@ class EventAdminForm(ModelForm):
                 raise ValidationError("`application_rejected_email` required for events with applications")
 
 
+class PrettyJSONWidgetFixed(PrettyJSONWidget):
+    def render(self, name, value, attrs=None, **kwargs):
+        return mark_safe(super().render(name, value, attrs=None, **kwargs))
+
+
 class PaymentAdminForm(ModelForm):
     class Meta:
         model = Payment
         widgets = {
             "name": textInputWidget,
             "address": textAreaWidget,
-            "data": textAreaWidget,
+            "data": PrettyJSONWidgetFixed(),
         }
         fields = "__all__"
 

@@ -41,13 +41,14 @@ dependencies = [
     "django-compressor>=4.4",
     "django-crispy-forms>=2.1",
     "django-environ>=0.11.2",
+    "django-form-surveys",
+    "django-hijack",
     "django-livereload-server>=0.5.1",
     "django-preferences>=1.0.0",
+    "django-prettyjson",
     "django-registration>=3.4", # @see https://django-registration.readthedocs.io
     "django-timezone-field>=3.1",
-    "django-hijack",
     "django>=5.0",
-    "django-form-surveys",
     "fpdf2>=2.7.8", # @see https://github.com/py-pdf/fpdf2
     "loguru",
     "pandas",

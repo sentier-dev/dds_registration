@@ -302,7 +302,6 @@ class PaymentAdmin(admin.ModelAdmin):
         "invoice_no",
         "created",
         "updated",
-        "data",
     ]
     list_display = [
         "invoice_no",
