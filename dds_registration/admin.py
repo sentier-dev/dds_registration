@@ -118,7 +118,7 @@ class MessageAdmin(admin.ModelAdmin):
             messages.SUCCESS,
         )
 
-    @admin.action(description="Email message(s) to users selected (status SELECTED)")
+    @admin.action(description="Email message(s) to selected users (status SELECTED)")
     def email_selected_users(self, request, queryset):
         count = 0
         for obj in queryset:

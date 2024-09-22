@@ -460,6 +460,8 @@ class Event(Model):
     application_rejected_email = models.TextField(
         blank=True, null=True, help_text="The email sent when an application is rejected"
     )
+    application_open = models.DateField(auto_now_add=True, help_text="Date applications open (inclusive)", null=True)
+    application_close = models.DateField(help_text="Date applications close (inclusive)", null=True)
     registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
     refund_last_day = models.DateField(null=True, blank=True, help_text="Last day that a fee refund can be offered")
@@ -475,22 +477,36 @@ class Event(Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(registration_close__gte=models.F("registration_open")),
+                check=Q(registration_close__gte=models.F("registration_open")),
                 name="registration_close_after_open",
             ),
             models.CheckConstraint(
                 name="no_vat_for_credit_cards",
                 check=(
-                    models.Q(
+                    Q(
                         vat_rate__isnull=True,
                         credit_cards=True,
                     )
-                    | models.Q(
+                    | Q(
                         vat_rate__isnull=False,
                         credit_cards=False,
                     )
                 ),
             ),
+            # models.CheckConstraint(
+            #     name="application_forms_need_valid_dates",
+            #     check=(
+            #         Q(
+            #             application_form__isnull=True,
+            #             application_open__isnull=True,
+            #         )
+            #         | Q(
+            #             application_form__isnull=False,
+            #             application_open__isnull=False,
+            #             application_close__gte=models.F("application_open")
+            #         )
+            #     ),
+            # ),
         ]
 
     def get_admin_url(self):
@@ -502,14 +518,32 @@ class Event(Model):
             )
         )
 
-    @property
-    def can_register(self):
+    def today_within_registration_band(self):
         today = date.today()
         return (
             today >= self.registration_open
             and today <= self.registration_close
-            and (not self.max_participants or self.active_registration_count < self.max_participants)
         )
+
+    def today_within_application_band(self):
+        if not self.application_open:
+            return False
+        today = date.today()
+        return (
+            today >= self.application_open
+            and today <= self.application_close
+        )
+
+    @property
+    def can_register(self, user):
+        # Only users who were selected can register after application deadline
+        if self.max_participants and self.active_registration_count >= self.max_participants:
+            return False
+        if self.application_form:
+            if Registration.objects.filter(user=user, event__id=self.id, status="SELECTED").count():
+                return self.today_within_registration_band()
+            return self.today_within_application_band()
+        return self.today_within_registration_band()
 
     @property
     @admin.display(description="Registration Count")
@@ -628,7 +662,7 @@ class Message(Model):
         if self.emailed:
             return 0
 
-        qs = Registration.objects.filter(Q(status__in=("SELECTED",)), event__id=self.event_id)
+        qs = Registration.objects.filter(status="SELECTED", event__id=self.event_id)
         for obj in qs:
             obj.user.email_user(
                 subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message

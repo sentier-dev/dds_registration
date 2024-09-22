@@ -28,7 +28,7 @@ def event_registration(request: HttpRequest, event_code: str):
     except ObjectDoesNotExist:
         raise Http404
 
-    if not event.can_register:
+    if not event.can_register(request.user):
         messages.error(request, f"Registration for {event.title} isn't open")
         return redirect("index")
 
