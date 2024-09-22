@@ -658,7 +658,7 @@ class Message(Model):
                     subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
                 )
         else:
-            qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, option__id=self.option_id)
+            qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, option__id=self.registration_option_id)
             for obj in qs:
                 obj.user.email_user(
                     subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
