@@ -658,8 +658,14 @@ class Message(Model):
             qs = Membership.mailinglist_people()
             for obj in qs:
                 obj.user.email_user(subject=self.subject or "DdS email for members", message=self.message)
-        else:
+        elif self.event:
             qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, event__id=self.event_id)
+            for obj in qs:
+                obj.user.email_user(
+                    subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
+                )
+        else:
+            qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, option__id=self.option_id)
             for obj in qs:
                 obj.user.email_user(
                     subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
