@@ -596,6 +596,7 @@ class RegistrationOption(Model):
 
 class Message(Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, blank=True, null=True)
+    registration_option = models.ForeignKey(RegistrationOption, on_delete=models.CASCADE, blank=True, null=True)
     for_members = models.BooleanField(default=False)
     subject = models.TextField(blank=True, null=True)
     message = models.TextField()
@@ -603,7 +604,7 @@ class Message(Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "{}: {} ({})".format(self.event or "Members", self.subject[:50], "sent" if self.emailed else "not sent")
+        return "{}: {} ({})".format(self.event or self.registration_option or "Members", self.subject[:50], "sent" if self.emailed else "not sent")
 
     def send_email(self):
         if self.emailed:
@@ -623,17 +624,37 @@ class Message(Model):
         self.save()
         return qs.count()
 
+    def send_email_if_selected(self):
+        if self.emailed:
+            return 0
+
+        qs = Registration.objects.filter(Q(status__in=("SELECTED",)), event__id=self.event_id)
+        for obj in qs:
+            obj.user.email_user(
+                subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
+            )
+        self.emailed = True
+        self.save()
+        return qs.count()
+
     class Meta:
         constraints = [
             models.CheckConstraint(
-                name="either_event_or_for_members",
+                name="either_event_or_registration_option_or_for_members",
                 check=(
                     models.Q(
                         event__isnull=True,
+                        registration_option__isnull=True,
                         for_members=True,
                     )
                     | models.Q(
                         event__isnull=False,
+                        registration_option__isnull=True,
+                        for_members=False,
+                    )
+                    | models.Q(
+                        event__isnull=True,
+                        registration_option__isnull=False,
                         for_members=False,
                     )
                 ),

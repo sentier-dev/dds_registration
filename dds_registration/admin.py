@@ -105,7 +105,7 @@ class MessageAdmin(admin.ModelAdmin):
     date_hierarchy = "created_at"
     readonly_fields = ["emailed"]
     list_filter = ["event"]
-    actions = ["email_registered_users"]
+    actions = ["email_registered_users", "email_selected_users"]
 
     @admin.action(description="Email message(s) to registered users or members")
     def email_registered_users(self, request, queryset):
@@ -118,6 +118,16 @@ class MessageAdmin(admin.ModelAdmin):
             messages.SUCCESS,
         )
 
+    @admin.action(description="Email message(s) to users selected (status SELECTED)")
+    def email_selected_users(self, request, queryset):
+        count = 0
+        for obj in queryset:
+            count += obj.send_email_if_selected()
+        self.message_user(
+            request,
+            f"Sent {queryset.count()} messages to {count} users",
+            messages.SUCCESS,
+        )
 
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     # membership_type = models.TextField(choices=MEMBERSHIP_DATA.choices, default=MEMBERSHIP_DATA.default)
