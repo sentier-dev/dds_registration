@@ -1,3 +1,4 @@
+import requests
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -5,7 +6,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpRequest
 from django.shortcuts import redirect, render
 from loguru import logger
-import requests
 
 from ..forms import FreeRegistrationForm, RegistrationForm
 from ..models import Event, Payment, Registration, RegistrationOption
@@ -78,7 +78,7 @@ def event_registration(request: HttpRequest, event_code: str):
                             "text": "Registration by {} for {} ({})".format(
                                 request.user.get_full_name(), event.title, event.get_admin_url()
                             )
-                        }
+                        },
                     )
 
                 messages.success(request, f"You have successfully registered for {event.title}.")
@@ -116,7 +116,7 @@ def event_registration(request: HttpRequest, event_code: str):
                             "text": "Registration by {} for {} ({})".format(
                                 request.user.get_full_name(), event.title, event.get_admin_url()
                             )
-                        }
+                        },
                     )
 
                 if not registration.option.price:

@@ -1,13 +1,13 @@
-from datetime import date
 import zipfile
+from datetime import date
 from io import BytesIO
 
+import pandas as pd
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Q
 from django.http import HttpResponse
-import pandas as pd
 
 from .forms import (
     EventAdminForm,
@@ -196,36 +196,42 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     @admin.action(description="Export to excel")
     def export_to_excel(self, request, queryset):
-        df = pd.DataFrame([{
-            "id": obj.id,
-            "user_email": obj.user.email,
-            "user_id": obj.user.id,
-            "user_name": obj.user.get_full_name(),
-            "status": obj.status,
-            "send_update_emails": obj.send_update_emails,
-            "event_title": obj.event.title,
-            "event_id": obj.event.id,
-            "option_id": obj.option.id if obj.option else None,
-            "option_item": obj.option.item if obj.option else None,
-            "option_includes_membership": obj.option.includes_membership if obj.option else None,
-            "option_price": obj.option.price if obj.option else None,
-            "option_currency": obj.option.currency if obj.option else None,
-            "application_id": obj.application.id if obj.application else None,
-            "payment_id": obj.payment.id if obj.payment else None,
-            "payment_status": obj.payment.status if obj.payment else None,
-            "created_at": obj.created_at.isoformat(),
-            "updated_at": obj.updated_at.isoformat(),
-        } for obj in queryset])
+        df = pd.DataFrame(
+            [
+                {
+                    "id": obj.id,
+                    "user_email": obj.user.email,
+                    "user_id": obj.user.id,
+                    "user_name": obj.user.get_full_name(),
+                    "status": obj.status,
+                    "send_update_emails": obj.send_update_emails,
+                    "event_title": obj.event.title,
+                    "event_id": obj.event.id,
+                    "option_id": obj.option.id if obj.option else None,
+                    "option_item": obj.option.item if obj.option else None,
+                    "option_includes_membership": obj.option.includes_membership if obj.option else None,
+                    "option_price": obj.option.price if obj.option else None,
+                    "option_currency": obj.option.currency if obj.option else None,
+                    "application_id": obj.application.id if obj.application else None,
+                    "payment_id": obj.payment.id if obj.payment else None,
+                    "payment_status": obj.payment.status if obj.payment else None,
+                    "created_at": obj.created_at.isoformat(),
+                    "updated_at": obj.updated_at.isoformat(),
+                }
+                for obj in queryset
+            ]
+        )
 
         outfile = BytesIO()
-        writer = pd.ExcelWriter(outfile, engine='xlsxwriter')
-        df.to_excel(writer, index=False, sheet_name='registrations')
+        writer = pd.ExcelWriter(outfile, engine="xlsxwriter")
+        df.to_excel(writer, index=False, sheet_name="registrations")
         writer.close()
         outfile.seek(0)
-        response = HttpResponse(outfile.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response = HttpResponse(
+            outfile.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
         response["Content-Disposition"] = "attachment; filename=registrations.xlsx"
         return response
-
 
     @admin.action(description="Accept application(s)")
     def accept_application(self, request, queryset):

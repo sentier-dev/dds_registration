@@ -12,7 +12,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import Model, Q, QuerySet, Count, F
+from django.db.models import Count, F, Model, Q, QuerySet
 from django.urls import reverse
 from fpdf import FPDF
 from loguru import logger
@@ -252,7 +252,7 @@ class Payment(Model):
                     membership_type="NORMAL",
                     payment=self,
                     mailing_list=True,
-                    until=self.data["membership_end_year"]
+                    until=self.data["membership_end_year"],
                 ).save()
 
         if settings.SLACK_PAYMENTS_WEBHOOK:
@@ -512,27 +512,18 @@ class Event(Model):
     def get_admin_url(self):
         return "https://{}{}".format(
             Site.objects.get_current().domain,
-            reverse(
-                "admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name),
-                args=(self.id,)
-            )
+            reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name), args=(self.id,)),
         )
 
     def today_within_registration_band(self):
         today = date.today()
-        return (
-            today >= self.registration_open
-            and today <= self.registration_close
-        )
+        return today >= self.registration_open and today <= self.registration_close
 
     def today_within_application_band(self):
         if not self.application_open or not self.application_close:
             return False
         today = date.today()
-        return (
-            today >= self.application_open
-            and today <= self.application_close
-        )
+        return today >= self.application_open and today <= self.application_close
 
     def can_register(self, user):
         # Only users who were selected can register after application deadline
@@ -633,9 +624,7 @@ class RegistrationOption(Model):
     @classmethod
     def free_spots(cls, event):
         qs = cls.objects.annotate(Count("registrations"))
-        return qs.filter(event=event).filter(
-            Q(max_participants=0) | Q(max_participants__gt=F("registrations__count"))
-        )
+        return qs.filter(event=event).filter(Q(max_participants=0) | Q(max_participants__gt=F("registrations__count")))
 
 
 class Message(Model):
@@ -648,7 +637,11 @@ class Message(Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "{}: {} ({})".format(self.event or self.registration_option or "Members", self.subject[:50], "sent" if self.emailed else "not sent")
+        return "{}: {} ({})".format(
+            self.event or self.registration_option or "Members",
+            self.subject[:50],
+            "sent" if self.emailed else "not sent",
+        )
 
     def send_email(self):
         if self.emailed:
