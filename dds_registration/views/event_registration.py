@@ -86,7 +86,7 @@ def event_registration(request: HttpRequest, event_code: str):
         else:
             form = RegistrationForm(
                 data=request.POST,
-                option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
+                option_choices=[(obj.id, obj.form_label) for obj in RegistrationOption.free_spots(event)],
                 credit_cards=event.credit_cards,
             )
 
@@ -203,7 +203,7 @@ def event_registration(request: HttpRequest, event_code: str):
             option = registration.option.id if registration.option else None
 
             form = RegistrationForm(
-                option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
+                option_choices=[(obj.id, obj.form_label) for obj in RegistrationOption.free_spots(event)],
                 credit_cards=event.credit_cards,
                 initial={
                     "name": name,

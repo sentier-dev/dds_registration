@@ -12,7 +12,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import Model, Q, QuerySet
+from django.db.models import Model, Q, QuerySet, Count, F
 from django.urls import reverse
 from fpdf import FPDF
 from loguru import logger
@@ -477,7 +477,7 @@ class Event(Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=Q(registration_close__gte=models.F("registration_open")),
+                check=Q(registration_close__gte=F("registration_open")),
                 name="registration_close_after_open",
             ),
             models.CheckConstraint(
@@ -582,6 +582,10 @@ class RegistrationOption(Model):
     membership_end_year = models.IntegerField(
         default=this_year, help_text="If membership is included, until what year is it valid?"
     )
+    max_participants = models.PositiveIntegerField(
+        default=0,
+        help_text="Maximum number of participants (0 = no limit)",
+    )
 
     SUPPORTED_CURRENCIES = site_supported_currencies
     DEFAULT_CURRENCY = site_default_currency
@@ -625,6 +629,13 @@ class RegistrationOption(Model):
         ]
         info = " ".join(filter(None, map(str, items)))
         return info
+
+    @classmethod
+    def free_spots(cls, event):
+        qs = cls.objects.annotate(Count("registrations"))
+        return qs.filter(event=event).filter(
+            Q(max_participants=0) | Q(max_participants__gt=F("registrations__count"))
+        )
 
 
 class Message(Model):
@@ -675,17 +686,17 @@ class Message(Model):
             models.CheckConstraint(
                 name="either_event_or_registration_option_or_for_members",
                 check=(
-                    models.Q(
+                    Q(
                         event__isnull=True,
                         registration_option__isnull=True,
                         for_members=True,
                     )
-                    | models.Q(
+                    | Q(
                         event__isnull=False,
                         registration_option__isnull=True,
                         for_members=False,
                     )
-                    | models.Q(
+                    | Q(
                         event__isnull=True,
                         registration_option__isnull=False,
                         for_members=False,
