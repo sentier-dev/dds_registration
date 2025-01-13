@@ -530,7 +530,7 @@ class Event(Model):
         if self.max_participants and self.active_registration_count >= self.max_participants:
             return False
         if self.application_form:
-            if Registration.objects.filter(user=user, event__id=self.id, status="SELECTED").count():
+            if user.is_authenticated() and Registration.objects.filter(user=user, event__id=self.id, status="SELECTED").count():
                 return self.today_within_registration_band()
             return self.today_within_application_band()
         return self.today_within_registration_band()
@@ -541,7 +541,7 @@ class Event(Model):
         return self.registrations.filter(REGISTRATION_ACTIVE_QUERY).count()
 
     def get_active_event_registration_for_user(self, user: User):
-        if not user.is_anonymous:
+        if user.is_authenticated():
             active_user_registrations = list(self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY, user=user))
         else:
             active_user_registrations = []
