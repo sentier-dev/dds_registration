@@ -12,7 +12,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import Model, Q, QuerySet
+from django.db.models import Count, F, Model, Q, QuerySet
 from django.urls import reverse
 from fpdf import FPDF
 from loguru import logger
@@ -208,7 +208,7 @@ class Payment(Model):
     #     "includes_membership": option.includes_membership,
     #     "membership_end_year": option.membership_end_year,
     # }
-    data = models.JSONField(help_text="Read-only JSON object", default=dict)
+    data = models.JSONField(help_text="JSON object", default=dict)
 
     def __str__(self):
         return "Payment {} | {} {:.2f} | {} | {}".format(
@@ -252,7 +252,7 @@ class Payment(Model):
                     membership_type="NORMAL",
                     payment=self,
                     mailing_list=True,
-                    until=self.data["membership_end_year"]
+                    until=self.data["membership_end_year"],
                 ).save()
 
         if settings.SLACK_PAYMENTS_WEBHOOK:
@@ -460,7 +460,9 @@ class Event(Model):
     application_rejected_email = models.TextField(
         blank=True, null=True, help_text="The email sent when an application is rejected"
     )
-    registration_open = models.DateField(auto_now_add=True, help_text="Date registration opens (inclusive)")
+    application_open = models.DateField(help_text="Date applications open (inclusive)", null=True)
+    application_close = models.DateField(help_text="Date applications close (inclusive)", null=True)
+    registration_open = models.DateField(help_text="Date registration opens (inclusive)")
     registration_close = models.DateField(help_text="Date registration closes (inclusive)")
     refund_last_day = models.DateField(null=True, blank=True, help_text="Last day that a fee refund can be offered")
     max_participants = models.PositiveIntegerField(
@@ -475,49 +477,71 @@ class Event(Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(registration_close__gte=models.F("registration_open")),
+                check=Q(registration_close__gte=F("registration_open")),
                 name="registration_close_after_open",
             ),
             models.CheckConstraint(
                 name="no_vat_for_credit_cards",
                 check=(
-                    models.Q(
+                    Q(
                         vat_rate__isnull=True,
                         credit_cards=True,
                     )
-                    | models.Q(
+                    | Q(
                         vat_rate__isnull=False,
                         credit_cards=False,
                     )
                 ),
             ),
+            # models.CheckConstraint(
+            #     name="application_forms_need_valid_dates",
+            #     check=(
+            #         Q(
+            #             application_form__isnull=True,
+            #             application_open__isnull=True,
+            #         )
+            #         | Q(
+            #             application_form__isnull=False,
+            #             application_open__isnull=False,
+            #             application_close__gte=models.F("application_open")
+            #         )
+            #     ),
+            # ),
         ]
 
     def get_admin_url(self):
         return "https://{}{}".format(
             Site.objects.get_current().domain,
-            reverse(
-                "admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name),
-                args=(self.id,)
-            )
+            reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name), args=(self.id,)),
         )
 
-    @property
-    def can_register(self):
+    def today_within_registration_band(self):
         today = date.today()
-        return (
-            today >= self.registration_open
-            and today <= self.registration_close
-            and (not self.max_participants or self.active_registration_count < self.max_participants)
-        )
+        return today >= self.registration_open and today <= self.registration_close
+
+    def today_within_application_band(self):
+        if not self.application_open or not self.application_close:
+            return False
+        today = date.today()
+        return today >= self.application_open and today <= self.application_close
+
+    def can_register(self, user):
+        # Only users who were selected can register after application deadline
+        if self.max_participants and self.active_registration_count >= self.max_participants:
+            return False
+        if self.application_form:
+            if user.is_authenticated and Registration.objects.filter(user=user, event__id=self.id, status="SELECTED").count():
+                return self.today_within_registration_band()
+            return self.today_within_application_band()
+        return self.today_within_registration_band()
 
     @property
     @admin.display(description="Registration Count")
     def active_registration_count(self):
-        return self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY).count()
+        return self.registrations.filter(REGISTRATION_ACTIVE_QUERY).count()
 
     def get_active_event_registration_for_user(self, user: User):
-        if not user.is_anonymous:
+        if user.is_authenticated:
             active_user_registrations = list(self.registrations.all().filter(REGISTRATION_ACTIVE_QUERY, user=user))
         else:
             active_user_registrations = []
@@ -548,6 +572,10 @@ class RegistrationOption(Model):
     )
     membership_end_year = models.IntegerField(
         default=this_year, help_text="If membership is included, until what year is it valid?"
+    )
+    max_participants = models.PositiveIntegerField(
+        default=0,
+        help_text="Maximum number of participants (0 = no limit)",
     )
 
     SUPPORTED_CURRENCIES = site_supported_currencies
@@ -593,9 +621,15 @@ class RegistrationOption(Model):
         info = " ".join(filter(None, map(str, items)))
         return info
 
+    @classmethod
+    def free_spots(cls, event):
+        qs = cls.objects.annotate(Count("registrations"))
+        return qs.filter(event=event).filter(Q(max_participants=0) | Q(max_participants__gt=F("registrations__count")))
+
 
 class Message(Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, blank=True, null=True)
+    registration_option = models.ForeignKey(RegistrationOption, on_delete=models.CASCADE, blank=True, null=True)
     for_members = models.BooleanField(default=False)
     subject = models.TextField(blank=True, null=True)
     message = models.TextField()
@@ -603,7 +637,11 @@ class Message(Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "{}: {} ({})".format(self.event or "Members", self.subject[:50], "sent" if self.emailed else "not sent")
+        return "{}: {} ({})".format(
+            self.event or self.registration_option or "Members",
+            self.subject[:50],
+            "sent" if self.emailed else "not sent",
+        )
 
     def send_email(self):
         if self.emailed:
@@ -613,8 +651,14 @@ class Message(Model):
             qs = Membership.mailinglist_people()
             for obj in qs:
                 obj.user.email_user(subject=self.subject or "DdS email for members", message=self.message)
-        else:
+        elif self.event:
             qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, event__id=self.event_id)
+            for obj in qs:
+                obj.user.email_user(
+                    subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
+                )
+        else:
+            qs = Registration.objects.filter(REGISTRATION_ACTIVE_QUERY, option__id=self.registration_option_id)
             for obj in qs:
                 obj.user.email_user(
                     subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
@@ -623,17 +667,37 @@ class Message(Model):
         self.save()
         return qs.count()
 
+    def send_email_if_selected(self):
+        if self.emailed:
+            return 0
+
+        qs = Registration.objects.filter(status="SELECTED", event__id=self.event_id)
+        for obj in qs:
+            obj.user.email_user(
+                subject=self.subject or f"Update for DdS Event {self.event.title}", message=self.message
+            )
+        self.emailed = True
+        self.save()
+        return qs.count()
+
     class Meta:
         constraints = [
             models.CheckConstraint(
-                name="either_event_or_for_members",
+                name="either_event_or_registration_option_or_for_members",
                 check=(
-                    models.Q(
+                    Q(
                         event__isnull=True,
+                        registration_option__isnull=True,
                         for_members=True,
                     )
-                    | models.Q(
+                    | Q(
                         event__isnull=False,
+                        registration_option__isnull=True,
+                        for_members=False,
+                    )
+                    | Q(
+                        event__isnull=True,
+                        registration_option__isnull=False,
                         for_members=False,
                     )
                 ),

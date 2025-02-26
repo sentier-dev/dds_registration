@@ -14,6 +14,8 @@
         {% if registration %} <i class="bi bi-check"></i>{% endif %}
       </h3>
 
+        {% if event.members_only %}<p><b>Registration for this event is only for members</b></p>{% endif %}
+
         <p class="events-list-item-description">{{ event.description }}</p>
 
         <div class="events-list-item-details">

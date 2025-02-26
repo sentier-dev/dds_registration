@@ -9,7 +9,7 @@ from ..models import Event, Registration
 
 
 def index(request: HttpRequest):
-    events = [obj for obj in Event.objects.filter(public=True) if obj.can_register]
+    events = [obj for obj in Event.objects.filter(public=True) if obj.can_register(request.user)]
     if request.user:
         for event in events:
             event.registration = event.get_active_event_registration_for_user(request.user)

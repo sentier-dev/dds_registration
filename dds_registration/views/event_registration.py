@@ -1,3 +1,4 @@
+import requests
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -5,7 +6,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpRequest
 from django.shortcuts import redirect, render
 from loguru import logger
-import requests
 
 from ..forms import FreeRegistrationForm, RegistrationForm
 from ..models import Event, Payment, Registration, RegistrationOption
@@ -28,7 +28,7 @@ def event_registration(request: HttpRequest, event_code: str):
     except ObjectDoesNotExist:
         raise Http404
 
-    if not event.can_register:
+    if not event.can_register(request.user):
         messages.error(request, f"Registration for {event.title} isn't open")
         return redirect("index")
 
@@ -78,7 +78,7 @@ def event_registration(request: HttpRequest, event_code: str):
                             "text": "Registration by {} for {} ({})".format(
                                 request.user.get_full_name(), event.title, event.get_admin_url()
                             )
-                        }
+                        },
                     )
 
                 messages.success(request, f"You have successfully registered for {event.title}.")
@@ -86,7 +86,7 @@ def event_registration(request: HttpRequest, event_code: str):
         else:
             form = RegistrationForm(
                 data=request.POST,
-                option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
+                option_choices=[(obj.id, obj.form_label) for obj in RegistrationOption.free_spots(event)],
                 credit_cards=event.credit_cards,
             )
 
@@ -116,7 +116,7 @@ def event_registration(request: HttpRequest, event_code: str):
                             "text": "Registration by {} for {} ({})".format(
                                 request.user.get_full_name(), event.title, event.get_admin_url()
                             )
-                        }
+                        },
                     )
 
                 if not registration.option.price:
@@ -203,7 +203,7 @@ def event_registration(request: HttpRequest, event_code: str):
             option = registration.option.id if registration.option else None
 
             form = RegistrationForm(
-                option_choices=[(obj.id, obj.form_label) for obj in event.options.all()],
+                option_choices=[(obj.id, obj.form_label) for obj in RegistrationOption.free_spots(event)],
                 credit_cards=event.credit_cards,
                 initial={
                     "name": name,

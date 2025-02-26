@@ -1,7 +1,8 @@
-from datetime import date
 import zipfile
+from datetime import date
 from io import BytesIO
 
+import pandas as pd
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -105,7 +106,7 @@ class MessageAdmin(admin.ModelAdmin):
     date_hierarchy = "created_at"
     readonly_fields = ["emailed"]
     list_filter = ["event"]
-    actions = ["email_registered_users"]
+    actions = ["email_registered_users", "email_selected_users"]
 
     @admin.action(description="Email message(s) to registered users or members")
     def email_registered_users(self, request, queryset):
@@ -118,6 +119,16 @@ class MessageAdmin(admin.ModelAdmin):
             messages.SUCCESS,
         )
 
+    @admin.action(description="Email message(s) to selected users (status SELECTED)")
+    def email_selected_users(self, request, queryset):
+        count = 0
+        for obj in queryset:
+            count += obj.send_email_if_selected()
+        self.message_user(
+            request,
+            f"Sent {queryset.count()} messages to {count} users",
+            messages.SUCCESS,
+        )
 
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     # membership_type = models.TextField(choices=MEMBERSHIP_DATA.choices, default=MEMBERSHIP_DATA.default)
@@ -157,7 +168,8 @@ class RegistrationAdmin(admin.ModelAdmin):
         "updated_at",
     ]
     search_fields = [
-        "event",
+        "event__title",
+        "user__email",
     ]
     list_display = [
         "user_column",
@@ -168,7 +180,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         "created_at",
     ]
     list_filter = ["event", "payment__status", "status"]
-    actions = ["accept_application", "decline_application"]
+    actions = ["accept_application", "decline_application", "export_to_excel"]
 
     def user_column(self, reg):
         return reg.user.full_name_with_email
@@ -181,6 +193,45 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     payment_column.short_description = "Payment"
     payment_column.admin_order_field = "payment"
+
+    @admin.action(description="Export to excel")
+    def export_to_excel(self, request, queryset):
+        df = pd.DataFrame(
+            [
+                {
+                    "id": obj.id,
+                    "user_email": obj.user.email,
+                    "user_id": obj.user.id,
+                    "user_name": obj.user.get_full_name(),
+                    "status": obj.status,
+                    "send_update_emails": obj.send_update_emails,
+                    "event_title": obj.event.title,
+                    "event_id": obj.event.id,
+                    "option_id": obj.option.id if obj.option else None,
+                    "option_item": obj.option.item if obj.option else None,
+                    "option_includes_membership": obj.option.includes_membership if obj.option else None,
+                    "option_price": obj.option.price if obj.option else None,
+                    "option_currency": obj.option.currency if obj.option else None,
+                    "application_id": obj.application.id if obj.application else None,
+                    "payment_id": obj.payment.id if obj.payment else None,
+                    "payment_status": obj.payment.status if obj.payment else None,
+                    "created_at": obj.created_at.isoformat(),
+                    "updated_at": obj.updated_at.isoformat(),
+                }
+                for obj in queryset
+            ]
+        )
+
+        outfile = BytesIO()
+        writer = pd.ExcelWriter(outfile, engine="xlsxwriter")
+        df.to_excel(writer, index=False, sheet_name="registrations")
+        writer.close()
+        outfile.seek(0)
+        response = HttpResponse(
+            outfile.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = "attachment; filename=registrations.xlsx"
+        return response
 
     @admin.action(description="Accept application(s)")
     def accept_application(self, request, queryset):
@@ -223,7 +274,6 @@ class RegistrationOptionAdmin(admin.ModelAdmin):
 class EventAdmin(admin.ModelAdmin):
     # TODO: Show linked options (in columns and in the form)?
     readonly_fields = [
-        "registration_open",
         "edit_registration_url",
     ]
     search_fields = [
@@ -237,6 +287,8 @@ class EventAdmin(admin.ModelAdmin):
         "max_participants",
         "registration_open",
         "registration_close",
+        "application_open",
+        "application_close",
         "public",
         "edit_registration_url",
     ]
@@ -250,7 +302,6 @@ class PaymentAdmin(admin.ModelAdmin):
         "invoice_no",
         "created",
         "updated",
-        "data",
     ]
     list_display = [
         "invoice_no",
@@ -261,7 +312,14 @@ class PaymentAdmin(admin.ModelAdmin):
         "created",
         "updated",
     ]
-    actions = ["mark_invoice_paid", "email_invoices", "email_receipts", "download_invoices", "download_receipts"]
+    actions = [
+        "mark_invoice_paid",
+        "email_invoices",
+        "email_receipts",
+        "download_selected_invoices",
+        "download_unpaid_invoices",
+        "download_receipts",
+    ]
 
     @admin.action(description="Mark selected invoices paid")
     def mark_invoice_paid(self, request, queryset):
@@ -295,8 +353,8 @@ class PaymentAdmin(admin.ModelAdmin):
             messages.SUCCESS,
         )
 
-    @admin.action(description="Download unpaid invoices")
-    def download_invoices(self, request, queryset):
+    @admin.action(description="Download unpaid from selected invoices")
+    def download_unpaid_invoices(self, request, queryset):
         qs = queryset.filter(status__in=("CREATED", "ISSUED"))
 
         if not qs.count():
@@ -311,6 +369,18 @@ class PaymentAdmin(admin.ModelAdmin):
 
         with zipfile.ZipFile(outfile, "w") as zf:
             for obj in qs:
+                zf.writestr(f"DdS invoice {obj.invoice_no}.pdf", obj.invoice_pdf().output())
+
+        response = HttpResponse(outfile.getvalue(), content_type="application/octet-stream")
+        response["Content-Disposition"] = "attachment; filename=dds-invoices.zip"
+        return response
+
+    @admin.action(description="Download all selected invoices")
+    def download_selected_invoices(self, request, queryset):
+        outfile = BytesIO()
+
+        with zipfile.ZipFile(outfile, "w") as zf:
+            for obj in queryset:
                 zf.writestr(f"DdS invoice {obj.invoice_no}.pdf", obj.invoice_pdf().output())
 
         response = HttpResponse(outfile.getvalue(), content_type="application/octet-stream")

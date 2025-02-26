@@ -14,6 +14,7 @@ cache_timeout = 0 if settings.DEV or settings.DEBUG else 15 * 60  # in seconds: 
 urlpatterns = [
     # App-provided paths...
     path("admin/", admin.site.urls, name="admin"),
+    path("hijack/", include("hijack.urls")),
     path("applications/", include((application_urlpatterns, "djf_surveys"))),
     # Service pages...
     path(
