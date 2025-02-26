@@ -3,12 +3,14 @@ site_supported_currencies = [
     ("CHF", "Swiss Franc"),
     ("EUR", "Euro"),
     ("CAD", "Canadian Dollar"),  # AKA Loonie :)
+    ("SGD", "Singaporean Dollar"),  # AKA Loonie :)
 ]
 currency_emojis = {
     "USD": "🇺🇸",
     "CHF": "🇨🇭",
     "EUR": "🇪🇺",
     "CAD": "🇨🇦",
+    "SGD": "🇸🇬",
 }
 site_default_currency = "EUR"
 
@@ -69,4 +71,17 @@ Bank address:
     5412 Gebenstorf
     Switzerland
 """,
+    "SGD": """
+Account holder: Départ de Sentier
+Account number: 173-493-58
+Bank Code: 0516
+SWIFT-BIC: TRWISGSGXXX
+Bank address:
+    Wise Asia-Pacific Pte. Ltd.
+    1 Paya Lebar Link #13-06 - #13-08
+    PLQ 2
+    Paya Lebar Quarter
+    408533
+    Singapore
+"""
 }
