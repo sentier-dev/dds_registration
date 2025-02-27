@@ -28,25 +28,26 @@ def event_registration(request: HttpRequest, event_code: str):
     except ObjectDoesNotExist:
         raise Http404
 
-    if not event.can_register(request.user):
-        messages.error(request, f"Registration for {event.title} isn't open")
-        return redirect("index")
-
-    if event.members_only and not request.user.is_member:
-        messages.error(request, f"{event.title} is only for members")
-        return redirect("index")
-
     registration = event.get_active_event_registration_for_user(request.user)
-    if registration and registration.payment and registration.payment.status == "PAID":
+
+    if not registration:
+        if not event.can_register(request.user):
+            messages.error(request, f"Registration for {event.title} isn't open")
+            return redirect("index")
+
+        if event.members_only and not request.user.is_member:
+            messages.error(request, f"{event.title} is only for members")
+            return redirect("index")
+        if event.application_form:
+            return redirect("djf_surveys:create", slug=event.application_form.slug)
+    elif registration.payment and registration.payment.status == "PAID":
         messages.error(
             request,
             f"Paid event registrations can't be edited manually; please either cancel and start again, or contact {settings.DEFAULT_CONTACT_EMAIL}. Sorry for the inconvenience.",
         )
         return redirect("profile")
-
-    if event.application_form and not registration:
-        return redirect("djf_surveys:create", slug=event.application_form.slug)
-    elif registration and registration.application and registration.status == "SUBMITTED":
+    elif registration.application and registration.status == "SUBMITTED":
+        # Applied but not yet accepted/rejected - can edit application form
         return redirect("djf_surveys:edit", pk=registration.application.id)
 
     logger.debug(f"Working on registration {registration}")
