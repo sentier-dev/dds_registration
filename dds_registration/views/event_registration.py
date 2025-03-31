@@ -3,22 +3,80 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404, HttpRequest
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from loguru import logger
 
 from ..forms import FreeRegistrationForm, RegistrationForm
-from ..models import Event, Payment, Registration, RegistrationOption
+from ..models import Event, Payment, Registration, RegistrationOption, Certificate, InvitationLetter
 
-# from .event_registration_cancel import (
-#     event_registration_cancel_confirm_form,
-#     event_registration_cancel_process_action,
-# )
-# from .helpers.events import (
-#     event_registration_form,
-#     get_event_registration_context,
-#     show_registration_form_success,
-# )
+
+@login_required
+def event_certificate(request: HttpRequest, event_code: str) -> HttpResponse:
+    try:
+        event = Event.objects.get(code=event_code)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    registration = event.get_active_event_registration_for_user(request.user)
+
+    if not event.has_certificate or not registration:
+        raise Http404
+
+    response = HttpResponse(
+        content=bytes(registration.get_certificate().output()),
+        content_type="application/pdf"
+    )
+    response["Content-Disposition"] = f'attachment; filename="DdS event certificate {registration.certificate.uuid}.pdf"'
+    return response
+
+
+def event_certificate_validation(request: HttpRequest, certificate_code: str) -> HttpResponse:
+    try:
+        certificate = Certificate.objects.get(uuid=certificate_code)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    response = HttpResponse(
+        content=bytes(certificate.pdf().output()),
+        content_type="application/pdf"
+    )
+    response["Content-Disposition"] = f'attachment; filename="DdS event certificate {certificate.uuid}.pdf"'
+    return response
+
+
+@login_required
+def event_invitation(request: HttpRequest, event_code: str) -> HttpResponse:
+    try:
+        event = Event.objects.get(code=event_code)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    registration = event.get_active_event_registration_for_user(request.user)
+
+    if not event.has_invitation or not registration:
+        raise Http404
+
+    response = HttpResponse(
+        content=bytes(registration.get_invitation().output()),
+        content_type="application/pdf"
+    )
+    response["Content-Disposition"] = f'attachment; filename="DdS Letter of Invitation {registration.invitation.uuid}.pdf"'
+    return response
+
+
+def event_invitation_validation(request: HttpRequest, invitation_code: str) -> HttpResponse:
+    try:
+        letter = InvitationLetter.objects.get(uuid=invitation_code)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    response = HttpResponse(
+        content=bytes(letter.pdf().output()),
+        content_type="application/pdf"
+    )
+    response["Content-Disposition"] = f'attachment; filename="DdS Letter of Invitation {letter.uuid}.pdf"'
+    return response
 
 
 @login_required

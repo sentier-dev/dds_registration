@@ -35,7 +35,7 @@ def normalize_text(text: str) -> str:
     return text.encode("utf-8", "ignore").decode("utf-8").strip()
 
 
-def create_pdf(
+def create_financial_pdf(
     kind: str,
     client_name: str,
     client_address: str,
@@ -58,10 +58,10 @@ def create_pdf(
     # Create pdf...
     pdf = FPDF(unit="mm", format="A4")
 
-    pdf.add_font("NotoSans", style="", fname=BASE_DIR / "fonts" / "NotoSans-Regular.ttf", uni=True)
-    pdf.add_font("NotoSans", style="B", fname=BASE_DIR / "fonts" / "NotoSans-Bold.ttf", uni=True)
-    pdf.add_font("NotoSans", style="I", fname=BASE_DIR / "fonts" / "NotoSans-Italic.ttf", uni=True)
-    pdf.add_font("NotoSans", style="BI", fname=BASE_DIR / "fonts" / "NotoSans-BoldItalic.ttf", uni=True)
+    pdf.add_font("NotoSans", style="", fname=BASE_DIR / "fonts" / "NotoSans-Regular.ttf")
+    pdf.add_font("NotoSans", style="B", fname=BASE_DIR / "fonts" / "NotoSans-Bold.ttf")
+    pdf.add_font("NotoSans", style="I", fname=BASE_DIR / "fonts" / "NotoSans-Italic.ttf")
+    pdf.add_font("NotoSans", style="BI", fname=BASE_DIR / "fonts" / "NotoSans-BoldItalic.ttf")
 
     pdf.set_title("{} {} ({})".format(kind.title(), invoice_number, client_name))
     pdf.set_margins(left=margin_size, top=margin_size, right=margin_size)
@@ -265,7 +265,7 @@ def get_common_pdf_table_items(payment: Model) -> (list, tuple):
 def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
     items, column_layout = get_common_pdf_table_items(payment)
 
-    return create_pdf(
+    return create_financial_pdf(
         kind="invoice",
         client_name=payment.data["user"]["name"],
         client_address=payment.data["user"]["address"],
@@ -281,7 +281,7 @@ def create_invoice_pdf_from_payment(payment: Model) -> FPDF:
 def create_receipt_pdf_from_payment(payment: Model) -> FPDF:
     items, column_layout = get_common_pdf_table_items(payment)
 
-    return create_pdf(
+    return create_financial_pdf(
         kind="receipt",
         client_name=payment.data["user"]["name"],
         client_address=payment.data["user"]["address"],
