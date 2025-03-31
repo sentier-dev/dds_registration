@@ -52,6 +52,7 @@ dependencies = [
     "fpdf2>=2.7.8", # @see https://github.com/py-pdf/fpdf2
     "loguru",
     "pandas",
+    "qrcode",
     "requests",
     "sendgrid>=6.11.0", # @see https://docs.sendgrid.com/for-developers/sending-email/django
     "sentry_sdk",
