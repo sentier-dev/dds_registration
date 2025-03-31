@@ -73,6 +73,9 @@
                 <i class="bi bi-filetype-pdf"></i>
               </a>
             {% endif %}
+            <a class="btn btn-primary btn-icon" title="Download Course Certificate" target="_blank" href="{% url "event_certificate" event_code=event.code %}">
+              <i class="bi bi-filetype-pdf"></i>
+            </a>
             <a class="btn btn-primary btn-icon" title="Edit registration" href="{% url 'event_registration' event_code=event.code %}">
               <i class="bi bi-pencil"></i>
             </a>

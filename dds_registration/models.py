@@ -3,6 +3,7 @@
 
 import random
 import string
+import uuid
 from datetime import date
 
 import requests
@@ -28,6 +29,7 @@ from .core.helpers.create_pdf import (
     create_invoice_pdf_from_payment,
     create_receipt_pdf_from_payment,
 )
+from .core.helpers.create_certificate import create_certificate_pdf
 from .core.helpers.dates import this_year
 from .core.helpers.email import send_email
 
@@ -469,6 +471,13 @@ class Event(Model):
         default=0,
         help_text="Maximum number of participants (0 = no limit)",
     )
+    has_certificate = models.BooleanField(default=False)
+    certificate_title = models.TextField(
+        blank=True, null=True, help_text="Certificate title."
+    )
+    certificate_text = models.TextField(
+        blank=True, null=True, help_text="Certificate text. Can include MarkDown. MUST include `{attendee_name}` template variable where the name of the attendee will be substituted."
+    )
     free = models.BooleanField(default=False)
     credit_cards = models.BooleanField(default=True)
     vat_rate = models.FloatField(null=True, blank=True)
@@ -773,6 +782,18 @@ class Registration(Model):
             message=self.event.success_email,
         )
 
+    def get_certificate(self):
+        if not self.event.has_certificate:
+            raise ValueError
+
+        try:
+            certificate = self.certificate
+        except ObjectDoesNotExist:
+            certificate = Certificate(registration=self)
+            certificate.save()
+
+        return certificate.pdf()
+
     def __str__(self):
         items = [
             self.user.full_name_with_email,
@@ -782,3 +803,20 @@ class Registration(Model):
         ]
         info = ", ".join(filter(None, map(str, items)))
         return info
+
+
+class Certificate(Model):
+    registration = models.OneToOneField(
+        Registration,
+        related_name="certificate",
+        on_delete=models.CASCADE
+    )
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+
+    def pdf(self):
+        return create_certificate_pdf(
+            attendee_name=self.registration.user.self.get_full_name(),
+            certificate_text=self.registration.event.certificate_text,
+            event_title=self.registration.event.certificate_title,
+            url=reverse("event_certificate_validation", args=(self.uuid,)),
+        )

@@ -11,6 +11,16 @@ urlpatterns = [
         event_registration_views.event_registration,
         name="event_registration",
     ),
+    path(
+        "event/<str:event_code>/certificate",
+        event_registration_views.event_certificate,
+        name="event_certificate",
+    ),
+    path(
+        "certificate/<str:certificate_code>/",
+        event_registration_views.event_certificate_validation,
+        name="event_certificate_validation",
+    ),
     # path(
     #     "event/<str:event_code>/registration/cancel",
     #     event_registration_views.event_registration_cancel_confirm,
