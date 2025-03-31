@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from loguru import logger
 
 from ..forms import FreeRegistrationForm, RegistrationForm
-from ..models import Event, Payment, Registration, RegistrationOption, Certificate
+from ..models import Event, Payment, Registration, RegistrationOption, Certificate, InvitationLetter
 
 
 @login_required
@@ -24,7 +24,7 @@ def event_certificate(request: HttpRequest, event_code: str) -> HttpResponse:
         raise Http404
 
     response = HttpResponse(
-        content=bytes(registration.certificate.pdf().output()),
+        content=bytes(registration.get_certificate().output()),
         content_type="application/pdf"
     )
     response["Content-Disposition"] = f'attachment; filename="DdS event certificate {registration.certificate.uuid}.pdf"'
@@ -42,6 +42,40 @@ def event_certificate_validation(request: HttpRequest, certificate_code: str) ->
         content_type="application/pdf"
     )
     response["Content-Disposition"] = f'attachment; filename="DdS event certificate {certificate.uuid}.pdf"'
+    return response
+
+
+@login_required
+def event_invitation(request: HttpRequest, event_code: str) -> HttpResponse:
+    try:
+        event = Event.objects.get(code=event_code)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    registration = event.get_active_event_registration_for_user(request.user)
+
+    if not event.has_invitation or not registration:
+        raise Http404
+
+    response = HttpResponse(
+        content=bytes(registration.get_invitation().output()),
+        content_type="application/pdf"
+    )
+    response["Content-Disposition"] = f'attachment; filename="DdS Letter of Invitation {registration.invitation.uuid}.pdf"'
+    return response
+
+
+def event_invitation_validation(request: HttpRequest, invitation_code: str) -> HttpResponse:
+    try:
+        letter = InvitationLetter.objects.get(uuid=invitation_code)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    response = HttpResponse(
+        content=bytes(letter.pdf().output()),
+        content_type="application/pdf"
+    )
+    response["Content-Disposition"] = f'attachment; filename="DdS Letter of Invitation {letter.uuid}.pdf"'
     return response
 
 

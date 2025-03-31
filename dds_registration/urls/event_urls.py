@@ -21,6 +21,16 @@ urlpatterns = [
         event_registration_views.event_certificate_validation,
         name="event_certificate_validation",
     ),
+    path(
+        "event/<str:event_code>/invitation",
+        event_registration_views.event_invitation,
+        name="event_invitation",
+    ),
+    path(
+        "invitation/<str:invitation_code>/",
+        event_registration_views.event_invitation_validation,
+        name="event_invitation_validation",
+    ),
     # path(
     #     "event/<str:event_code>/registration/cancel",
     #     event_registration_views.event_registration_cancel_confirm,

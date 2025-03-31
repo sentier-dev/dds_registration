@@ -78,10 +78,10 @@ def create_certificate_pdf(
     )
 
     pdf.set_font("NotoSans", "B", size=16)
-    pdf.set_xy(0, pdf.get_y() + large_vertical_space)
-    pdf.cell(
+    pdf.set_xy(20, pdf.get_y() + vertical_space * 2.5)
+    pdf.multi_cell(
         text=normalize_text(event_title),
-        w=0,
+        w=page_width,
         align=Align.C,
         new_x="LEFT",
         new_y="NEXT",
