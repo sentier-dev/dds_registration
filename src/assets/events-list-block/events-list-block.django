@@ -42,13 +42,12 @@
         {% if user.is_authenticated %}
           <p class="events-list-item-actions">
             {% if registration %}
-              <a href="{% url 'event_registration' event_code=event.code %}">Show your registration</a>
+              <a class="btn btn-outline-primary" href="{% url 'event_registration' event_code=event.code %}">Show your registration</a>
             {% else %}
-              <a href="{% url 'event_registration' event_code=event.code %}">Register</a>
+              <a class="btn btn-primary" href="{% url 'event_registration' event_code=event.code %}">Register</a>
             {% endif %}
           </p>
         {% endif %}
-
       </div>
     {% endwith %}
     {% endfor %}
