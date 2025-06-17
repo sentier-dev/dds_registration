@@ -4,6 +4,8 @@
   @changed 2024.03.11, 01:03
 -->
 
+{% load markdownify %}
+
 {% if events %}
   <div class="events-list-block mb-3">
     {% for event in events %}{% with registration=event.registration %}
@@ -16,7 +18,7 @@
 
         {% if event.members_only %}<p><b>Registration for this event is only for members</b></p>{% endif %}
 
-        <p class="events-list-item-description">{{ event.description }}</p>
+        <p class="events-list-item-description">{{ event.description|markdownify }}</p>
 
         <div class="events-list-item-details">
           {% if registration %}

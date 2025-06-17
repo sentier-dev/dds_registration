@@ -137,6 +137,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "django_registration",
+    "markdownify.apps.MarkdownifyConfig",
     "hijack",
     "prettyjson",
     "hijack.contrib.admin",

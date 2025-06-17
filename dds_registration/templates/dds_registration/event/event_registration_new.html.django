@@ -7,6 +7,7 @@
 {% extends "base-regular.html.django" %}
 
 {% load crispy_forms_tags %}
+{% load markdownify %}
 
 {% block title %}DdS Event Registration — {{ block.super }}{% endblock title %}
 
@@ -22,7 +23,7 @@
 
   <div class="event-info mb-3">
     {% if event.description %}
-    <p class="primary-color"><strong>{{ event.description }}</strong></p>
+    <p class="primary-color"><strong>{{ event.description|markdownify }}</strong></p>
     {% endif %}
     {% if event.registration_open %}
       {% if event.registration_close %}

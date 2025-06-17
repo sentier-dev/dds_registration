@@ -43,6 +43,7 @@ dependencies = [
     "django-form-surveys",
     "django-hijack",
     "django-livereload-server>=0.5.1",
+    "django-markdownify",
     "django-preferences>=1.0.0",
     "django-prettyjson",
     "django-registration>=3.4", # @see https://django-registration.readthedocs.io

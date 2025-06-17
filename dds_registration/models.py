@@ -446,7 +446,7 @@ class Membership(Model):
 class Event(Model):
     code = models.TextField(unique=True, default=random_code)  # Show as an input
     title = models.TextField(unique=True, null=False, blank=False)  # Show as an input
-    description = models.TextField(blank=False, null=False)
+    description = models.TextField(blank=False, null=False, help_text="You can use Markdown here")
     success_email = models.TextField(
         blank=False, null=False, help_text="The email sent when registration is complete and paid for"
     )
