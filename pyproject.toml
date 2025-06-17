@@ -13,7 +13,6 @@ authors = [
 ]
 maintainers = [
   { name="Chris Mutel", email="cmutel@gmail.com" },
-  { name="Igor Mikheev", email="lilliputten@gmail.com" }
 ]
 description = "Django app for event dds_registration and billing "
 readme = "README.md"
@@ -50,11 +49,14 @@ dependencies = [
     "django-timezone-field>=3.1",
     "django>=5.0",
     "fpdf2>=2.7.8", # @see https://github.com/py-pdf/fpdf2
+    "google-api-python-client",
+    "google-auth-httplib2",
+    "google-auth-oauthlib",
     "loguru",
     "pandas",
     "qrcode",
+    "qrcode",
     "requests",
-    "sendgrid>=6.11.0", # @see https://docs.sendgrid.com/for-developers/sending-email/django
     "sentry_sdk",
     "stripe>=8.9.0",
     "xlsxwriter",

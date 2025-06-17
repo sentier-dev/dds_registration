@@ -13,8 +13,8 @@ A user account is required for using the membership and events portal. User acco
 sequenceDiagram
     User->>Frontend: Enter user details
     Frontend->>Backend: User account created
-    Backend->>Sendgrid: Verification email request
-    Sendgrid->>User: Verification email sent
+    Backend->>Email_Provider: Verification email request
+    Email_Provider->>User: Verification email sent
     User->>Frontend: Click on verification link
     Frontend->>Backend: Mark user account verified
 ```
@@ -30,15 +30,15 @@ sequenceDiagram
     User->>Frontend: Sign up for membership or for-cost event
     opt Invoice
         Frontend->>Backend: Create `Payment` object with status `ISSUED`
-        Backend->>Sendgrid: Request email with invoice PDF
-        Sendgrid->>User: Send email with invoice PDF
+        Backend->>Email_Provider: Request email with invoice PDF
+        Email_Provider->>User: Send email with invoice PDF
         User->>Wise: Make payment
         Note over User,Wise: Can take several days or weeks
         Wise->>Staff: Payment received notification
         Staff->>Admin site: `Mark selected invoices paid` admin action
         Admin site->>Backend: Change `Payment` object status to `PAID`
-        Backend->>Sendgrid: Request email with receipt PDF
-        Sendgrid->>User: Send email with receipt PDF
+        Backend->>Email_Provider: Request email with receipt PDF
+        Email_Provider->>User: Send email with receipt PDF
     end
     opt Stripe
         Frontend->>Stripe: Create payment intent
@@ -46,8 +46,8 @@ sequenceDiagram
         User->>Stripe: Enter payment details
         Stripe->>Frontend: Redirect to payment processed page
         Frontend->>Backend: Create `Payment` object with status `PAID`
-        Backend->>Sendgrid: Request email with receipt PDF
-        Sendgrid->>User: Send email with receipt PDF
+        Backend->>Email_Provider: Request email with receipt PDF
+        Email_Provider->>User: Send email with receipt PDF
     end
     Frontend->>User: Redirect to `profile` page
 ```
@@ -92,13 +92,14 @@ sequenceDiagram
     Note over User,Frontend: User can go to same URL to edit application
     Staff->>Admin: User is accepted via `accept_application` admin action
     Admin->>Backend: `Registration` status updated to `SELECTED`
-    Backend->>Sendgrid: Request email with registration URL
-    Sendgrid->>User: Send email with registration URL
+    Backend->>Email_Provider: Request email with registration URL
+    Email_Provider->>User: Send email with registration URL
     User->>Frontend: Enter registration information
     Note over User,Frontend: Enter payment process
 ```
 
 ## Development
+
 The `dev_server.sh` script is here to help setting up a development site.
 
 ```shell script
@@ -117,6 +118,7 @@ This will run all the tests currently available in the codebase and provided by 
 For more options the script has to offer.
 
 ## Releasing
+
 #### Preparation
 * Update `setup.cfg` with the new version number and commit
 * Merge all desired changes to `master`

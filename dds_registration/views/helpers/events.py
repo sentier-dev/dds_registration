@@ -46,7 +46,7 @@ def get_email_context(request: HttpRequest, activation_key: str):
     }
 
 
-def send_re_actvation_email(request: HttpRequest, user: AbstractBaseUser | AnonymousUser):
+def send_re_activation_email(request: HttpRequest, user: AbstractBaseUser | AnonymousUser):
     """
     Send the activation email. The activation key is the username,
     signed using TimestampSigner.

@@ -109,6 +109,29 @@ sudo systemctl restart nginx
 sudo certbot --nginx -d events.d-d-s.ch --agree-tos --email cmutel@gmail.com
 ```
 
+## Authenticating with Google email server and generate `token.json`
+
+The registration site needs a `token.json` filepath specified as the environment variable  in the same directory as the running script (this is how the "simple" Google OAuth system works...). Generating this file needs to be done on a system where you can use the web browser to authenticate yourself. The base "credentials.json" file was generated following the [defined procedure](https://developers.google.com/gmail/api/quickstart/python) and can be downloaded from [Google Cloud](https://console.cloud.google.com/apis/credentials?inv=1&invt=AboYtA&project=email-relay-449507).
+
+You can generate `token.json` with (needs `credentials.json`):
+
+```python
+from google_auth_oauthlib.flow import InstalledAppFlow
+
+# If modifying these scopes, delete the file token.json.
+SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
+
+flow = InstalledAppFlow.from_client_secrets_file(
+  "credentials.json", SCOPES
+)
+
+# Opens web browser
+creds = flow.run_local_server(port=0)
+
+with open("token.json", "w") as token:
+    token.write(creds.to_json())
+```
+
 # Running the app
 
 ## Export necessary environment variables
@@ -118,7 +141,7 @@ Can generate secret keys via
     python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
 
 ```bash
-export SENDGRID_API_KEY=""
+export GOOGLE_TOKEN_FILEPATH=""
 export DEBUG=0
 export SECRET_KEY=""
 export REGISTRATION_SALT=""
@@ -153,11 +176,11 @@ After=network.target
 
 [Service]
 Type=simple
-User=cmutel
-WorkingDirectory=/home/cmutel
-ExecStart=/home/cmutel/venvs/registration/bin/uwsgi --http :8076 --wsgi-file /home/cmutel/registration/dds_registration/wsgi.py
+User=registration
+WorkingDirectory=/home/registration
+ExecStart=/home/registration/venvs/registration/bin/uwsgi --http :8076 --wsgi-file /home/registration/registration/dds_registration/wsgi.py
 Restart=always
-Environment=SENDGRID_API_KEY=""
+Environment=GOOGLE_TOKEN_FILEPATH=""
 Environment=DEBUG=0
 Environment=SECRET_KEY=""
 Environment=REGISTRATION_SALT=""

@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 
 from ..core.helpers.errors import errorToString
 from ..forms import UpdateUserForm
-from .helpers.events import send_re_actvation_email
+from .helpers.events import send_re_activation_email
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ def edit_user_profile(request: HttpRequest):
                         "user_form": user_form,
                     }
                     # LOG.debug("Email has changed: %s", debug_data)
-                    send_re_actvation_email(request, user)
+                    send_re_activation_email(request, user)
                     user.is_active = False
                     user.save()
                     messages.success(

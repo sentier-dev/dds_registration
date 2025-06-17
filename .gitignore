@@ -152,3 +152,6 @@ test.pdf
 # Temporarily exposed packages (for dev/debug)
 django
 django_registration
+
+# Email authentication (better safe than sorry)
+token.json

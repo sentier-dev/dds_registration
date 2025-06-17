@@ -34,7 +34,7 @@ env = environ.Env(
     # @see https://django-environ.readthedocs.io
     DEBUG=(bool, False),  # Django debug mode
     SECRET_KEY=(str, random_string()),
-    SENDGRID_API_KEY=(str, ""),
+    GOOGLE_TOKEN_FILEPATH=(str, ""),
     REGISTRATION_SALT=(str, random_string()),
     DEFAULT_FROM_EMAIL=(str, "events@d-d-s.ch"),
     STRIPE_PUBLISHABLE_KEY=(str, ""),
@@ -58,7 +58,7 @@ USE_DJANGO_PREPROCESSORS = False  # LOCAL
 # Secrets
 SECRET_KEY = env("SECRET_KEY")
 REGISTRATION_SALT = env("REGISTRATION_SALT")
-SENDGRID_API_KEY = env("SENDGRID_API_KEY")
+GOOGLE_TOKEN_FILEPATH = env("GOOGLE_TOKEN_FILEPATH")
 STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY") or ""
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 SLACK_PAYMENTS_WEBHOOK = env("SLACK_PAYMENTS_WEBHOOK")
@@ -244,12 +244,12 @@ ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
 # NOTE: It's possible to store some of these parameters (`DEFAULT_FROM_EMAIL`, definitely) in the site preferences or in the `.env*` files
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 DEFAULT_CONTACT_EMAIL = DEFAULT_FROM_EMAIL
-EMAIL_HOST = "smtp.sendgrid.net"
-EMAIL_HOST_USER = "apikey"  # this is exactly the value 'apikey'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-# @see https://docs.sendgrid.com/for-developers/sending-email/django
-EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+# EMAIL_HOST = "smtp.sendgrid.net"
+# EMAIL_HOST_USER = "apikey"  # this is exactly the value 'apikey'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# # @see https://docs.sendgrid.com/for-developers/sending-email/django
+# EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
