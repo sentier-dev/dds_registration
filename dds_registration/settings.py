@@ -242,15 +242,9 @@ AUTHENTICATION_BACKENDS = [APP_NAME + ".core.app.backends.EmailBackend"]
 
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
 
-# NOTE: It's possible to store some of these parameters (`DEFAULT_FROM_EMAIL`, definitely) in the site preferences or in the `.env*` files
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 DEFAULT_CONTACT_EMAIL = DEFAULT_FROM_EMAIL
-# EMAIL_HOST = "smtp.sendgrid.net"
-# EMAIL_HOST_USER = "apikey"  # this is exactly the value 'apikey'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# # @see https://docs.sendgrid.com/for-developers/sending-email/django
-# EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+EMAIL_BACKEND = "dds_registration.core.helpers.email.GSuiteEmailBackend"
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"

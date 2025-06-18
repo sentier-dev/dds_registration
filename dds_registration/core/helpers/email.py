@@ -1,24 +1,15 @@
+from email.message import EmailMessage
 from typing import Any
 import base64
 
 from django.conf import settings
-from email.message import EmailMessage
+from django.core.mail.message import sanitize_address
+from django.core.mail.backends.base import BaseEmailBackend
 from fpdf import FPDF
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from loguru import logger
-
-import base64
-import mimetypes
-import os
-from email.message import EmailMessage
-from email.mime.base import MIMEBase
-from email.mime.text import MIMEText
-
-import google.auth
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 
 
 def get_creds() -> Any:  # Too lazy to look up proper type
@@ -56,8 +47,8 @@ def send_email(
     email_message = EmailMessage()
     email_message.set_content(message)
 
-    email_message["To"] = recipient_address
-    email_message["From"] = from_email
+    email_message["To"] = sanitize_address(recipient_address, "utf-8")
+    email_message["From"] = sanitize_address(from_email, "utf-8")
     email_message["Subject"] = subject
 
     if pdf:
@@ -73,3 +64,19 @@ def send_email(
 
     encoded_message = base64.urlsafe_b64encode(email_message.as_bytes()).decode()
     service.users().messages().send(userId="me", body={"raw": encoded_message}).execute()
+
+
+class GSuiteEmailBackend(BaseEmailBackend):
+    def send_messages(self, email_messages):
+        """
+        Send one or more EmailMessage objects and return the number of email
+        messages sent.
+        """
+        for message in email_messages:
+            for recipient in message.to:
+                send_email(
+                    recipient_address=recipient,
+                    subject=message.subject,
+                    message=message.body,
+                    from_email=message.from_email,
+                )
