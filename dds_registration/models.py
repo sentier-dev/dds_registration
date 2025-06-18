@@ -133,10 +133,10 @@ class User(AbstractUser):
         self,
         subject: str,
         message: str,
+        from_email: str | None = settings.DEFAULT_FROM_EMAIL,
         html_content: bool = False,
         attachment_content: FPDF | None = None,
         attachment_name: str | None = None,
-        from_email: str | None = settings.DEFAULT_FROM_EMAIL,
     ) -> None:
         send_email(
             recipient_address=self.email,
