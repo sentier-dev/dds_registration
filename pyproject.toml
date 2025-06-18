@@ -46,7 +46,7 @@ dependencies = [
     "django-markdownify",
     "django-preferences>=1.0.0",
     "django-prettyjson",
-    "django-registration>=3.4", # @see https://django-registration.readthedocs.io
+    "django-registration==3.4", # @see https://django-registration.readthedocs.io
     "django-timezone-field>=3.1",
     "django>=5.0",
     "fpdf2>=2.7.8", # @see https://github.com/py-pdf/fpdf2
