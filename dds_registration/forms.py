@@ -1,3 +1,4 @@
+from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
@@ -100,6 +101,7 @@ class DdsRegistrationForm(BaseRegistrationForm):
         required=False,
         widget=forms.Textarea(attrs={"class": "form-control", "rows": 5}),
     )
+    captcha = CaptchaField()
 
     class Meta:
         model = User
