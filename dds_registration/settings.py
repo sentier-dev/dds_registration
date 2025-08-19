@@ -134,6 +134,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.staticfiles",
     "compressor",
+    "captcha",
     "crispy_forms",
     "crispy_bootstrap5",
     "django_registration",
