@@ -159,7 +159,36 @@ class MembershipAdmin(admin.ModelAdmin):
         "user__username",
     ]
     list_filter = [IsActiveFilter, "membership_type"]
+    actions = ["export_current_member_list"]
 
+    @admin.action(description="Export all current members to excel")
+    def export_current_member_list(self, request, queryset):
+        queryset = Membership.objects.filter(until__gte=date.today().year)
+        df = pd.DataFrame(
+            [
+                {
+                    "email": obj.user.email,
+                    "id": obj.user.id,
+                    "name": obj.user.get_full_name(),
+                    "started": obj.started,
+                    "unit": obj.until,
+                    "on_mailing_list": obj.mailing_list,
+                    "type": str(obj.membership_type),
+                }
+                for obj in queryset
+            ]
+        )
+
+        outfile = BytesIO()
+        writer = pd.ExcelWriter(outfile, engine="xlsxwriter")
+        df.to_excel(writer, index=False, sheet_name="memberships")
+        writer.close()
+        outfile.seek(0)
+        response = HttpResponse(
+            outfile.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = "attachment; filename=memberships.xlsx"
+        return response
 
 @admin.register(Registration)
 class RegistrationAdmin(admin.ModelAdmin):
