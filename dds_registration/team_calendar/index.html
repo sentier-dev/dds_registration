@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DdS Team Calendar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F5F3EE; --surface: #FFFFFF; --surface2: #F0EDE6;
+      --border: rgba(0,0,0,0.09); --border-med: rgba(0,0,0,0.15);
+      --text: #1A1916; --text-2: #6B6960; --text-3: #A09D97;
+      --accent: #1A3A2A; --accent-mid: #2E5C42;
+      --green-fill: #EAF3DE; --green-text: #27500A;
+      --red-fill:   #FCEBEB; --red-text:   #791F1F;
+      --amber-fill: #FAEEDA; --amber-text: #633806;
+      --blue-fill:  #E6F1FB; --blue-text:  #0C447C;
+      --dot-green: #639922; --dot-red: #E24B4A; --dot-amber: #EF9F27; --dot-blue: #1A6BAA;
+      --radius: 14px; --radius-sm: 8px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141412; --surface: #1E1E1B; --surface2: #252520;
+        --border: rgba(255,255,255,0.08); --border-med: rgba(255,255,255,0.14);
+        --text: #EDE9E0; --text-2: #8C8980; --text-3: #5A5852;
+        --accent: #3B7A57; --accent-mid: #4E9970;
+        --green-fill: #173404; --green-text: #97C459;
+        --red-fill:   #2A0E0E; --red-text:   #F09595;
+        --amber-fill: #261500; --amber-text: #EF9F27;
+        --blue-fill:  #0A1E33; --blue-text:  #85B7EB;
+      }
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: "DM Sans", system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .page-header { max-width: 1000px; margin: 0 auto; padding: 3rem 2rem 1.5rem; display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .page-header h1 { font-family: "DM Serif Display", Georgia, serif; font-size: clamp(24px,4vw,38px); font-weight: 400; line-height: 1.1; letter-spacing: -0.5px; color: var(--text); }
+    .page-header p { font-size: 13px; color: var(--text-3); font-weight: 300; }
+    .tabs { max-width: 1000px; margin: 0 auto; padding: 0 2rem; display: flex; gap: 4px; border-bottom: 0.5px solid var(--border-med); margin-bottom: 2rem; }
+    .tab-btn { background: none; border: none; padding: 10px 16px; font-family: "DM Sans", sans-serif; font-size: 14px; color: var(--text-2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -0.5px; display: flex; align-items: center; gap: 6px; transition: color 0.15s; }
+    .tab-btn.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .content { max-width: 1000px; margin: 0 auto; padding: 0 2rem 4rem; }
+    .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
+    .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 12px; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.25rem; position: relative; }
+    .stat-label { font-size: 12px; color: var(--text-3); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+    .stat-value { font-family: "DM Serif Display", serif; font-size: 28px; color: var(--text); line-height: 1; }
+    .stat-sub { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+    /* Hover tooltip on stat cards */
+    .stat-card[data-tooltip]:hover::after {
+      content: attr(data-tooltip);
+      position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      background: var(--text); color: var(--bg); font-size: 12px; font-weight: 400;
+      padding: 7px 11px; border-radius: var(--radius-sm); white-space: pre-line;
+      pointer-events: none; z-index: 50; line-height: 1.6;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 240px; text-align: left;
+    }
+    /* Away breakdown inside stat card */
+    .stat-breakdown { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+    .stat-breakdown-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 12px; flex-wrap: wrap; }
+    .stat-breakdown-name { color: var(--text-2); font-weight: 500; flex-shrink: 0; }
+    .stat-breakdown-sub { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .stat-breakdown-val { font-weight: 500; color: var(--text); font-family: "DM Serif Display", serif; font-size: 15px; }
+    .stat-taken    { color: var(--text-2); }
+    .stat-planned  { color: var(--dot-amber); font-weight: 500; }
+    .stat-remaining{ color: var(--dot-green); font-weight: 500; }
+    .stat-sep      { color: var(--text-3); }
+    .timeline-wrap { margin-bottom: 1.5rem; }
+    .tl-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .tl-control-group { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); }
+    .tl-control-group label { font-size: 11px; color: var(--text-3); }
+    .tl-month-select { background: var(--surface); border: 0.5px solid var(--border-med); border-radius: var(--radius-sm); padding: 4px 8px; font-family: "DM Sans", sans-serif; font-size: 12px; color: var(--text); cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23A09D97'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 7px center; padding-right: 22px; }
+    .tl-month-select:focus { outline: none; border-color: var(--accent); }
+    .tl-reset-btn { background: none; border: 0.5px solid var(--border-med); border-radius: var(--radius-sm); padding: 4px 10px; font-family: "DM Sans", sans-serif; font-size: 11px; color: var(--text-3); cursor: pointer; }
+    .tl-reset-btn:hover { background: var(--surface2); color: var(--text); }
+    .tl-container { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .tl-months-header { display: grid; grid-template-columns: 160px 1fr; }
+    .tl-months-labels { display: flex; padding: 8px 12px; border-bottom: 0.5px solid var(--border); }
+    .tl-month-label { flex: 1; font-size: 11px; color: var(--text-3); }
+    .tl-header-label { padding: 8px 16px; font-size: 11px; color: var(--text-3); border-right: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); }
+    .tl-row { display: grid; grid-template-columns: 160px 1fr; border-bottom: 0.5px solid var(--border); }
+    .tl-row:last-child { border-bottom: none; }
+    .tl-name-cell { padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-right: 0.5px solid var(--border); }
+    .avatar-sm { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+    .tl-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .tl-role { font-size: 11px; color: var(--text-3); }
+    .tl-bar-cell { padding: 10px 12px; display: flex; align-items: center; position: relative; overflow: hidden; min-height: 42px; }
+    .tl-bg { position: absolute; inset: 0; display: flex; }
+    .tl-month-stripe { flex: 1; border-right: 0.5px solid var(--border); }
+    .tl-month-stripe:last-child { border-right: none; }
+    .tl-bar-wrapper { position: relative; width: 100%; height: 22px; }
+    .tl-segment { position: absolute; height: 100%; border-radius: 4px; top: 0; display: flex; align-items: center; padding: 0 6px; font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; min-width: 6px; cursor: pointer; transition: filter 0.1s; }
+    .tl-segment:hover { filter: brightness(0.92); }
+    .tl-segment.active { filter: brightness(0.88); outline: 2px solid rgba(0,0,0,0.18); outline-offset: 1px; }
+
+    /* SEGMENT POPOVER */
+    .seg-popover { position: fixed; z-index: 999; background: var(--surface); border: 0.5px solid var(--border-med); border-radius: var(--radius); padding: 14px 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08); min-width: 220px; max-width: 300px; display: none; }
+    .seg-popover.visible { display: block; }
+    .seg-popover-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .seg-popover-name { font-size: 14px; font-weight: 500; color: var(--text); }
+    .seg-popover-close { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 16px; line-height: 1; padding: 0 2px; }
+    .seg-popover-close:hover { color: var(--text); }
+    .seg-popover-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
+    .seg-popover-row:last-child { margin-bottom: 0; }
+    .seg-popover-row i { font-size: 14px; margin-top: 1px; flex-shrink: 0; color: var(--text-3); }
+    .seg-popover-row span { color: var(--text); }
+    .seg-away    { background: #FCEBEB; color: #791F1F; }
+    .seg-partial { background: #FAEEDA; color: #633806; }
+    .seg-outside { background: #E6F1FB; color: #0C447C; }
+    .seg-halfday { background: #FAEEDA; color: #633806; border: 1px dashed #EF9F27; }
+    .seg-public  { background: #F3EBFC; color: #5B1FA8; }
+    .seg-event   { background: #D0F0E8; color: #0A4A35; font-weight: 600; }
+    .seg-meeting { background: #E8EAF6; color: #283593; font-weight: 600; }
+    .seg-not-started { background: repeating-linear-gradient(135deg, var(--surface2) 0px, var(--surface2) 4px, var(--bg) 4px, var(--bg) 8px); color: var(--text-3); border: 0.5px solid var(--border); }
+    @media (prefers-color-scheme: dark) {
+      .seg-away    { background: #501313; color: #F09595; }
+      .seg-partial { background: #412402; color: #EF9F27; }
+      .seg-outside { background: #0A1E33; color: #85B7EB; }
+      .seg-halfday { background: #412402; color: #EF9F27; border-color: #EF9F27; }
+      .seg-public  { background: #1E0A33; color: #C89EF0; }
+      .seg-event   { background: #0A2E24; color: #7FD9BE; }
+      .seg-meeting { background: #0D1545; color: #9FA8DA; }
+      .badge-away-public { background: #1E0A33; color: #C89EF0; }
+      .dot-away-public { background: #9B59D0; }
+    }
+    .tl-events-label { font-size: 12px; font-weight: 600; color: var(--text-2); letter-spacing: 0.02em; }
+    .member-cards-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 12px; }
+    .member-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; flex-direction: column; gap: 14px; }
+    .member-card-top { display: flex; align-items: center; gap: 12px; }
+    .avatar-lg { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; flex-shrink: 0; }
+    .mc-name { font-size: 15px; font-weight: 500; color: var(--text); }
+    .mc-role { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+    .mc-divider { border: none; border-top: 0.5px solid var(--border); }
+    .mc-row { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--text-2); }
+    .mc-row i { font-size: 15px; margin-top: 1px; flex-shrink: 0; }
+    .mc-row span { color: var(--text); }
+    .mc-contact { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-3); }
+    .mc-contact i { font-size: 14px; }
+    .mc-contact a { color: #1A6BAA; text-decoration: none; }
+    .mc-contact a:hover { text-decoration: underline; }
+    @media (prefers-color-scheme: dark) { .mc-contact a { color: #85B7EB; } }
+    .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+    .badge-available   { background: var(--green-fill); color: var(--green-text); }
+    .badge-away        { background: var(--red-fill);   color: var(--red-text);   }
+    .badge-away-public { background: #F3EBFC; color: #5B1FA8; }
+    .badge-partial     { background: var(--amber-fill); color: var(--amber-text); }
+    .badge-halfday     { background: var(--amber-fill); color: var(--amber-text); }
+    .badge-outside     { background: var(--blue-fill);  color: var(--blue-text);  }
+    .badge-not-started { background: var(--surface2);   color: var(--text-3);     }
+    .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .dot-available   { background: var(--dot-green); }
+    .dot-away        { background: var(--dot-red);   }
+    .dot-away-public { background: #9B59D0; }
+    .dot-partial     { background: var(--dot-amber); }
+    .dot-halfday     { background: var(--dot-amber); }
+    .dot-outside     { background: var(--dot-blue);  }
+    .dot-not-started { background: var(--text-3);    }
+    .checker-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 700px) { .checker-layout { grid-template-columns: 1fr; } }
+    .cal-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; user-select: none; }
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .cal-nav-btn { background: none; border: 0.5px solid var(--border-med); border-radius: var(--radius-sm); width: 30px; height: 30px; cursor: pointer; color: var(--text-2); font-size: 14px; display: flex; align-items: center; justify-content: center; }
+    .cal-nav-btn:hover { background: var(--surface2); }
+    .cal-month-label { font-size: 14px; font-weight: 500; color: var(--text); }
+    .cal-grid-wrap { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+    .cal-dow { font-size: 11px; color: var(--text-3); text-align: center; padding: 3px 0 8px; }
+    .cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; border-radius: var(--radius-sm); cursor: pointer; color: var(--text-2); border: 0.5px solid transparent; gap: 2px; transition: background 0.08s; position: relative; }
+    .cal-cell:hover:not(.empty) { background: var(--surface2); }
+    .cal-cell.today { color: var(--text); border-color: var(--border-med); font-weight: 500; }
+    .cal-cell.empty { cursor: default; }
+    .cal-cell.sel-single { background: var(--accent); color: #FFF; border-color: var(--accent); border-radius: var(--radius-sm); }
+    .cal-cell.sel-start  { background: var(--accent); color: #FFF; border-color: var(--accent); border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+    .cal-cell.sel-end    { background: var(--accent); color: #FFF; border-color: var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    .cal-cell.sel-mid    { background: var(--accent-mid); color: #EDE9E0; border-color: transparent; border-radius: 0; opacity: 0.75; }
+    .cal-cell.sel-single .cal-pips .cal-pip,
+    .cal-cell.sel-start  .cal-pips .cal-pip,
+    .cal-cell.sel-end    .cal-pips .cal-pip,
+    .cal-cell.sel-mid    .cal-pips .cal-pip { opacity: 0.6; }
+    .cal-pips { display: flex; gap: 2px; height: 5px; align-items: center; }
+    .cal-pip { width: 4px; height: 4px; border-radius: 50%; }
+    .cal-hint { font-size: 11px; color: var(--text-3); text-align: center; margin-top: 10px; min-height: 16px; }
+    .legend-row { display: flex; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid var(--border); flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-3); }
+    .results-panel { display: flex; flex-direction: column; gap: 12px; }
+    .results-header { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .results-date { font-family: "DM Serif Display", serif; font-size: 22px; color: var(--text); }
+    .summary-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .summary-pill { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 99px; display: flex; align-items: center; gap: 5px; }
+    .member-result-row { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; }
+    .mr-info { flex: 1; min-width: 0; }
+    .mr-name { font-size: 14px; font-weight: 500; color: var(--text); }
+    .mr-detail { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+    .mr-time { font-size: 11px; color: var(--text-3); margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+    .no-sel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 3rem 2rem; text-align: center; color: var(--text-3); font-size: 14px; }
+    .no-sel i { font-size: 28px; display: block; margin-bottom: 8px; }
+    .range-member-row { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+    .range-member-top { display: flex; align-items: center; gap: 10px; }
+    .range-spans { display: flex; flex-direction: column; gap: 6px; padding-top: 2px; }
+    .range-span-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    .range-span-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; min-width: 90px; justify-content: center; }
+    .range-span-dates { font-size: 12px; color: var(--text); }
+    .range-span-detail { font-size: 11px; color: var(--text-3); }
+
+    .element-icon {
+      display: inline-block; width: 16px; height: 16px;
+      background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAGRElEQVR42sWWW2wdRxnHfzM7Z/fcT3yXGzt2rCZNnIJDaBQnrqJEplBBoFVTCYEiteShLyB4qWhDRQkUpRT60AokJJAqEBehoEB4aFVArVGJ00tCY6VxXDUBX3LDd/v43HbP7gwPe2yfYwehCiHmZaWdmf3tfPN9/+8vAMPthiUh0ABIW6G6O7F2dCDbmyEdD9dkC+iJKYLL4/iXx9Cev27v2iHWAYUIn8ZgNaSxH+hDHdyJaG8CJ1KZMpWllbVuGXNtGn9gCO8PgwSz2Zrv/HugEGAMAnAO78c+ej+01GGKHnhl0LpqG6tbpQQ7gojZMDmP99KruKfeCGcr31wPrEzIqE3sG19EfXoPOlcEtxyGSAgEICt/ro2pDY0xYRidCDIZw3/lbYonfo0ueTXQEFj5iHQiJL7/GGLfDsxsdgW0PDSGvF9GCIhKhSNVBWzWgUVDGjM4TP6Jn6Dd8uo1AceREmEM8W8eQfbvwsxkIWKtg0WFxScaOml30hSCMlNeHiEEtpSrSCHCEOdKiG3tWC11+AND4TtjUMsZ5TzYhzrUi16GVQ0lJPNega929XFiywEApr0Cpybf57nRt7jmZkkph8BUZWbEwsxmUYd6cS5cpXR6EKTEAnPcqk8R++7R1butOplAYElJ2WgWfZeYVLg6YGuinnsyrTzUfBdnF64zWlwgaqnaexUC4weoj3Thv/oOpugiMWB/bh+01IUJUgWzhMA3AXNunvpIDInghxN/4+D5X7L7zZd4bXaMTbE0v9t5mDYnhasDBKK2xNwytNSFDANS2grVvytMfUtWwSQ53yNjOfxgaz/v7HmUd/ce5fzeL/Hl9ns4vzDBA0O/5bXZMVqdJE919VH0PZSUKCFrBMQUPVT/LqStkGp7R1jU3urpLCHI+S53J5v4y+4jPL65l45Yhsu5af40M8q57C1idgLXaJ68MoCnAx5u2UZ7LMN8uci8V0AvB7dyStHehNregbJ2dIYKkiuClAgEng5osROc3vkwHbEMg/PXOXZlgAtLkxS0jyUEMamwpcV7uWmGc9P0pFroiGZojMQ51HQnP77+LkXtYyEwRoPjYO3oRMpNzbUSKgQF3+PY5n10xDKcmb/GZy+cZHDxBlIIUsomLiOYShG72uemm1sRhK939vKdO/fTl2kj73sr7wHkpmYU6XhFG8PrLmmfO6JpvtDajW80j3/wOvOlRRJOChDoKpnSBhypeOYfZ/jz7ChDS5NsSdSjjSEflFe1FhEy0nFk9emkEJS0z/ZEIxtUlItLUwznpvha1730pJpxtV+ThQaDIxWX8jO8OHqG7kQjH001s+CXGMnPEK0oUQ2DbKHyJ2alEyQshRSCK4V57k4288K2+3i661487SPF8kZRCZehGPhscDI8f1c/ESH5za0RbpSyROVyXZqQkS2g9MQU1kqIDAllc3bxBk9ffYNXZq5iCwttDHc4SaJWBG3CuyvoMoExxKWiL7ORZ7ccpK+ujYniIidGB4kpm2DN6fTEFMofHiPilkGEeigRFLXPM3//K0JatNoJ5solticb6Uk2cy57C0cq9mY28tTmfbRFU3QnmwC4kp/j8xd/z6SXJ1kNFBLcMsHwGNIfGcdcmw5Lo7JAIqiz49RHotwsZTn5z8soIfnelgPEpaLg5didbuWTjV10J5sYLy7y/NjbHDj/K97LTZNUzirMGHAiYYMeGQ/bU+zRTxH5yoNhS1JWjY6WTUCDivHmnkdoi6YYmBvnyQ9e51J+hu5EI9oYrrtLTHk5YpaNI63aUPoBoiFN+UenKf7sjwgExqpLkfjFMUwiCn6wTk9zvsfHUi2c7HmIzlgGgHOLNxnJz/Li+Dku5qZIqyi+0et7o7IQ+RL5I88SLCxhIeVxU3ARhRLqvo9DvhT2rioTEbUijJcWOTX5Praw6Ixm2JpooCfVwk13iYG5sTCh1vqxQCM3JPFeOEV56GpFycAgJUJr4t9+BOszvasNeI0ClXRAKSiz0UmxLdFA3IpwdvEGJe0jq7sEQDlANKYJXn6Lwrd+jpEStL6NxXjuMUTf7S2GqNSeq31K2scYSKhILazGYlwi/8RPayzGhzJR1c5rnZn6UCZqjU0EiB3eT+R/ahP/L0b4P1n97g7kpv/O6v8LDsAbLrahlxEAAAAASUVORK5CYII=");
+      background-size: cover; border-radius: 50%;
+      flex-shrink: 0; vertical-align: middle;
+    }
+    @media (max-width: 600px) {
+      .page-header, .tabs, .content { padding-left: 1rem; padding-right: 1rem; }
+      .tl-row { grid-template-columns: 110px 1fr; }
+      .tl-name-cell { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="page-header">
+  <div>
+    <h1>DdS Team Calendar</h1>
+    <p id="header-range" style="font-size:13px;color:var(--text-3);margin-top:4px;font-weight:300;"></p>
+  </div>
+  <p id="header-meta">Loading&hellip;</p>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab-btn active" data-tab="overview" role="tab">
+    <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Overview
+  </button>
+  <button class="tab-btn" data-tab="checker" role="tab">
+    <i class="ti ti-calendar-search" aria-hidden="true"></i> Day checker
+  </button>
+</nav>
+
+<div class="tab-panel active content" id="tab-overview">
+  <div class="overview-grid" id="stat-cards"></div>
+  <div class="timeline-wrap">
+    <p class="section-title" id="tl-section-title">Timeline</p>
+    <div class="tl-controls">
+      <div class="tl-control-group">
+        <label for="tl-from">From</label>
+        <select class="tl-month-select" id="tl-from"></select>
+      </div>
+      <div class="tl-control-group">
+        <label for="tl-to">To</label>
+        <select class="tl-month-select" id="tl-to"></select>
+      </div>
+      <button class="tl-reset-btn" id="tl-reset">Reset to data range</button>
+    </div>
+    <div class="tl-container">
+      <div class="tl-months-header">
+        <div class="tl-header-label">Name</div>
+        <div class="tl-months-labels" id="tl-months-labels"></div>
+      </div>
+      <div id="tl-rows"></div>
+    </div>
+  </div>
+  <p class="section-title" style="margin-bottom:12px;">Team members</p>
+  <div class="member-cards-grid" id="member-cards"></div>
+</div>
+
+<div class="tab-panel content" id="tab-checker">
+  <div class="checker-layout">
+    <div class="cal-card">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" id="prev-btn" aria-label="Previous month">&#8592;</button>
+        <span class="cal-month-label" id="month-label"></span>
+        <button class="cal-nav-btn" id="next-btn" aria-label="Next month">&#8594;</button>
+      </div>
+      <div class="cal-grid-wrap" id="cal-grid"></div>
+      <div class="cal-hint" id="cal-hint">Click a day, or click &amp; drag to select a range</div>
+      <div class="legend-row">
+        <div class="legend-item"><span class="dot dot-available"></span> Available</div>
+        <div class="legend-item"><span class="dot dot-away"></span> Away</div>
+        <div class="legend-item"><span class="dot dot-away-public"></span> Public holiday</div>
+        <div class="legend-item"><span class="dot dot-halfday"></span> Half-day</div>
+        <div class="legend-item"><span class="dot dot-partial"></span> Partial</div>
+        <div class="legend-item"><span class="dot dot-outside"></span> Outside CH</div>
+        <div class="legend-item"><span class="dot dot-not-started"></span> Not yet at DdS</div>
+      </div>
+    </div>
+    <div class="results-panel" id="results-panel">
+      <div class="no-sel"><i class="ti ti-calendar-event" aria-hidden="true"></i>Select a day or range to see availability</div>
+    </div>
+  </div>
+</div>
+
+<div class="seg-popover" id="seg-popover" role="dialog" aria-modal="true" aria-label="Period details">
+  <div class="seg-popover-header">
+    <span class="seg-popover-name" id="sp-name"></span>
+    <button class="seg-popover-close" id="sp-close" aria-label="Close">&times;</button>
+  </div>
+  <div id="sp-body"></div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   DATA  —  edit ONLY this section; all views update automatically.
+
+   STATUS VALUES (copy exactly):
+     "away"                   fully out of office (personal holiday)
+     "away"  + type:"public"  public / bank holiday (shown in purple)
+     "half-day"               absent for part of the day — add timeFrom / timeTo
+     "partial"                reduced hours, still reachable
+     "outside of Switzerland" abroad but working normally
+
+   HALF-DAY EXTRA FIELDS (only for "half-day"):
+     timeFrom  e.g. "08:00"   start of absence
+     timeTo    e.g. "13:00"   end of absence
+
+   TYPE FIELD (optional, only meaningful on "away" periods):
+     type: "public"    public / bank holiday  → purple badge in all views
+     type: "personal"  or omit               → default red badge
+
+   CONTACT: use "element" for Matrix handle, "slack" for Slack, or both.
+
+   AVATAR COLOUR PAIRS (avBg / avColor):
+     Blue   #E6F1FB / #0C447C    Teal   #E1F5EE / #085041
+     Amber  #FAEEDA / #633806    Pink   #FBEAF0 / #72243E
+     Purple #EEEDFE / #3C3489    Coral  #FAECE7 / #712B13
+     Green  #EAF3DE / #27500A
+
+   RECURRING RULES (optional array alongside periods):
+     weekday   0=Sun 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat
+     from/to   date bounds for the rule (inclusive)
+     status    same values as periods
+     timeFrom/timeTo  e.g. "13:00"/"17:30" — omit for full day
+     label     short description shown in views
+
+   DdS EVENTS — shown as a pinned row at the top of the timeline:
+     name      event name displayed on the bar
+     from/to   YYYY-MM-DD dates (inclusive)
+     location  optional location string
+════════════════════════════════════════════════════════ */
+const EVENTS = [
+  { name: "Brightcon 2026",    from: "2026-09-20", to: "2026-09-25" },
+  { name: "Autumn School",     from: "2026-11-22", to: "2026-11-29", location: "Möschberg, Switzerland" }
+];
+
+const MEETINGS = [
+  { name: "Carbon Minds Consortium meeting", from: "2026-06-22", to: "2026-06-22", location: "Cologne, Germany" },
+  { name: "2nd GreenGrocer General Assembly", from: "2026-11-03", to: "2026-11-05", location: "Oxford, UK" }
+];
+const MEMBERS = [
+  {
+    initials: "XZ",
+    name: "Xiaojin Zhang",
+    role: "Director",
+    avBg: "#E6F1FB", avColor: "#0C447C",
+    email: "xiaojin@d-d-s.ch",
+    element: "@xiaojin.zhang:matrix.org",
+    annualDays: 20,      // annual holiday entitlement
+    carryOver: 2.7,      // days carried over from 2025
+    periods: [
+      { from: "2026-01-26", to: "2026-01-29", status: "away", type: "personal", location: "Private holiday" },
+      { from: "2026-06-02", to: "2026-06-02", status: "half-day", timeFrom: "08:00", timeTo: "13:00", location: "Wettingen, Switzerland" },
+      { from: "2026-06-04", to: "2026-06-04", status: "away", type: "public", location: "Fronleichnam" },
+      { from: "2026-07-20", to: "2026-08-02", status: "away", type: "personal", location: "TBD" }
+    ],
+    recurring: [
+      // Full Fridays off: Sep 2025 – 7 Aug 2026
+      { weekday: 5, from: "2025-09-01", to: "2026-08-07", status: "away", type: "personal", label: "Regular day off (Friday)" },
+      // Monday afternoons off: from 8 Aug 2026 onwards
+      { weekday: 1, from: "2026-08-08", to: "2027-12-31", status: "half-day", timeFrom: "13:00", timeTo: "17:30", label: "Regular half-day (Monday PM)" },
+      // Friday afternoons off: from 8 Aug 2026 onwards
+      { weekday: 5, from: "2026-08-08", to: "2027-12-31", status: "half-day", timeFrom: "13:00", timeTo: "17:30", label: "Regular half-day (Friday PM)" }
+    ]
+  },
+  {
+    initials: "LB",
+    name: "Laurenz Bougan",
+    role: "Senior Data and Platform Engineer",
+    avBg: "#E1F5EE", avColor: "#085041",
+    email: "laurenz@d-d-s.ch",
+    element: "@lbougan:matrix.org",
+    startDate: "2026-04-15",   // not at DdS before this date
+    annualDays: 25,      // annual holiday entitlement
+    carryOver: 0,
+    periods: [
+      { from: "2026-06-02", to: "2026-06-21", status: "outside of Switzerland", location: "Paris, France" }
+    ]
+  }
+];
+/* ════════════════════════════════════════════════════════ */
+
+/* HELPERS */
+function parseDate(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+function toKey(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+function fmtDate(s){ return parseDate(s).toLocaleDateString("en-GB",{day:"numeric",month:"short"}); }
+function fmtDateLong(s){ return parseDate(s).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); }
+
+function getMemberStatus(member, key){
+  const d = parseDate(key);
+  // Before member's start date — not yet at DdS
+  if(member.startDate && d < parseDate(member.startDate))
+    return { status:"not-started", type:"personal", location:null, timeFrom:null, timeTo:null, label:null, recurring:false };
+  // Specific periods take priority over recurring rules
+  for(const p of member.periods){
+    if(d >= parseDate(p.from) && d <= parseDate(p.to))
+      return { status:p.status, type:p.type||"personal", location:p.location||null, timeFrom:p.timeFrom||null, timeTo:p.timeTo||null, label:p.label||null, recurring:false };
+  }
+  // Check recurring rules
+  if(member.recurring){
+    for(const r of member.recurring){
+      if(d >= parseDate(r.from) && d <= parseDate(r.to) && d.getDay() === r.weekday){
+        return { status:r.status, type:r.type||"personal", location:r.location||null, timeFrom:r.timeFrom||null, timeTo:r.timeTo||null, label:r.label||null, recurring:true };
+      }
+    }
+  }
+  return { status:"available", type:"personal", location:null, timeFrom:null, timeTo:null, label:null, recurring:false };
+}
+
+function daysInRange(s,e){
+  const days=[];
+  for(let d=new Date(parseDate(s)); d<=parseDate(e); d.setDate(d.getDate()+1)) days.push(toKey(new Date(d)));
+  return days;
+}
+
+/* statusKey combines status + type for unique visual identity */
+function statusKey(status, type){
+  if(status==="away" && type==="public") return "away-public";
+  return status.toLowerCase();
+}
+
+function statusLabel(status, type){
+  const k = statusKey(status, type);
+  const m={
+    "available":            "Available",
+    "away":                 "Away",
+    "away-public":          "Public holiday",
+    "half-day":             "Half-day away",
+    "partial":              "Partially available",
+    "outside of switzerland": "Outside Switzerland",
+    "not-started":          "Not yet at DdS"
+  };
+  return m[k] || m[status.toLowerCase()] || status;
+}
+function statusClass(status, type){
+  const k = statusKey(status, type);
+  if(k==="available")              return "available";
+  if(k==="away-public")            return "away-public";
+  if(k==="away")                   return "away";
+  if(k==="half-day")               return "halfday";
+  if(k==="partial")                return "partial";
+  if(k==="outside of switzerland") return "outside";
+  if(k==="not-started")            return "not-started";
+  return "partial";
+}
+function statusPipColor(status, type){
+  const k = statusKey(status, type);
+  if(k==="available")              return "#639922";
+  if(k==="away-public")            return "#9B59D0";
+  if(k==="away")                   return "#E24B4A";
+  if(k==="half-day")               return "#EF9F27";
+  if(k==="partial")                return "#EF9F27";
+  if(k==="outside of switzerland") return "#1A6BAA";
+  if(k==="not-started")            return "#A09D97";
+  return "#EF9F27";
+}
+function segClass(status, type){
+  const k = statusKey(status, type);
+  if(k==="away-public")            return "seg-public";
+  if(k==="away")                   return "seg-away";
+  if(k==="half-day")               return "seg-halfday";
+  if(k==="partial")                return "seg-partial";
+  if(k==="outside of switzerland") return "seg-outside";
+  if(k==="not-started")            return "seg-partial";
+  return "seg-partial";
+}
+function badgeHtml(status, type){
+  const c = statusClass(status, type);
+  return `<span class="badge badge-${c}"><span class="dot dot-${c}"></span>${statusLabel(status, type)}</span>`;
+}
+
+/* DYNAMIC DATE RANGE from data */
+function computeDateRange(){
+  let minD=null, maxD=null;
+  MEMBERS.forEach(m=>{
+    m.periods.forEach(p=>{
+      const f=parseDate(p.from),t=parseDate(p.to);
+      if(!minD||f<minD) minD=f;
+      if(!maxD||t>maxD) maxD=t;
+    });
+    if(m.recurring) m.recurring.forEach(r=>{
+      const f=parseDate(r.from);
+      if(!minD||f<minD) minD=f;
+    });
+  });
+  // Also include EVENTS and MEETINGS dates
+  [...EVENTS, ...MEETINGS].forEach(e=>{
+    const f=parseDate(e.from),t=parseDate(e.to);
+    if(!minD||f<minD) minD=f;
+    if(!maxD||t>maxD) maxD=t;
+  });
+  if(!minD){ const n=new Date(); minD=new Date(n.getFullYear(),n.getMonth(),1); maxD=new Date(n.getFullYear(),n.getMonth()+1,0); }
+  return { start:new Date(minD.getFullYear(),minD.getMonth(),1), end:new Date(maxD.getFullYear(),maxD.getMonth()+1,1) };
+}
+
+/* TABS */
+document.querySelectorAll(".tab-btn").forEach(btn=>btn.addEventListener("click",()=>{
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("tab-"+btn.dataset.tab).classList.add("active");
+}));
+
+/* OVERVIEW */
+/* Populate the from/to selects with every month from 2 years back to 2 years ahead */
+function initTimelinePicker(){
+  const {start:dataStart, end:dataEnd} = computeDateRange();
+  const menuStart = new Date(2025, 8, 1); // Sep 2025 — earliest selectable
+  const menuEnd   = new Date(dataEnd.getFullYear()+1, 11, 1);
+  const mNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const opts = [];
+  for(let d=new Date(menuStart); d<=menuEnd; d.setMonth(d.getMonth()+1)){
+    const val=toKey(d).slice(0,7); // "YYYY-MM"
+    const lbl=mNames[d.getMonth()]+" "+d.getFullYear();
+    opts.push({val,lbl});
+  }
+  const fromSel=document.getElementById("tl-from");
+  const toSel  =document.getElementById("tl-to");
+  fromSel.innerHTML=opts.map(o=>`<option value="${o.val}">${o.lbl}</option>`).join("");
+  toSel.innerHTML  =opts.map(o=>`<option value="${o.val}">${o.lbl}</option>`).join("");
+  // Default to data range
+  fromSel.value = toKey(dataStart).slice(0,7);
+  toSel.value   = toKey(new Date(dataEnd.getFullYear(), dataEnd.getMonth()-1, 1)).slice(0,7);
+
+  function rebuild(){
+    closePopover();
+    let fVal=fromSel.value, tVal=toSel.value;
+    // Prevent from > to
+    if(fVal > tVal){ toSel.value=fVal; tVal=fVal; }
+    const [fy,fm]=fVal.split("-").map(Number);
+    const [ty,tm]=tVal.split("-").map(Number);
+    const customStart = new Date(fy, fm-1, 1);
+    const customEnd   = new Date(ty, tm, 1); // exclusive end = first day of month after
+    buildOverview(customStart, customEnd);
+  }
+
+  fromSel.addEventListener("change", rebuild);
+  toSel.addEventListener("change", rebuild);
+  document.getElementById("tl-reset").addEventListener("click", ()=>{
+    fromSel.value = toKey(dataStart).slice(0,7);
+    toSel.value   = toKey(new Date(dataEnd.getFullYear(), dataEnd.getMonth()-1, 1)).slice(0,7);
+    rebuild();
+  });
+}
+
+function buildOverview(customStart, customEnd){
+  // Use provided range or fall back to data range
+  const {start:dataStart, end:dataEnd} = computeDateRange();
+  const TL_START = customStart || dataStart;
+  const TL_END   = customEnd   || dataEnd;
+  const TL_TOTAL = daysBetween(TL_START, TL_END);
+
+  const endPrev=new Date(TL_END.getFullYear(),TL_END.getMonth(),0);
+  const sLbl=TL_START.toLocaleDateString("en-GB",{month:"short",year:"numeric"});
+  const eLbl=endPrev.toLocaleDateString("en-GB",{month:"short",year:"numeric"});
+  document.getElementById("header-range").textContent = sLbl===eLbl?sLbl:sLbl+"\u2013"+eLbl;
+  document.getElementById("header-meta").textContent  = "Updated "+new Date().toLocaleDateString("en-GB",{month:"long",year:"numeric"})+"\u00b7"+MEMBERS.length+" member"+(MEMBERS.length!==1?"s":"");
+
+  let allAvail=0;
+  for(let d=new Date(TL_START);d<TL_END;d.setDate(d.getDate()+1)){
+    if(MEMBERS.every(m=>getMemberStatus(m,toKey(d)).status==="available")) allAvail++;
+  }
+
+  // Per-member private holiday counts split into taken (past) and planned (future)
+  // Days that fall on a recurring "away" weekday are not counted (not working days)
+  const today = toKey(new Date());
+
+  function countWorkingDays(member, fromStr, toStr){
+    let count = 0;
+    for(let d=new Date(parseDate(fromStr)); d<=parseDate(toStr); d.setDate(d.getDate()+1)){
+      const dow = d.getDay();
+      // Skip weekends
+      if(dow===0 || dow===6) continue;
+      // Skip recurring full-day-off weekdays for this member
+      const isRecurringOff = (member.recurring||[]).some(r =>
+        r.status==="away" &&
+        d >= parseDate(r.from) && d <= parseDate(r.to) &&
+        d.getDay() === r.weekday
+      );
+      if(!isRecurringOff) count++;
+    }
+    return count;
+  }
+
+  const memberAway = MEMBERS.map(m=>{
+    const personal = m.periods.filter(p=>(p.status==="away"&&p.type!=="public")||p.status==="half-day");
+    let taken=0, planned=0;
+    personal.forEach(p=>{
+      // half-day periods always count as 0.5 regardless of date range
+      let days;
+      if(p.status==="half-day"){
+        days = 0.5;
+      } else {
+        days = countWorkingDays(m, p.from, p.to);
+      }
+      const pEnd   = toKey(parseDate(p.to));
+      const pStart = toKey(parseDate(p.from));
+      if(pEnd <= today){
+        taken   += days;
+      } else if(pStart > today){
+        planned += days;
+      } else {
+        // straddles today — split proportionally by calendar days
+        const totalCal  = daysBetween(parseDate(p.from), parseDate(p.to)) + 1;
+        const pastCal   = daysBetween(parseDate(p.from), new Date());
+        const ratio     = totalCal > 0 ? pastCal / totalCal : 0;
+        taken   += Math.round(days * ratio * 2) / 2;
+        planned += Math.round(days * (1 - ratio) * 2) / 2;
+      }
+    });
+    taken   = Math.round(taken   * 10) / 10;
+    planned = Math.round(planned * 10) / 10;
+    const entitlement = (m.annualDays || 0) + (m.carryOver || 0);
+    const remaining   = Math.round((entitlement - taken - planned) * 10) / 10;
+    return { name: m.name, taken, planned, remaining, entitlement };
+  });
+  const totalAway = memberAway.reduce((a,m)=>a+m.taken+m.planned, 0);
+
+  // Days on which at least one person is away
+  const awaySet=new Set();
+  MEMBERS.forEach(m=>m.periods.filter(p=>p.status==="away").forEach(p=>{
+    for(let d=new Date(parseDate(p.from));d<=parseDate(p.to);d.setDate(d.getDate()+1)) awaySet.add(toKey(d));
+  }));
+
+  // Team members card — tooltip lists all names
+  const memberTooltip = MEMBERS.map(m=>m.name).join("\n");
+
+  // Annual private holidays breakdown rows — taken / planned / remaining per person
+  const breakdownRows = memberAway.map(m=>`<div class="stat-breakdown-row">
+       <span class="stat-breakdown-name">${m.name.split(" ")[0]}</span>
+       <span class="stat-breakdown-sub">
+         <span class="stat-taken" title="taken">${m.taken} taken</span>
+         <span class="stat-sep">\u00b7</span>
+         <span class="stat-planned" title="planned">${m.planned} planned</span>
+         <span class="stat-sep">\u00b7</span>
+         <span class="stat-remaining" title="remaining">${m.remaining} left</span>
+       </span>
+     </div>`).join("");
+
+  const statCards = [
+    `<div class="stat-card" data-tooltip="${memberTooltip}">
+       <div class="stat-label"><i class="ti ti-users" aria-hidden="true"></i>Team members</div>
+       <div class="stat-value">${MEMBERS.length}</div>
+       <div class="stat-sub">hover to see names</div>
+     </div>`,
+    `<div class="stat-card">
+       <div class="stat-label"><i class="ti ti-calendar-off" aria-hidden="true"></i>Annual private holidays</div>
+       <div class="stat-breakdown">${breakdownRows}</div>
+     </div>`,
+    `<div class="stat-card">
+       <div class="stat-label"><i class="ti ti-map-pin-off" aria-hidden="true"></i>Days someone is away</div>
+       <div class="stat-value">${awaySet.size}</div>
+       <div class="stat-sub">within the period</div>
+     </div>`,
+    `<div class="stat-card">
+       <div class="stat-label"><i class="ti ti-circle-check" aria-hidden="true"></i>Everyone available</div>
+       <div class="stat-value">${allAvail}</div>
+       <div class="stat-sub">days within the period</div>
+     </div>`
+  ];
+  document.getElementById("stat-cards").innerHTML = statCards.join("");
+
+  const months=[];
+  for(let d=new Date(TL_START);d<TL_END;d.setMonth(d.getMonth()+1))
+    months.push(new Date(d).toLocaleDateString("en-GB",{month:"short",year:"2-digit"}));
+  document.getElementById("tl-section-title").textContent=
+    "Timeline \u2014 "+TL_START.toLocaleDateString("en-GB",{month:"long",year:"numeric"})+" \u2013 "+endPrev.toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+  document.getElementById("tl-months-labels").innerHTML=
+    months.map(m=>`<div class="tl-month-label">${m}</div>`).join("");
+
+  // Build events row
+  const eventSegs = EVENTS.map((e, eidx)=>{
+    const from=parseDate(e.from), to=parseDate(e.to);
+    const cFrom=from<TL_START?TL_START:from, cTo=to>=TL_END?new Date(TL_END.getTime()-86400000):to;
+    if(cFrom>cTo) return "";
+    const left=daysBetween(TL_START,cFrom)/TL_TOTAL;
+    const width=(daysBetween(cFrom,cTo)+1)/TL_TOTAL;
+    const tip=e.name+(e.location?" \u00b7 "+e.location:"");
+    return `<div class="tl-segment seg-event" style="left:${(left*100).toFixed(2)}%;width:${(width*100).toFixed(2)}%" title="${tip}" data-row-type="event" data-row-idx="${eidx}" tabindex="0" role="button" aria-label="${tip}">${e.name}</div>`;
+  }).join("");
+  const eventStripes=months.map(()=>`<div class="tl-month-stripe"></div>`).join("");
+  const eventsRow = `<div class="tl-row tl-row-events">
+    <div class="tl-name-cell">
+      <div><div class="tl-name">DdS events</div></div>
+    </div>
+    <div class="tl-bar-cell"><div class="tl-bg">${eventStripes}</div><div class="tl-bar-wrapper">${eventSegs}</div></div>
+  </div>`;
+
+  // Build meetings row
+  const meetingSegs = MEETINGS.map((e, eidx)=>{
+    const from=parseDate(e.from), to=parseDate(e.to);
+    const cFrom=from<TL_START?TL_START:from, cTo=to>=TL_END?new Date(TL_END.getTime()-86400000):to;
+    if(cFrom>cTo) return "";
+    const left=daysBetween(TL_START,cFrom)/TL_TOTAL;
+    const width=(daysBetween(cFrom,cTo)+1)/TL_TOTAL;
+    const tip=e.name+(e.location?" \u00b7 "+e.location:"");
+    return `<div class="tl-segment seg-meeting" style="left:${(left*100).toFixed(2)}%;width:${Math.max(width*100,1.2).toFixed(2)}%" title="${tip}" data-row-type="meeting" data-row-idx="${eidx}" tabindex="0" role="button" aria-label="${tip}">${e.name}</div>`;
+  }).join("");
+  const meetingStripes=months.map(()=>`<div class="tl-month-stripe"></div>`).join("");
+  const meetingsRow = `<div class="tl-row">
+    <div class="tl-name-cell">
+      <div><div class="tl-name">DdS project meetings</div></div>
+    </div>
+    <div class="tl-bar-cell"><div class="tl-bg">${meetingStripes}</div><div class="tl-bar-wrapper">${meetingSegs}</div></div>
+  </div>`;
+
+  document.getElementById("tl-rows").innerHTML = MEMBERS.map(m=>{
+    const segs=[];
+    // Pre-start hatched segment if member joined after timeline start
+    if(m.startDate){
+      const startD=parseDate(m.startDate);
+      if(startD>TL_START){
+        const cFrom=TL_START, cTo=new Date(Math.min(startD.getTime()-86400000, TL_END.getTime()-86400000));
+        if(cFrom<=cTo){
+          const left=0;
+          const width=daysBetween(cFrom,startD)/TL_TOTAL;
+          segs.push(`<div class="tl-segment seg-not-started" style="left:0%;width:${(width*100).toFixed(2)}%" title="Not yet at DdS">Not yet at DdS</div>`);
+        }
+      }
+    }
+    m.periods.forEach((p, pidx)=>{
+      const from=parseDate(p.from),to=parseDate(p.to);
+      const cFrom=from<TL_START?TL_START:from, cTo=to>=TL_END?new Date(TL_END.getTime()-86400000):to;
+      if(cFrom>cTo) return;
+      const dayW=1/TL_TOTAL;
+      let left=daysBetween(TL_START,cFrom)/TL_TOTAL;
+      let width=p.status==="half-day"?dayW*0.5:(daysBetween(cFrom,cTo)+1)/TL_TOTAL;
+      const tip=p.status==="half-day"
+        ?`${p.timeFrom}\u2013${p.timeTo}${p.location?" \u00b7 "+p.location:""}`
+        :(p.location||statusLabel(p.status, p.type));
+      const safeN=m.name.replace(/"/g,"&quot;");
+      segs.push(`<div class="tl-segment ${segClass(p.status, p.type)}" style="left:${(left*100).toFixed(2)}%;width:${(width*100).toFixed(2)}%" title="${tip}" data-member-name="${safeN}" data-period-idx="${pidx}" tabindex="0" role="button" aria-label="${safeN}: ${tip}">${tip}</div>`);
+    });
+    const stripes=months.map(()=>`<div class="tl-month-stripe"></div>`).join("");
+    return `<div class="tl-row">
+      <div class="tl-name-cell">
+        <div class="avatar-sm" style="background:${m.avBg};color:${m.avColor}">${m.initials}</div>
+        <div><div class="tl-name">${m.name.split(" ")[0]}</div></div>
+      </div>
+      <div class="tl-bar-cell"><div class="tl-bg">${stripes}</div><div class="tl-bar-wrapper">${segs.join("")}</div></div>
+    </div>`;
+  }).join("") + eventsRow + meetingsRow;
+
+  document.getElementById("member-cards").innerHTML=MEMBERS.map(m=>{
+    const todayKey = toKey(new Date());
+    const mAway = memberAway.find(ma=>ma.name===m.name) || {taken:0,planned:0};
+    const awayDays=m.periods.filter(p=>p.status==="away"&&p.type!=="public").reduce((a,p)=>a+daysBetween(parseDate(p.from),parseDate(p.to))+1,0);
+    const pRows=m.periods.map(p=>{
+      const timeStr=p.status==="half-day"&&p.timeFrom?` (${p.timeFrom}\u2013${p.timeTo})`:"";
+      const isPublic=p.status==="away"&&p.type==="public";
+      const icon=isPublic?"ti-building-bank":p.status==="away"?"ti-map-pin":p.status==="half-day"?"ti-clock-half-2":p.status==="outside of switzerland"?"ti-plane":"ti-map-pin-pause";
+      const lbl=statusLabel(p.status, p.type);
+      const isPastPersonal = p.status==="away" && p.type!=="public" && toKey(parseDate(p.to)) < todayKey;
+      const takenTag = isPastPersonal ? ` <span style="font-size:10px;color:var(--text-3);font-style:italic">taken</span>` : "";
+      return `<div class="mc-row"><i class="ti ${icon}" aria-hidden="true"></i><span>${lbl}${timeStr}${p.location?" \u00b7 "+p.location:""} \u00b7 ${fmtDate(p.from)}${p.from!==p.to?" \u2013 "+fmtDate(p.to):""}${takenTag}</span></div>`;
+    }).join("");
+    const summarySub = mAway.entitlement
+      ? `<span style="color:var(--text-2)">${mAway.taken} taken</span> <span style="color:var(--text-3)">\u00b7</span> <span style="color:var(--dot-amber);font-weight:500">${mAway.planned} planned</span> <span style="color:var(--text-3)">\u00b7</span> <span style="color:var(--dot-green);font-weight:500">${mAway.remaining} left</span>`
+      : `<span style="color:var(--text-2)">${mAway.taken} taken</span> <span style="color:var(--text-3)">\u00b7</span> <span style="color:var(--dot-amber);font-weight:500">${mAway.planned} planned</span>`;
+    // Recurring rules section
+    const recurRows = (m.recurring||[]).map(r=>{
+      const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+      const timeStr=r.timeFrom?` ${r.timeFrom}\u2013${r.timeTo}`:"";
+      const icon=r.status==="half-day"?"ti-clock-half-2":"ti-repeat";
+      const farFuture=daysBetween(new Date(),parseDate(r.to))>365;
+      const bounds=farFuture?`from ${fmtDate(r.from)} onwards`:`${fmtDate(r.from)}\u2013${fmtDate(r.to)}`;
+      const desc=(r.label||("Every "+days[r.weekday]))+timeStr;
+      return `<div class="mc-row"><i class="ti ${icon}" aria-hidden="true"></i><span>${desc} \u00b7 ${bounds}</span></div>`;
+    }).join("");
+    const recurSection = recurRows
+      ? `<hr class="mc-divider"><div class="mc-row" style="margin-bottom:2px"><i class="ti ti-repeat" aria-hidden="true" style="color:var(--text-3)"></i><span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;font-weight:500">Recurring</span></div>${recurRows}`
+      : "";
+    const elementIcon = '\x3Cspan class="element-icon" title="Element"\x3E\x3C/span\x3E';
+    const contact=(m.element?`<div class="mc-contact">${elementIcon}<span>${m.element}</span></div>`:"")
+                 +(m.slack?`<div class="mc-contact"><i class="ti ti-brand-slack" aria-hidden="true"></i><span>${m.slack}</span></div>`:"");
+    return `<div class="member-card">
+      <div class="member-card-top"><div class="avatar-lg" style="background:${m.avBg};color:${m.avColor}">${m.initials}</div><div><div class="mc-name">${m.name}</div></div></div>
+      <hr class="mc-divider">
+      <div class="mc-row"><i class="ti ti-calendar" aria-hidden="true"></i><span>Private holidays: ${summarySub}</span></div>
+      ${pRows}${recurSection}
+      <hr class="mc-divider">
+      <div class="mc-contact"><i class="ti ti-mail" aria-hidden="true"></i><a href="mailto:${m.email}">${m.email}</a></div>
+      ${contact}
+    </div>`;
+  }).join("");
+}
+
+/* CHECKER STATE */
+const {start:DATA_START}=computeDateRange();
+let viewYear=2025, viewMonth=8; // Start at September 2025
+let rangeStart=null,rangeEnd=null,dragStart=null,dragHover=null,isDragging=false;
+function selMin(){ if(!rangeStart)return null; if(!rangeEnd)return rangeStart; return rangeStart<=rangeEnd?rangeStart:rangeEnd; }
+function selMax(){ if(!rangeStart)return null; if(!rangeEnd)return rangeStart; return rangeStart<=rangeEnd?rangeEnd:rangeStart; }
+function dragMin(){ if(!dragStart||!dragHover)return dragStart; return dragStart<=dragHover?dragStart:dragHover; }
+function dragMax(){ if(!dragStart||!dragHover)return dragStart; return dragStart<=dragHover?dragHover:dragStart; }
+function cellClass(key){
+  const aS=isDragging?dragMin():selMin(), aE=isDragging?dragMax():selMax();
+  if(!aS)return "";
+  if(aS===aE&&key===aS)return "sel-single";
+  if(key===aS)return "sel-start";
+  if(key===aE)return "sel-end";
+  if(key>aS&&key<aE)return "sel-mid";
+  return "";
+}
+
+function renderCal(){
+  const mN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  document.getElementById("month-label").textContent=mN[viewMonth]+" "+viewYear;
+  const grid=document.getElementById("cal-grid");
+  grid.innerHTML="";
+  ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(d=>{ const e=document.createElement("div");e.className="cal-dow";e.textContent=d;grid.appendChild(e); });
+  const first=new Date(viewYear,viewMonth,1),startDow=first.getDay(),dim=new Date(viewYear,viewMonth+1,0).getDate(),today=toKey(new Date());
+  for(let i=0;i<startDow;i++){const e=document.createElement("div");e.className="cal-cell empty";grid.appendChild(e);}
+  for(let d=1;d<=dim;d++){
+    const key=viewYear+"-"+String(viewMonth+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+    const el=document.createElement("div"); el.className="cal-cell"; el.dataset.key=key;
+    if(key===today)el.classList.add("today");
+    const cls=cellClass(key); if(cls)el.classList.add(cls);
+    const num=document.createElement("span"); num.textContent=d; el.appendChild(num);
+    const pips=document.createElement("div"); pips.className="cal-pips";
+    MEMBERS.forEach(m=>{ const st=getMemberStatus(m,key); if(st.status==="not-started") return; const pip=document.createElement("span");pip.className="cal-pip";pip.style.background=statusPipColor(st.status,st.type);pips.appendChild(pip); });
+    el.appendChild(pips); grid.appendChild(el);
+  }
+  updateHint();
+}
+
+function updateHint(){
+  const hint=document.getElementById("cal-hint"),s=selMin(),e=selMax();
+  if(isDragging){ const ds=dragMin(),de=dragMax(); if(ds&&de&&ds!==de){const n=daysBetween(parseDate(ds),parseDate(de))+1;hint.textContent=n+" day"+(n!==1?"s":"")+" selected \u2014 release to confirm";}else{hint.textContent="Drag to extend range";} }
+  else if(s&&e&&s!==e){const n=daysBetween(parseDate(s),parseDate(e))+1;hint.innerHTML=n+" day"+(n!==1?"s":"")+" selected &middot; click any day to reset";}
+  else if(s){hint.textContent="Click another day to set range end, or click same to reset";}
+  else{hint.textContent="Click a day, or click & drag to select a range";}
+}
+
+const calGrid=document.getElementById("cal-grid");
+calGrid.addEventListener("mousedown",e=>{const c=e.target.closest(".cal-cell:not(.empty)");if(!c)return;e.preventDefault();isDragging=true;dragStart=c.dataset.key;dragHover=c.dataset.key;renderCal();});
+calGrid.addEventListener("mouseover",e=>{if(!isDragging)return;const c=e.target.closest(".cal-cell:not(.empty)");if(!c)return;dragHover=c.dataset.key;renderCal();});
+document.addEventListener("mouseup",()=>{
+  if(!isDragging)return; isDragging=false;
+  if(dragStart&&dragHover){if(dragStart===dragHover){if(rangeStart===dragStart&&!rangeEnd){rangeStart=null;rangeEnd=null;}else{rangeStart=dragStart;rangeEnd=null;}}else{rangeStart=dragMin();rangeEnd=dragMax();}}
+  dragStart=null;dragHover=null;renderCal();renderResults();
+});
+calGrid.addEventListener("touchstart",e=>{const t=e.touches[0],c=document.elementFromPoint(t.clientX,t.clientY)?.closest(".cal-cell:not(.empty)");if(!c)return;isDragging=true;dragStart=c.dataset.key;dragHover=c.dataset.key;renderCal();},{passive:true});
+calGrid.addEventListener("touchmove",e=>{if(!isDragging)return;const t=e.touches[0],c=document.elementFromPoint(t.clientX,t.clientY)?.closest(".cal-cell:not(.empty)");if(!c)return;dragHover=c.dataset.key;renderCal();},{passive:true});
+calGrid.addEventListener("touchend",()=>{if(!isDragging)return;isDragging=false;if(dragStart&&dragHover){if(dragStart===dragHover){if(rangeStart===dragStart&&!rangeEnd){rangeStart=null;rangeEnd=null;}else{rangeStart=dragStart;rangeEnd=null;}}else{rangeStart=dragMin();rangeEnd=dragMax();}}dragStart=null;dragHover=null;renderCal();renderResults();});
+document.getElementById("prev-btn").addEventListener("click",()=>{viewMonth--;if(viewMonth<0){viewMonth=11;viewYear--;}renderCal();});
+document.getElementById("next-btn").addEventListener("click",()=>{viewMonth++;if(viewMonth>11){viewMonth=0;viewYear++;}renderCal();});
+
+function renderResults(){
+  const panel=document.getElementById("results-panel"),s=selMin(),e=selMax();
+  if(!s){panel.innerHTML='<div class="no-sel"><i class="ti ti-calendar-event" aria-hidden="true"></i>Select a day or range to see availability</div>';return;}
+  (s!==e&&e!==null)?renderRange(panel,s,e):renderSingleDay(panel,s);
+}
+
+function renderSingleDay(panel,key){
+  const d=parseDate(key);
+  const label=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const rows=MEMBERS.map(m=>({...m,...getMemberStatus(m,key)})).filter(m=>m.status!=="not-started");
+  const counts={};
+  rows.forEach(r=>{
+    const k=statusKey(r.status,r.type);
+    counts[k]=(counts[k]||0)+1;
+  });
+  let html=`<div class="results-header"><div class="results-date">${label}</div><div class="summary-pills">`;
+  Object.entries(counts).forEach(([k,n])=>{
+    // k is already the combined key like "away-public"
+    const c=k==="away-public"?"away-public":k==="available"?"available":k==="away"?"away":k==="halfday"?"halfday":k==="outside of switzerland"?"outside":"partial";
+    const lbl=statusLabel(k==="away-public"?"away":"away",k==="away-public"?"public":"personal");
+    const dispLbl={"available":"Available","away":"Away","away-public":"Public holiday","halfday":"Half-day away","partial":"Partially available","outside of switzerland":"Outside Switzerland"}[k]||k;
+    html+=`<span class="summary-pill badge-${c}"><span class="dot dot-${c}"></span>${n} ${dispLbl.toLowerCase()}</span>`;
+  });
+  html+="</div></div>";
+  html+=rows.map(m=>{
+    const isPublic=m.status==="away"&&m.type==="public";
+    const timeStr=m.status==="half-day"&&m.timeFrom
+      ?`<div class="mr-time"><i class="ti ti-clock" style="font-size:12px"></i> Away ${m.timeFrom}\u2013${m.timeTo}</div>`:"";
+    const recurIcon = m.recurring ? `<i class="ti ti-repeat" style="font-size:11px;color:var(--text-3);margin-right:3px"></i>` : "";
+    const detail = m.label ? m.label : (m.status!=="available"&&m.location ? m.location : "");
+    return `<div class="member-result-row"><div class="avatar-sm" style="background:${m.avBg};color:${m.avColor}">${m.initials}</div><div class="mr-info"><div class="mr-name">${m.name}</div><div class="mr-detail">${recurIcon}${detail}</div>${timeStr}</div>${badgeHtml(m.status,m.type)}</div>`;
+  }).join("");
+  panel.innerHTML=html;
+}
+
+function renderRange(panel,startKey,endKey){
+  const days=daysInRange(startKey,endKey),total=days.length;
+  let teamFree=0;
+  days.forEach(k=>{if(MEMBERS.every(m=>getMemberStatus(m,k).status==="available"))teamFree++;});
+  let html=`<div class="results-header"><div class="results-date">${fmtDate(startKey)} \u2013 ${fmtDateLong(endKey)}</div><div class="summary-pills"><span class="summary-pill badge-available"><span class="dot dot-available"></span>${teamFree} day${teamFree!==1?"s":""} everyone free</span><span class="summary-pill" style="background:var(--surface2);color:var(--text-2)">${total} day${total!==1?"s":""} total</span></div></div>`;
+  html+=MEMBERS.filter(m=>getMemberStatus(m,startKey).status!=="not-started"||getMemberStatus(m,endKey).status!=="not-started").map(m=>{
+    const spans=[]; let cur=null;
+    days.forEach(k=>{
+      const info=getMemberStatus(m,k);
+      if(info.status==="not-started") return; // skip days before member started
+      const sig=info.status+"|"+(info.type||"personal")+"|"+(info.location||"")+"|"+(info.timeFrom||"")+"|"+(info.timeTo||"")+"|"+(info.label||"")+"|"+(info.recurring?"R":"");
+      if(cur&&cur.sig===sig){cur.end=k;}else{if(cur)spans.push(cur);cur={...info,sig,start:k,end:k};}
+    });
+    if(cur)spans.push(cur);
+    if(spans.length===0) return ""; // member has no active days in range
+    const mainSt=spans.length===1?spans[0].status:spans.some(s=>s.status==="away"&&s.type!=="public")?"away":"partial";
+    const mainType=spans.length===1?spans[0].type:"personal";
+    const spanRows=spans.map(sp=>{
+      const c=statusClass(sp.status,sp.type);
+      const ds=fmtDate(sp.start),de=fmtDate(sp.end);
+      const dateStr=sp.start===sp.end?ds:`${ds} \u2013 ${de}`;
+      const timeStr=sp.status==="half-day"&&sp.timeFrom?` \u00b7 ${sp.timeFrom}\u2013${sp.timeTo}`:"";
+      const locStr=sp.label?` \u00b7 ${sp.label}`:sp.location&&sp.status!=="available"?` \u00b7 ${sp.location}`:"";
+      const detail=(timeStr+locStr).trim();
+      const recurMark=sp.recurring?`<i class="ti ti-repeat" style="font-size:10px;opacity:.6;margin-right:2px"></i>`:"";
+      return `<div class="range-span-row"><span class="range-span-badge badge-${c}"><span class="dot dot-${c}"></span>${statusLabel(sp.status,sp.type)}</span><span class="range-span-dates">${recurMark}${dateStr}</span>${detail?`<span class="range-span-detail">${detail}</span>`:""}</div>`;
+    }).join("");
+    return `<div class="range-member-row"><div class="range-member-top"><div class="avatar-sm" style="background:${m.avBg};color:${m.avColor}">${m.initials}</div><div class="mr-info"><div class="mr-name">${m.name}</div></div>${badgeHtml(mainSt,mainType)}</div><div class="range-spans">${spanRows}</div></div>`;
+  }).join("");
+  panel.innerHTML=html;
+}
+
+/* ── TIMELINE SEGMENT POPOVER ── */
+const popover   = document.getElementById("seg-popover");
+const spName    = document.getElementById("sp-name");
+const spBody    = document.getElementById("sp-body");
+
+function openPopover(memberName, period, anchorEl) {
+  spName.textContent = memberName;
+
+  const timeStr = period.status === "half-day" && period.timeFrom
+    ? `<div class="seg-popover-row"><i class="ti ti-clock" aria-hidden="true"></i><span>${period.timeFrom}\u2013${period.timeTo}</span></div>`
+    : "";
+  const locStr = period.label
+    ? `<div class="seg-popover-row"><i class="ti ti-info-circle" aria-hidden="true"></i><span>${period.label}</span></div>`
+    : period.location
+      ? `<div class="seg-popover-row"><i class="ti ti-map-pin" aria-hidden="true"></i><span>${period.location}</span></div>`
+      : "";
+  const dateStr = period.from === period.to
+    ? fmtDateLong(period.from)
+    : `${fmtDate(period.from)} \u2013 ${fmtDateLong(period.to)}`;
+  const isPublic = period.status === "away" && period.type === "public";
+  const typeRow = isPublic
+    ? `<div class="seg-popover-row"><i class="ti ti-building-bank" aria-hidden="true"></i><span>Public / bank holiday</span></div>`
+    : "";
+
+  const cls = statusClass(period.status, period.type);
+  spBody.innerHTML = `
+    <div class="seg-popover-row" style="margin-bottom:10px;">
+      <span class="badge badge-${cls}" style="font-size:11px;"><span class="dot dot-${cls}"></span>${statusLabel(period.status, period.type)}</span>
+    </div>
+    <div class="seg-popover-row"><i class="ti ti-calendar" aria-hidden="true"></i><span>${dateStr}</span></div>
+    ${typeRow}${timeStr}${locStr}`;
+
+  positionAndShowPopover(anchorEl);
+}
+
+function closePopover() {
+  popover.classList.remove("visible");
+  document.querySelectorAll(".tl-segment.active").forEach(el => el.classList.remove("active"));
+}
+
+document.getElementById("sp-close").addEventListener("click", closePopover);
+
+// Close on outside click
+document.addEventListener("click", e => {
+  if (!popover.contains(e.target) && !e.target.closest(".tl-segment")) closePopover();
+}, true);
+
+// Close on Escape
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePopover(); });
+
+function openEntryPopover(rowType, idx, anchorEl) {
+  const entry = rowType === "event" ? EVENTS[idx] : MEETINGS[idx];
+  if (!entry) return;
+  const rowLabel = rowType === "event" ? "DdS event" : "DdS project meeting";
+  const icon     = rowType === "event" ? "ti-calendar-event" : "ti-users";
+  spName.textContent = entry.name;
+  const dateStr = entry.from === entry.to
+    ? fmtDateLong(entry.from)
+    : `${fmtDate(entry.from)} \u2013 ${fmtDateLong(entry.to)}`;
+  const locStr = entry.location
+    ? `<div class="seg-popover-row"><i class="ti ti-map-pin" aria-hidden="true"></i><span>${entry.location}</span></div>`
+    : "";
+  spBody.innerHTML = `
+    <div class="seg-popover-row" style="margin-bottom:10px;">
+      <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text-2);">
+        <i class="ti ${icon}" style="font-size:14px;"></i>${rowLabel}
+      </span>
+    </div>
+    <div class="seg-popover-row"><i class="ti ti-calendar" aria-hidden="true"></i><span>${dateStr}</span></div>
+    ${locStr}`;
+
+  positionAndShowPopover(anchorEl);
+}
+
+function positionAndShowPopover(anchorEl) {
+  popover.classList.remove("visible");
+  popover.style.display = "block";
+  const pw = popover.offsetWidth;
+  const ph = popover.offsetHeight;
+  popover.style.display = "";
+  const rect = anchorEl.getBoundingClientRect();
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let top  = rect.bottom + 6;
+  let left = rect.left;
+  if (left + pw > vw - 12) left = vw - pw - 12;
+  if (left < 8) left = 8;
+  if (top + ph > vh - 12) top = rect.top - ph - 6;
+  popover.style.top  = top  + "px";
+  popover.style.left = left + "px";
+  popover.classList.add("visible");
+  document.querySelectorAll(".tl-segment.active").forEach(el => el.classList.remove("active"));
+  anchorEl.classList.add("active");
+}
+
+// Delegate clicks on timeline segments
+document.getElementById("tl-rows").addEventListener("click", e => {
+  const seg = e.target.closest(".tl-segment");
+  if (!seg) return;
+  e.stopPropagation();
+  if (seg.classList.contains("active")) { closePopover(); return; }
+
+  const rowType = seg.dataset.rowType;
+
+  if (rowType === "event" || rowType === "meeting") {
+    openEntryPopover(rowType, parseInt(seg.dataset.rowIdx, 10), seg);
+    return;
+  }
+
+  // Member segment
+  const memberName = seg.dataset.memberName;
+  const periodIdx  = parseInt(seg.dataset.periodIdx, 10);
+  const member     = MEMBERS.find(m => m.name === memberName);
+  if (!member) return;
+  openPopover(member.name, member.periods[periodIdx], seg);
+});
+
+// Keyboard support for segments
+document.getElementById("tl-rows").addEventListener("keydown", e => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const seg = e.target.closest(".tl-segment");
+  if (!seg) return;
+  e.preventDefault();
+  if (seg.classList.contains("active")) { closePopover(); return; }
+  const rowType = seg.dataset.rowType;
+  if (rowType === "event" || rowType === "meeting") {
+    openEntryPopover(rowType, parseInt(seg.dataset.rowIdx, 10), seg);
+    return;
+  }
+  const member = MEMBERS.find(m => m.name === seg.dataset.memberName);
+  if (!member) return;
+  openPopover(member.name, member.periods[parseInt(seg.dataset.periodIdx, 10)], seg);
+});
+
+initTimelinePicker();
+buildOverview();
+renderCal();
+renderResults();
+
+</script>
+</body>
+</html>
