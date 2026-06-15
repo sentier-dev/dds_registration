@@ -4,5 +4,6 @@
 
 from .root import components_demo, index, profile
 from .system import RobotsView, page403, page404, page500
+from .team_calendar import team_calendar
 from .user import edit_user_profile  # SignUpView,
 from .user_registration import DdsRegistrationView

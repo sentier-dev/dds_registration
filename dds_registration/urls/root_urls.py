@@ -17,6 +17,8 @@ urlpatterns = [
     path("captcha/", include("captcha.urls")),
     path("hijack/", include("hijack.urls")),
     path("applications/", include((application_urlpatterns, "djf_surveys"))),
+    # Private team calendar (login required)...
+    path("team-calendar/", views.team_calendar, name="team_calendar"),
     # Service pages...
     path(
         "robots.txt",
