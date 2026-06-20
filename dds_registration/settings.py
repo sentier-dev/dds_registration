@@ -112,16 +112,33 @@ COMPRESS_PRECOMPILERS = (
 
 # These settings already exist in `default_settings.py` Should we remove those?
 DEFAULT_HOST = "events.d-d-s.ch"
+
+# Single host serving the gated static LCA dashboards (one route per dashboard,
+# each authorised per-user -- see views/sso_gateway.py and deployment.md). It
+# shares this app's session cookie via the widened cookie domain below, so one
+# login here also authorises the dashboard host.
+DASHBOARD_HOST = "dashboard.d-d-s.ch"
+
 ALLOWED_HOSTS = [
     DEFAULT_HOST,
+    DASHBOARD_HOST,
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://" + DEFAULT_HOST,
+    "https://" + DASHBOARD_HOST,
 ]
 
 if LOCAL or DEBUG:
     # Allow work with local server in local dev mode
     ALLOWED_HOSTS.extend(["localhost", "127.0.0.1"])
+else:
+    # Share the auth session/CSRF cookie across every *.d-d-s.ch host so a
+    # single SSO login at events.d-d-s.ch also authorises the dashboard
+    # subdomains. Secure flag is safe here since production is HTTPS-only.
+    SESSION_COOKIE_DOMAIN = ".d-d-s.ch"
+    CSRF_COOKIE_DOMAIN = ".d-d-s.ch"
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Application definition
 
