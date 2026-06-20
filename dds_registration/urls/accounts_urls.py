@@ -22,6 +22,12 @@ urlpatterns = [
         views.edit_user_profile,
         name="profile_edit",
     ),
+    # SSO gateway for the gated static dashboards on dashboard.d-d-s.ch.
+    # `login/` overrides the stock auth view so the dashboard host is honoured
+    # as a `?next=` target; must precede the auth.urls include below to win.
+    # `dashboards/<key>/auth/` is the per-route nginx `auth_request` target.
+    path("accounts/login/", views.SubdomainLoginView.as_view(), name="login"),
+    path("dashboards/<slug:key>/auth/", views.dashboard_auth, name="dashboard_auth"),
     # Stock accounts...
     path(
         "accounts/",
