@@ -139,6 +139,18 @@ else:
     CSRF_COOKIE_DOMAIN = ".d-d-s.ch"
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    # Widening the cookie domain (above) turned the previously host-only
+    # `sessionid`/`csrftoken` cookies into distinct `Domain=.d-d-s.ch` cookies.
+    # Per RFC 6265 a host-only cookie and a domain cookie with the same name
+    # coexist, so any browser that logged in before the domain change carries
+    # BOTH. Django reads the last duplicate, and when a browser (notably Safari,
+    # whose cookie send-order differs from Chrome) sends the stale host-only one
+    # last, login breaks: 403 on the POST, or a stale session that bounces back
+    # to an empty login form. Renaming the cookies sidesteps the collision --
+    # the new names match no pre-existing cookie, so every browser gets a clean
+    # cookie. One-time cost: existing sessions are invalidated and re-login once.
+    SESSION_COOKIE_NAME = "dds_sessionid"
+    CSRF_COOKIE_NAME = "dds_csrftoken"
 
 # Application definition
 
