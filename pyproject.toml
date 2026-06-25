@@ -78,6 +78,7 @@ testing = [
     "dds_registration",
     "pytest",
     "pytest-cov",
+    "pytest-django",
     "python-coveralls"
 ]
 dev = [
@@ -86,6 +87,7 @@ dev = [
     "pylint",
     "pytest",
     "pytest-cov",
+    "pytest-django",
     "pytest-randomly",
     "setuptools",
     # "blue>=0.9.1",  # UNUSED: Python formatter, based on black, but wit a support (at least) for single quotes coding style
@@ -128,6 +130,7 @@ packages = ["dds_registration"]
 version = {attr = "dds_registration.__version__"}
 
 [tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "dds_registration.settings"
 addopts = "--cov dds_registration --cov-report term-missing --verbose"
 norecursedirs = [
     "dist",
