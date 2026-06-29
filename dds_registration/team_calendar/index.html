@@ -82,7 +82,11 @@
     .tl-reset-btn:hover { background: var(--surface2); color: var(--text); }
     .tl-container { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
     .tl-months-header { display: grid; grid-template-columns: 160px 1fr; }
-    .tl-months-labels { display: flex; padding: 8px 12px; border-bottom: 0.5px solid var(--border); }
+    .tl-months-col { display: flex; flex-direction: column; min-width: 0; }
+    .tl-years-labels { display: flex; background: var(--surface2); border-bottom: 0.5px solid var(--border); }
+    .tl-year-label { font-size: 11px; font-weight: 600; color: var(--text-2); padding: 4px 8px; letter-spacing: 0.04em; border-right: 0.5px solid var(--border-med); }
+    .tl-year-label:last-child { border-right: none; }
+    .tl-months-labels { display: flex; padding: 5px 8px; border-bottom: 0.5px solid var(--border); }
     .tl-month-label { flex: 1; font-size: 11px; color: var(--text-3); }
     .tl-header-label { padding: 8px 16px; font-size: 11px; color: var(--text-3); border-right: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); }
     .tl-row { display: grid; grid-template-columns: 160px 1fr; border-bottom: 0.5px solid var(--border); }
@@ -93,7 +97,7 @@
     .tl-role { font-size: 11px; color: var(--text-3); }
     .tl-bar-cell { padding: 10px 12px; display: flex; align-items: center; position: relative; overflow: hidden; min-height: 42px; }
     .tl-bg { position: absolute; inset: 0; display: flex; }
-    .tl-month-stripe { flex: 1; border-right: 0.5px solid var(--border); }
+    .tl-month-stripe { flex: 1; border-right: none; }
     .tl-month-stripe:last-child { border-right: none; }
     .tl-bar-wrapper { position: relative; width: 100%; height: 22px; }
     .tl-segment { position: absolute; height: 100%; border-radius: 4px; top: 0; display: flex; align-items: center; padding: 0 6px; font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; min-width: 6px; cursor: pointer; transition: filter 0.1s; }
@@ -114,7 +118,7 @@
     .seg-away    { background: #FCEBEB; color: #791F1F; }
     .seg-partial { background: #FAEEDA; color: #633806; }
     .seg-outside { background: #E6F1FB; color: #0C447C; }
-    .seg-halfday { background: #FAEEDA; color: #633806; border: 1px dashed #EF9F27; }
+    .seg-halfday { background: #FAEEDA; color: #633806; }
     .seg-public  { background: #F3EBFC; color: #5B1FA8; }
     .seg-event   { background: #D0F0E8; color: #0A4A35; font-weight: 600; }
     .seg-meeting { background: #E8EAF6; color: #283593; font-weight: 600; }
@@ -258,7 +262,10 @@
     <div class="tl-container">
       <div class="tl-months-header">
         <div class="tl-header-label">Name</div>
-        <div class="tl-months-labels" id="tl-months-labels"></div>
+        <div class="tl-months-col">
+          <div class="tl-years-labels" id="tl-years-labels"></div>
+          <div class="tl-months-labels" id="tl-months-labels"></div>
+        </div>
       </div>
       <div id="tl-rows"></div>
     </div>
@@ -342,12 +349,18 @@
 ════════════════════════════════════════════════════════ */
 const EVENTS = [
   { name: "Brightcon 2026",    from: "2026-09-20", to: "2026-09-25" },
-  { name: "Autumn School",     from: "2026-11-22", to: "2026-11-29", location: "Möschberg, Switzerland" }
+  { name: "Spring School",     from: "2027-02-28", to: "2027-03-05", location: "Möschberg, Switzerland" }
 ];
 
 const MEETINGS = [
   { name: "Carbon Minds Consortium meeting", from: "2026-06-22", to: "2026-06-22", location: "Cologne, Germany" },
   { name: "2nd GreenGrocer General Assembly", from: "2026-11-03", to: "2026-11-05", location: "Oxford, UK" }
+];
+const EXTERNAL_EVENTS = [
+  { name: "93rd LCA Discussion Forum", from: "2026-07-07", to: "2026-07-07", location: "ETH Zurich, Alumni Pavillon", url: "https://lca-forum.ch/forum?tx_news_pi1%5BactbackPid%5D=1&tx_news_pi1%5Baction%5D=detail&tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5Bnews%5D=93&cHash=1a9feca5af660e14cc86ab8e86d5231e" }
+];
+const INTERNAL_MEETINGS = [
+  { name: "DdS Strategic Workshop", from: "2026-07-16", to: "2026-07-16", location: "Zurich, Switzerland" }
 ];
 const MEMBERS = [
   {
@@ -381,7 +394,6 @@ const MEMBERS = [
     avBg: "#E1F5EE", avColor: "#085041",
     email: "laurenz@d-d-s.ch",
     element: "@lbougan:matrix.org",
-    startDate: "2026-04-15",   // not at DdS before this date
     annualDays: 25,      // annual holiday entitlement
     carryOver: 0,
     periods: [
@@ -495,8 +507,8 @@ function computeDateRange(){
       if(!minD||f<minD) minD=f;
     });
   });
-  // Also include EVENTS and MEETINGS dates
-  [...EVENTS, ...MEETINGS].forEach(e=>{
+  // Also include EVENTS, MEETINGS, EXTERNAL_EVENTS and INTERNAL_MEETINGS dates
+  [...EVENTS, ...MEETINGS, ...EXTERNAL_EVENTS, ...INTERNAL_MEETINGS].forEach(e=>{
     const f=parseDate(e.from),t=parseDate(e.to);
     if(!minD||f<minD) minD=f;
     if(!maxD||t>maxD) maxD=t;
@@ -674,11 +686,21 @@ function buildOverview(customStart, customEnd){
 
   const months=[];
   for(let d=new Date(TL_START);d<TL_END;d.setMonth(d.getMonth()+1))
-    months.push(new Date(d).toLocaleDateString("en-GB",{month:"short",year:"2-digit"}));
+    months.push(new Date(d));
   document.getElementById("tl-section-title").textContent=
     "Timeline \u2014 "+TL_START.toLocaleDateString("en-GB",{month:"long",year:"numeric"})+" \u2013 "+endPrev.toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+
+  // Year band: one label per year, spanning its months proportionally
+  const yearGroups=[];
+  months.forEach(d=>{
+    const y=d.getFullYear();
+    if(!yearGroups.length||yearGroups[yearGroups.length-1].year!==y) yearGroups.push({year:y,count:1});
+    else yearGroups[yearGroups.length-1].count++;
+  });
+  document.getElementById("tl-years-labels").innerHTML=
+    yearGroups.map(g=>`<div class="tl-year-label" style="flex:${g.count}">${g.year}</div>`).join("");
   document.getElementById("tl-months-labels").innerHTML=
-    months.map(m=>`<div class="tl-month-label">${m}</div>`).join("");
+    months.map(d=>`<div class="tl-month-label">${d.toLocaleDateString("en-GB",{month:"short"})}</div>`).join("");
 
   // Build events row
   const eventSegs = EVENTS.map((e, eidx)=>{
@@ -688,12 +710,13 @@ function buildOverview(customStart, customEnd){
     const left=daysBetween(TL_START,cFrom)/TL_TOTAL;
     const width=(daysBetween(cFrom,cTo)+1)/TL_TOTAL;
     const tip=e.name+(e.location?" \u00b7 "+e.location:"");
-    return `<div class="tl-segment seg-event" style="left:${(left*100).toFixed(2)}%;width:${(width*100).toFixed(2)}%" title="${tip}" data-row-type="event" data-row-idx="${eidx}" tabindex="0" role="button" aria-label="${tip}">${e.name}</div>`;
+    const styleAttr = e.style ? `style="left:${(left*100).toFixed(2)}%;width:${(width*100).toFixed(2)}%;${e.style}"` : `style="left:${(left*100).toFixed(2)}%;width:${(width*100).toFixed(2)}%"`;
+    return `<div class="tl-segment seg-event" ${styleAttr} title="${tip}" data-row-type="event" data-row-idx="${eidx}" tabindex="0" role="button" aria-label="${tip}">${e.name}</div>`;
   }).join("");
   const eventStripes=months.map(()=>`<div class="tl-month-stripe"></div>`).join("");
   const eventsRow = `<div class="tl-row tl-row-events">
     <div class="tl-name-cell">
-      <div><div class="tl-name">DdS events</div></div>
+      <div><div class="tl-name">Events DdS organizes</div></div>
     </div>
     <div class="tl-bar-cell"><div class="tl-bg">${eventStripes}</div><div class="tl-bar-wrapper">${eventSegs}</div></div>
   </div>`;
@@ -714,6 +737,42 @@ function buildOverview(customStart, customEnd){
       <div><div class="tl-name">DdS project meetings</div></div>
     </div>
     <div class="tl-bar-cell"><div class="tl-bg">${meetingStripes}</div><div class="tl-bar-wrapper">${meetingSegs}</div></div>
+  </div>`;
+
+  // Build external events row (events DdS attends/presents)
+  const externalEventSegs = EXTERNAL_EVENTS.map((e, eidx)=>{
+    const from=parseDate(e.from), to=parseDate(e.to);
+    const cFrom=from<TL_START?TL_START:from, cTo=to>=TL_END?new Date(TL_END.getTime()-86400000):to;
+    if(cFrom>cTo) return "";
+    const left=daysBetween(TL_START,cFrom)/TL_TOTAL;
+    const width=(daysBetween(cFrom,cTo)+1)/TL_TOTAL;
+    const tip=e.name+(e.location?" \u00b7 "+e.location:"");
+    return `<div class="tl-segment seg-event" style="left:${(left*100).toFixed(2)}%;width:${Math.max(width*100,1.2).toFixed(2)}%;opacity:0.75;" title="${tip}" data-row-type="external-event" data-row-idx="${eidx}" tabindex="0" role="button" aria-label="${tip}">${e.name}</div>`;
+  }).join("");
+  const externalEventStripes=months.map(()=>`<div class="tl-month-stripe"></div>`).join("");
+  const externalEventsRow = `<div class="tl-row">
+    <div class="tl-name-cell">
+      <div><div class="tl-name">Events DdS attends/presents</div></div>
+    </div>
+    <div class="tl-bar-cell"><div class="tl-bg">${externalEventStripes}</div><div class="tl-bar-wrapper">${externalEventSegs}</div></div>
+  </div>`;
+
+  // Build internal meetings row
+  const internalMeetingSegs = INTERNAL_MEETINGS.map((e, eidx)=>{
+    const from=parseDate(e.from), to=parseDate(e.to);
+    const cFrom=from<TL_START?TL_START:from, cTo=to>=TL_END?new Date(TL_END.getTime()-86400000):to;
+    if(cFrom>cTo) return "";
+    const left=daysBetween(TL_START,cFrom)/TL_TOTAL;
+    const width=(daysBetween(cFrom,cTo)+1)/TL_TOTAL;
+    const tip=e.name+(e.location?" \u00b7 "+e.location:"");
+    return `<div class="tl-segment seg-meeting" style="left:${(left*100).toFixed(2)}%;width:${Math.max(width*100,1.2).toFixed(2)}%" title="${tip}" data-row-type="internal-meeting" data-row-idx="${eidx}" tabindex="0" role="button" aria-label="${tip}">${e.name}</div>`;
+  }).join("");
+  const internalMeetingStripes=months.map(()=>`<div class="tl-month-stripe"></div>`).join("");
+  const internalMeetingsRow = `<div class="tl-row">
+    <div class="tl-name-cell">
+      <div><div class="tl-name">DdS internal meetings</div></div>
+    </div>
+    <div class="tl-bar-cell"><div class="tl-bg">${internalMeetingStripes}</div><div class="tl-bar-wrapper">${internalMeetingSegs}</div></div>
   </div>`;
 
   document.getElementById("tl-rows").innerHTML = MEMBERS.map(m=>{
@@ -751,7 +810,7 @@ function buildOverview(customStart, customEnd){
       </div>
       <div class="tl-bar-cell"><div class="tl-bg">${stripes}</div><div class="tl-bar-wrapper">${segs.join("")}</div></div>
     </div>`;
-  }).join("") + eventsRow + meetingsRow;
+  }).join("") + eventsRow + externalEventsRow + internalMeetingsRow + meetingsRow;
 
   document.getElementById("member-cards").innerHTML=MEMBERS.map(m=>{
     const todayKey = toKey(new Date());
@@ -775,7 +834,7 @@ function buildOverview(customStart, customEnd){
       const timeStr=r.timeFrom?` ${r.timeFrom}\u2013${r.timeTo}`:"";
       const icon=r.status==="half-day"?"ti-clock-half-2":"ti-repeat";
       const farFuture=daysBetween(new Date(),parseDate(r.to))>365;
-      const bounds=farFuture?`from ${fmtDate(r.from)} onwards`:`${fmtDate(r.from)}\u2013${fmtDate(r.to)}`;
+      const bounds=farFuture?`from ${fmtDateLong(r.from)} onwards`:`${fmtDateLong(r.from)}\u2013${fmtDateLong(r.to)}`;
       const desc=(r.label||("Every "+days[r.weekday]))+timeStr;
       return `<div class="mc-row"><i class="ti ${icon}" aria-hidden="true"></i><span>${desc} \u00b7 ${bounds}</span></div>`;
     }).join("");
@@ -976,16 +1035,19 @@ document.addEventListener("click", e => {
 document.addEventListener("keydown", e => { if (e.key === "Escape") closePopover(); });
 
 function openEntryPopover(rowType, idx, anchorEl) {
-  const entry = rowType === "event" ? EVENTS[idx] : MEETINGS[idx];
+  const entry = rowType === "event" ? EVENTS[idx] : rowType === "external-event" ? EXTERNAL_EVENTS[idx] : rowType === "internal-meeting" ? INTERNAL_MEETINGS[idx] : MEETINGS[idx];
   if (!entry) return;
-  const rowLabel = rowType === "event" ? "DdS event" : "DdS project meeting";
-  const icon     = rowType === "event" ? "ti-calendar-event" : "ti-users";
+  const rowLabel = rowType === "event" ? "Event DdS organizes" : rowType === "external-event" ? "Event DdS attends/presents" : rowType === "internal-meeting" ? "DdS internal meeting" : "DdS project meeting";
+  const icon     = (rowType === "meeting" || rowType === "internal-meeting") ? "ti-users" : "ti-calendar-event";
   spName.textContent = entry.name;
   const dateStr = entry.from === entry.to
     ? fmtDateLong(entry.from)
     : `${fmtDate(entry.from)} \u2013 ${fmtDateLong(entry.to)}`;
   const locStr = entry.location
     ? `<div class="seg-popover-row"><i class="ti ti-map-pin" aria-hidden="true"></i><span>${entry.location}</span></div>`
+    : "";
+  const urlStr = entry.url
+    ? `<div class="seg-popover-row"><i class="ti ti-link" aria-hidden="true"></i><a href="${entry.url}" target="_blank" rel="noopener" style="color:#1A6BAA;text-decoration:none;font-size:12px;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">More info</a></div>`
     : "";
   spBody.innerHTML = `
     <div class="seg-popover-row" style="margin-bottom:10px;">
@@ -994,7 +1056,7 @@ function openEntryPopover(rowType, idx, anchorEl) {
       </span>
     </div>
     <div class="seg-popover-row"><i class="ti ti-calendar" aria-hidden="true"></i><span>${dateStr}</span></div>
-    ${locStr}`;
+    ${locStr}${urlStr}`;
 
   positionAndShowPopover(anchorEl);
 }
@@ -1028,7 +1090,7 @@ document.getElementById("tl-rows").addEventListener("click", e => {
 
   const rowType = seg.dataset.rowType;
 
-  if (rowType === "event" || rowType === "meeting") {
+  if (rowType === "event" || rowType === "external-event" || rowType === "internal-meeting" || rowType === "meeting") {
     openEntryPopover(rowType, parseInt(seg.dataset.rowIdx, 10), seg);
     return;
   }
@@ -1049,7 +1111,7 @@ document.getElementById("tl-rows").addEventListener("keydown", e => {
   e.preventDefault();
   if (seg.classList.contains("active")) { closePopover(); return; }
   const rowType = seg.dataset.rowType;
-  if (rowType === "event" || rowType === "meeting") {
+  if (rowType === "event" || rowType === "external-event" || rowType === "internal-meeting" || rowType === "meeting") {
     openEntryPopover(rowType, parseInt(seg.dataset.rowIdx, 10), seg);
     return;
   }
