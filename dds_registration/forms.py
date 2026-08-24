@@ -1,7 +1,7 @@
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.forms.models import ModelForm
 from django.utils.safestring import mark_safe
@@ -178,8 +178,11 @@ class PaymentAdminForm(ModelForm):
         fields = "__all__"
 
 
-class UserAdminForm(ModelForm):
-    class Meta:
+class UserAdminForm(UserChangeForm):
+    # Must extend UserChangeForm, not ModelForm: a plain ModelForm renders the raw
+    # password hash as an editable text input, and saving it overwrites the hash
+    # with plaintext, permanently locking the user out.
+    class Meta(UserChangeForm.Meta):
         model = User
         widgets = {
             "first_name": textInputWidget,
