@@ -1,9 +1,7 @@
 # dds_registration
 A Django App to manage DdS membership and event registration.
 
-[![Pypi Version](https://img.shields.io/pypi/v/django-dds_registration.svg)](https://pypi.org/project/django-dds_registration/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/django-dds_registration.svg)](https://pypi.org/project/django-dds_registration/)
-[![Run tests](https://github.com/gchazot/dds_registration/actions/workflows/run_tests.yml/badge.svg)](https://github.com/gchazot/dds_registration/actions/workflows/run_tests.yml)
+[![Run tests](https://github.com/sentier-dev/dds_registration/actions/workflows/run_tests.yml/badge.svg)](https://github.com/sentier-dev/dds_registration/actions/workflows/run_tests.yml)
 
 ## User accounts
 
