@@ -98,37 +98,20 @@ sequenceDiagram
 
 ## Development
 
-The `dev_server.sh` script is here to help setting up a development site.
-
 ```shell script
-./dev_server.sh run
-```
-This will start a local dev server running with its own virtualenv.
+pip install -e ".[testing]"   # or ".[dev]" for linters and pre-commit
 
-```shell script
-./dev_server.sh test
-```
-This will run all the tests currently available in the codebase and provided by Django.
+pytest                        # run the test suite (tests/, with coverage)
 
-```shell script
-./dev_server.sh --help
+DEBUG=True DEV=True python manage.py migrate
+DEBUG=True DEV=True python manage.py runserver   # local dev server (sqlite)
 ```
-For more options the script has to offer.
+
+Frontend assets (SCSS/TS) are rebuilt with `npm install && npm run update-assets`.
 
 ## Releasing
 
-#### Preparation
-* Update `setup.cfg` with the new version number and commit
-* Merge all desired changes to `master`
-* Create a release in GitHub with a summary description, including creating a new tag v<version_number>.
-
-#### Automatic release
-[Github Actions](https://github.com/gchazot/dds_registration/actions) take care of everything.
-
-#### Manual release process
-A little more involved but it's Okay I guess
-```shell script
-rm -rf build/ dist/ django_dds_registration.egg-info/
-python setup.py sdist
-twine upload dist/*
-```
+1. Merge all desired changes to `main`.
+2. Create a GitHub release with a summary description and a new tag like `1.4.4`.
+   Merging alone deploys nothing; the production server installs from the
+   latest release zipball.
