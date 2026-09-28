@@ -155,3 +155,6 @@ django_registration
 
 # Email authentication (better safe than sorry)
 token.json
+
+# uv writes this on `uv run`; deps come from pyproject via `uv pip install`, never commit it.
+uv.lock
