@@ -76,6 +76,7 @@ tracker = "https://github.com/Depart-de-Sentier/dds_registration/issues"
 # seems to work, at least for now
 testing = [
     "dds_registration",
+    "openpyxl",  # read back the xlsx export in tests
     "pytest",
     "pytest-cov",
     "pytest-django",
