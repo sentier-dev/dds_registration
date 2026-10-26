@@ -210,7 +210,7 @@ class Payment(Model):
     #     "price": option.price,
     #     "currency": option.currency,
     #     "includes_membership": option.includes_membership,
-    #     "membership_end_year": option.membership_end_year,
+    #     "membership_until": option.membership_until.isoformat(),
     # }
     data = models.JSONField(help_text="JSON object", default=dict)
 
@@ -246,9 +246,12 @@ class Payment(Model):
 
         if self.data.get("includes_membership"):
             user = User.objects.get(id=self.data["user"]["id"])
+            granted_until = date.fromisoformat(
+                until_label(self.data.get("membership_until") or self.data.get("membership_end_year"))
+            )
             try:
                 membership = Membership.objects.get(user=user)
-                membership.until = max(membership.until, self.data["membership_end_year"])
+                membership.until = max(membership.until, granted_until)
                 membership.save()
             except ObjectDoesNotExist:
                 Membership(
@@ -256,7 +259,7 @@ class Payment(Model):
                     membership_type="NORMAL",
                     payment=self,
                     mailing_list=True,
-                    until=self.data["membership_end_year"],
+                    until=granted_until,
                 ).save()
 
         if settings.SLACK_PAYMENTS_WEBHOOK:
@@ -339,7 +342,8 @@ class Payment(Model):
         # TODO: Issue #149: To extract these (and all other hardcoded here, in `send_email` methods?) texts to template files, with substiting names, urls and emails from settings or preferences values?
         if self.data["kind"] == "membership":
             subject = f"DdS Membership Invoice {self.invoice_no}"
-            message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\n\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\n\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\n\nYou can change your invoice details here: https://events.d-d-s.ch{reverse('membership_application')}.\n\nIf you have any questions, please contact events@d-d-s.ch."
+            until_text = user.membership.until.strftime("%-d %B %Y")
+            message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\n\nYour membership will run until {until_text} (Don't worry, you will get a reminder to renew for another year :).\n\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\n\nYou can change your invoice details here: https://events.d-d-s.ch{reverse('membership_application')}.\n\nIf you have any questions, please contact events@d-d-s.ch."
         else:
             event = Event.objects.get(id=self.data["event"]["id"])
             subject = f"DdS Event {event.title} Registration Invoice {self.invoice_no}"

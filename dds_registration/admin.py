@@ -63,9 +63,9 @@ class IsActiveFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "1":
-            return queryset.filter(until__gte=date.today().year)
+            return queryset.filter(until__gte=date.today())
         if self.value() == "0":
-            return queryset.filter(until__lt=date.today().year)
+            return queryset.filter(until__lt=date.today())
 
 
 class UserAdmin(BaseUserAdmin):
@@ -163,17 +163,20 @@ class MembershipAdmin(admin.ModelAdmin):
 
     @admin.action(description="Export all current members to excel")
     def export_current_member_list(self, request, queryset):
-        queryset = Membership.objects.filter(until__gte=date.today().year)
+        queryset = Membership.objects.filter(until__gte=date.today()).select_related("user")
         df = pd.DataFrame(
             [
                 {
                     "email": obj.user.email,
                     "id": obj.user.id,
-                    "name": obj.user.get_full_name(),
+                    "first_name": obj.user.first_name,
+                    "last_name": obj.user.last_name,
+                    "organization": obj.organization,
+                    "organization_type": obj.get_organization_type_display(),
                     "started": obj.started,
-                    "unit": obj.until,
+                    "until": obj.until,
                     "on_mailing_list": obj.mailing_list,
-                    "type": str(obj.membership_type),
+                    "type": obj.get_membership_type_display(),
                 }
                 for obj in queryset
             ]
@@ -189,6 +192,7 @@ class MembershipAdmin(admin.ModelAdmin):
         )
         response["Content-Disposition"] = "attachment; filename=memberships.xlsx"
         return response
+
 
 @admin.register(Registration)
 class RegistrationAdmin(admin.ModelAdmin):
