@@ -217,3 +217,80 @@ sudo systemctl start dds-registration
 ## Configure the Django `site`
 
 You **must** login to the admin portal and configure the `Site` or the URLs will break!
+
+## Celery worker and beat (membership renewal reminders)
+
+The app sends renewal reminders through Celery. The broker is the Redis instance
+already running on the server for Indico; this app uses database index 2
+(`redis://127.0.0.1:6379/2`). Never point it at db0 or db1 (Indico's broker and cache).
+
+Install the dependency in the app venv (the venv is uv-managed, there is no pip):
+
+```bash
+sudo -u registration bash -c 'cd /home/registration && ~/.local/bin/uv pip install --python venvs/registration/bin/python "celery[redis]>=5.4"'
+```
+
+Create two units with the same `User` and `Environment=` block as
+`dds-registration.service`, plus `Environment=CELERY_BROKER_URL=redis://127.0.0.1:6379/2`:
+
+```
+# /etc/systemd/system/dds-registration-worker.service
+[Unit]
+Description=DdS events registration - Celery worker
+After=network.target redis-server.service
+
+[Service]
+Type=simple
+User=registration
+WorkingDirectory=/home/registration/registration
+ExecStart=/home/registration/venvs/registration/bin/celery -A dds_registration worker --concurrency 1 --loglevel info
+Restart=always
+# Environment= lines copied from dds-registration.service
+Environment=CELERY_BROKER_URL=redis://127.0.0.1:6379/2
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```
+# /etc/systemd/system/dds-registration-beat.service
+[Unit]
+Description=DdS events registration - Celery beat
+After=network.target redis-server.service
+
+[Service]
+Type=simple
+User=registration
+WorkingDirectory=/home/registration/registration
+ExecStart=/home/registration/venvs/registration/bin/celery -A dds_registration beat --schedule /home/registration/celerybeat-schedule --loglevel info
+Restart=always
+# Environment= lines copied from dds-registration.service
+Environment=CELERY_BROKER_URL=redis://127.0.0.1:6379/2
+
+[Install]
+WantedBy=multi-user.target
+```
+
+The schedule file lives outside the checkout because `download-latest.sh` deletes
+and recreates `registration/` on every deploy. Run exactly one beat instance. The
+worker runs with concurrency 1 because it shares the SQLite database with uWSGI.
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now dds-registration-worker dds-registration-beat
+```
+
+After every deploy run the migrations and restart all three services:
+
+```bash
+sudo -u registration bash -c 'cd /home/registration/registration && ../venvs/registration/bin/python manage.py migrate'
+sudo systemctl restart dds-registration dds-registration-worker dds-registration-beat
+```
+
+Check what would go out today without sending anything:
+
+```bash
+sudo -u registration bash -c 'cd /home/registration/registration && ../venvs/registration/bin/python manage.py send_membership_reminders --dry-run'
+```
+
+The sweep runs daily at 06:00 UTC (`CELERY_BEAT_SCHEDULE` in `settings.py`).

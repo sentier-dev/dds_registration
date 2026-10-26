@@ -52,7 +52,7 @@ sequenceDiagram
 
 ## Membership
 
-DdS membership runs per calendar year, from January 1st to December 31st. Signing up for DdS membership requires a valid user account.
+DdS membership runs for one year from the day of joining; renewing early adds a year to the current end date, and both dates can be adjusted in the admin. Renewal reminders go out automatically 60 and 30 days before the end date, on the day, and 30 and 60 days after (see `deployment.md`, Celery section). Signing up for DdS membership requires a valid user account.
 
 ```mermaid
 sequenceDiagram
