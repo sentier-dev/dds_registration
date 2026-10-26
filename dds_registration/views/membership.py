@@ -1,39 +1,38 @@
 from datetime import date
 
+from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
-from ..core.helpers.dates import this_year
-from ..forms import MembershipForm
+from ..core.membership.validity import renewal_until, within_renewal_window
+from ..forms import MembershipDetailsForm, MembershipForm
 from ..models import MEMBERSHIP_DATA, Membership, Payment
 
 
 def membership_application(request: HttpRequest):
-    if not request.user:
+    if not request.user or not request.user.is_authenticated:
         messages.error(request, "You have to have an account before you can register for membership")
         return redirect("login")
-    if not request.user.is_authenticated:
-        messages.error(request, "You have to authenticate your account before you can register for membership")
-        return redirect("login")
 
-    try:
-        membership = Membership.objects.get(user=request.user)
-        if membership.active:
-            messages.error(request, "You are already a DdS member")
-            return redirect("profile")
-    except ObjectDoesNotExist:
-        pass
+    membership = Membership.objects.filter(user=request.user).first()
+    today = date.today()
+    current_until = membership.until if membership else None
+    if not within_renewal_window(current_until, today, settings.MEMBERSHIP_RENEWAL_WINDOW_DAYS):
+        messages.error(
+            request,
+            f"Your membership is valid until {current_until:%-d %B %Y}; renewal opens "
+            f"{settings.MEMBERSHIP_RENEWAL_WINDOW_DAYS} days before that.",
+        )
+        return redirect("profile")
 
     if request.method == "POST":
         form = MembershipForm(request.POST)
 
         if form.is_valid():
-            today = date.today()
-            september = date(year=today.year, month=9, day=15)
-            until = today.year if today < september else today.year + 1
-
+            until = renewal_until(current_until, today)
+            membership_type = form.cleaned_data["membership_type"]
             payment = Payment(
                 status="CREATED",
                 data={
@@ -45,32 +44,28 @@ def membership_application(request: HttpRequest):
                     "extra": form.cleaned_data["extra"],
                     "kind": "membership",
                     "membership": {
-                        "type": form.cleaned_data["membership_type"],
-                        "label": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["label"],
+                        "type": membership_type,
+                        "label": MEMBERSHIP_DATA[membership_type]["label"],
+                        "organization": form.cleaned_data["organization"],
+                        "organization_type": form.cleaned_data["organization_type"],
                     },
                     "method": form.cleaned_data["payment_method"],
-                    "price": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["price"],
-                    "currency": MEMBERSHIP_DATA[form.cleaned_data["membership_type"]]["currency"],
-                    "until": until,
+                    "price": MEMBERSHIP_DATA[membership_type]["price"],
+                    "currency": MEMBERSHIP_DATA[membership_type]["currency"],
+                    "until": until.isoformat(),
                 },
             )
             payment.save()
 
-            try:
-                membership = Membership.objects.get(user=request.user)
-                membership.mailing_list = form.cleaned_data["mailing_list"]
-                membership.membership_type = form.cleaned_data["membership_type"]
-                membership.until = until
-                membership.payment = payment
-                membership.save()
-            except ObjectDoesNotExist:
-                membership = Membership(
-                    user=request.user,
-                    membership_type=form.cleaned_data["membership_type"],
-                    payment=payment,
-                    mailing_list=form.cleaned_data["mailing_list"],
-                )
-                membership.save()
+            if membership is None:
+                membership = Membership(user=request.user, started=today)
+            membership.mailing_list = form.cleaned_data["mailing_list"]
+            membership.membership_type = membership_type
+            membership.organization = form.cleaned_data["organization"]
+            membership.organization_type = form.cleaned_data["organization_type"]
+            membership.until = until
+            membership.payment = payment
+            membership.save()
 
             if payment.data["method"] == "INVOICE":
                 payment.status = "ISSUED"
@@ -89,6 +84,8 @@ def membership_application(request: HttpRequest):
                 "name": request.user.get_full_name(),
                 "address": request.user.address,
                 "extra": "",
+                "organization": membership.organization if membership else "",
+                "organization_type": membership.organization_type if membership else "",
             }
         )
 
@@ -99,60 +96,19 @@ def membership_application(request: HttpRequest):
     )
 
 
-# @login_required
-# def membership_proceed_success(request: HttpRequest):
-#     context = {
-#         "action": "membership_proceed_success",
-#     }
-#     return render(request, "dds_registration/membership/membership_test.html.django", context)
-
-
-# def send_membership_registration_success_message(request: HttpRequest):
-#     """
-#     Send successful membership registration message to the user
-
-#     TODO: Send different messages depending on the `payment_method`?
-#     """
-
-#     email_body_template = "dds_registration/membership/membership_registration_new_success_message_body.txt"
-#     email_subject_template = "dds_registration/membership/membership_registration_new_success_message_subject.txt"
-
-#     user = request.user
-
-#     context = get_membership_invoice_context(request)
-
-#     invoice = context.get("invoice")
-
-#     try:
-#         subject = render_to_string(
-#             template_name=email_subject_template,
-#             context=context,
-#             request=request,
-#         )
-#         subject = " ".join(subject.splitlines()).strip()
-#         body = render_to_string(
-#             template_name=email_body_template,
-#             context=context,
-#             request=request,
-#         )
-
-#         if invoice.payment_method == "INVOICE" and invoice.status in ("ISSUED", "CREATED"):
-#             user.email_user(
-#                 subject=subject,
-#                 message=body,
-#                 attachment_content=create_invoice_pdf(context),
-#                 attachment_name="DdS Membership Invoice {}.pdf".format(user.get_full_name()),
-#             )
-#             invoice.status = "ISSUED"
-#             invoice.save()
-#         else:
-#             user.email_user(subject=subject, message=body)
-#     except Exception as err:
-#         sError = errorToString(err, show_stacktrace=False)
-#         sTraceback = str(traceback.format_exc())
-#         debug_data = {
-#             "err": err,
-#             "traceback": sTraceback,
-#         }
-#         LOG.error("Caught error %s (re-raising): %s", sError, debug_data)
-#         raise err
+@login_required
+def membership_details(request: HttpRequest):
+    membership = get_object_or_404(Membership, user=request.user)
+    if request.method == "POST":
+        form = MembershipDetailsForm(request.POST, instance=membership)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Thanks, your membership record is complete.")
+            return redirect("profile")
+    else:
+        form = MembershipDetailsForm(instance=membership)
+    return render(
+        request=request,
+        template_name="dds_registration/membership/membership_details.html.django",
+        context={"form": form, "membership": membership},
+    )

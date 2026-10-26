@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from django_registration.forms import RegistrationForm as BaseRegistrationForm
 from prettyjson import PrettyJSONWidget
 
-from .models import MEMBERSHIP_DATA, Event, Payment, RegistrationOption, User
+from .models import MEMBERSHIP_DATA, Event, Membership, OrganizationType, Payment, RegistrationOption, User
 
 # A text field to use in those TextField's which don't require large texts, but can use one-line text inputs
 textInputWidget = forms.TextInput(attrs={"class": "vLargeTextField"})
@@ -34,6 +34,18 @@ class MembershipForm(forms.Form):
         widget=forms.RadioSelect,
         required=True,
         label="Membership type",
+    )
+    organization = forms.CharField(
+        label="Organization",
+        max_length=200,
+        widget=textInputWidget,
+        required=True,
+        help_text="University, company, institute, or 'Independent'.",
+    )
+    organization_type = forms.ChoiceField(
+        choices=[("", "---------")] + list(OrganizationType.choices),
+        required=True,
+        label="Type of organization",
     )
     payment_method = forms.ChoiceField(
         choices=Payment.METHODS,
@@ -229,3 +241,16 @@ class UpdateUserForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["first_name"].required = True
         self.fields["last_name"].required = True
+
+
+class MembershipDetailsForm(ModelForm):
+    class Meta:
+        model = Membership
+        fields = ["organization", "organization_type"]
+        widgets = {"organization": textInputWidget}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["organization"].required = True
+        self.fields["organization_type"].required = True
+        self.fields["organization_type"].choices = [("", "---------")] + list(OrganizationType.choices)

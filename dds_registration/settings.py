@@ -313,6 +313,9 @@ TIMEOUT = 30 if DEBUG else 300  # Short value for debug time
 # Site config
 
 # TODO: Use `Site.objects.get_current().name` (via `from django.contrib.sites.models import Site`) as site title.
+# Members may renew this many days before their membership ends.
+MEMBERSHIP_RENEWAL_WINDOW_DAYS = 60
+
 SITE_NAME = "Départ de Sentier Events and Membership Portal"
 SITE_TITLE = SITE_NAME
 # TODO: Issue #40: Add proper site description and keywords...
