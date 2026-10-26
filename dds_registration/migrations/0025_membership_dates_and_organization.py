@@ -30,13 +30,20 @@ def year_to_until(year) -> date:
 
 
 def started_from(payment_data, started_year) -> date:
+    """Join date: the linked payment's paid date when it falls in the stored start year, else Jan 1.
+
+    The linked payment is the *latest* one (renewals replace it), so a paid date from a
+    later year says nothing about when the member first joined.
+    """
+    year = _plausible_year(started_year) or date.today().year
     paid = (payment_data or {}).get("paid_date")
     if paid:
         try:
-            return date.fromisoformat(paid)
+            paid_date = date.fromisoformat(paid)
         except ValueError:
-            pass
-    year = _plausible_year(started_year) or date.today().year
+            paid_date = None
+        if paid_date and paid_date.year == year:
+            return paid_date
     return date(year, 1, 1)
 
 

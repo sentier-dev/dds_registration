@@ -26,6 +26,11 @@ def test_year_zero_or_none_falls_back_to_current_year():
     assert migration.started_from({"paid_date": "garbage"}, 0) == date(date.today().year, 1, 1)
 
 
+def test_started_from_ignores_renewal_paid_in_a_later_year():
+    # membership.payment points at the latest (renewal) payment, not the first one
+    assert migration.started_from({"paid_date": "2025-03-14"}, 2024) == date(2024, 1, 1)
+
+
 def test_started_from_falls_back_to_jan_1():
     assert migration.started_from({}, 2024) == date(2024, 1, 1)
     assert migration.started_from(None, 2024) == date(2024, 1, 1)
