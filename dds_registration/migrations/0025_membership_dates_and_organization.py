@@ -12,15 +12,32 @@ from django.db import migrations, models
 import dds_registration.core.helpers.dates
 
 
-def year_to_until(year: int) -> date:
-    return date(int(year), 12, 31)
+MIN_PLAUSIBLE_YEAR = 2000  # production has a RegistrationOption with membership_end_year = 0
 
 
-def started_from(payment_data, started_year: int) -> date:
+def _plausible_year(year) -> int | None:
+    try:
+        year = int(year)
+    except (TypeError, ValueError):
+        return None
+    return year if year >= MIN_PLAUSIBLE_YEAR else None
+
+
+def year_to_until(year) -> date:
+    """Dec 31 of ``year``; a missing or nonsense year (0, None) becomes Dec 31 of the current year."""
+    year = _plausible_year(year) or date.today().year
+    return date(year, 12, 31)
+
+
+def started_from(payment_data, started_year) -> date:
     paid = (payment_data or {}).get("paid_date")
     if paid:
-        return date.fromisoformat(paid)
-    return date(int(started_year), 1, 1)
+        try:
+            return date.fromisoformat(paid)
+        except ValueError:
+            pass
+    year = _plausible_year(started_year) or date.today().year
+    return date(year, 1, 1)
 
 
 def forwards(apps, schema_editor):

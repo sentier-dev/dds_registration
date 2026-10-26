@@ -19,6 +19,13 @@ def test_started_from_paid_date_when_present():
     assert migration.started_from({"paid_date": "2025-03-14"}, 2025) == date(2025, 3, 14)
 
 
+def test_year_zero_or_none_falls_back_to_current_year():
+    # production has a RegistrationOption with membership_end_year = 0
+    assert migration.year_to_until(0) == date(date.today().year, 12, 31)
+    assert migration.year_to_until(None) == date(date.today().year, 12, 31)
+    assert migration.started_from({"paid_date": "garbage"}, 0) == date(date.today().year, 1, 1)
+
+
 def test_started_from_falls_back_to_jan_1():
     assert migration.started_from({}, 2024) == date(2024, 1, 1)
     assert migration.started_from(None, 2024) == date(2024, 1, 1)
