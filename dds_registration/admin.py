@@ -18,6 +18,7 @@ from .forms import (
 from .models import (
     Event,
     Membership,
+    MembershipReminder,
     Message,
     Payment,
     Registration,
@@ -63,9 +64,9 @@ class IsActiveFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "1":
-            return queryset.filter(until__gte=date.today().year)
+            return queryset.filter(until__gte=date.today())
         if self.value() == "0":
-            return queryset.filter(until__lt=date.today().year)
+            return queryset.filter(until__lt=date.today())
 
 
 class UserAdmin(BaseUserAdmin):
@@ -139,41 +140,85 @@ class MessageAdmin(admin.ModelAdmin):
     # mailing_list = models.BooleanField(default=False)
 
 
+class MembershipReminderInline(admin.TabularInline):
+    model = MembershipReminder
+    extra = 0
+    can_delete = False
+    readonly_fields = ["until", "stage", "sent_at"]
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Membership)
 class MembershipAdmin(admin.ModelAdmin):
     fieldsets = (
-        (None, {"fields": ("user", "membership_type")}),
+        ("Member", {"fields": ("user", "membership_type", "organization", "organization_type")}),
         ("Validity", {"fields": ("started", "until")}),
         ("Communication", {"fields": ("mailing_list",)}),
     )
-
+    inlines = [MembershipReminderInline]
     list_display = [
-        "user",
-        "started",
-        "until",
-        #  "paid",
-        "active",
+        "full_name",
+        "last_name",
+        "first_name",
+        "email",
+        "organization",
+        "organization_type",
         "membership_type",
+        "started_iso",
+        "until_iso",
+        "active",
     ]
-    search_fields = [
-        "user__username",
-    ]
-    list_filter = [IsActiveFilter, "membership_type"]
+    list_select_related = ["user"]
+    search_fields = ["user__email", "user__first_name", "user__last_name", "organization"]
+    list_filter = [IsActiveFilter, "membership_type", "organization_type"]
     actions = ["export_current_member_list"]
+
+    @admin.display(description="Name", ordering="user__last_name")
+    def full_name(self, obj):
+        return obj.user.get_full_name() or obj.user.email
+
+    @admin.display(description="Last name", ordering="user__last_name")
+    def last_name(self, obj):
+        return obj.user.last_name
+
+    @admin.display(description="First name", ordering="user__first_name")
+    def first_name(self, obj):
+        return obj.user.first_name
+
+    @admin.display(description="Email", ordering="user__email")
+    def email(self, obj):
+        return obj.user.email
+
+    @admin.display(description="Started", ordering="started")
+    def started_iso(self, obj):
+        return obj.started.isoformat()
+
+    @admin.display(description="Until", ordering="until")
+    def until_iso(self, obj):
+        return obj.until.isoformat()
+
+    @admin.display(description="Active", boolean=True, ordering="until")
+    def active(self, obj):
+        return obj.active
 
     @admin.action(description="Export all current members to excel")
     def export_current_member_list(self, request, queryset):
-        queryset = Membership.objects.filter(until__gte=date.today().year)
+        queryset = Membership.objects.filter(until__gte=date.today()).select_related("user")
         df = pd.DataFrame(
             [
                 {
                     "email": obj.user.email,
                     "id": obj.user.id,
-                    "name": obj.user.get_full_name(),
+                    "first_name": obj.user.first_name,
+                    "last_name": obj.user.last_name,
+                    "organization": obj.organization,
+                    "organization_type": obj.get_organization_type_display(),
                     "started": obj.started,
-                    "unit": obj.until,
+                    "until": obj.until,
                     "on_mailing_list": obj.mailing_list,
-                    "type": str(obj.membership_type),
+                    "type": obj.get_membership_type_display(),
                 }
                 for obj in queryset
             ]
@@ -189,6 +234,7 @@ class MembershipAdmin(admin.ModelAdmin):
         )
         response["Content-Disposition"] = "attachment; filename=memberships.xlsx"
         return response
+
 
 @admin.register(Registration)
 class RegistrationAdmin(admin.ModelAdmin):

@@ -10,6 +10,7 @@ from ..constants.payments import (
     payment_recipient_address,
     payment_recipient_name,
 )
+from ..membership.validity import until_label
 
 __all__ = [
     "create_invoice_pdf_from_payment",
@@ -253,7 +254,7 @@ def get_common_pdf_table_items(payment: Model) -> (list, tuple):
             (
                 user.get_full_name(),
                 payment.data["membership"]["label"],
-                str(payment.data["until"]) + "-12-31",
+                until_label(payment.data["until"]),
                 payment.data["price"],
             ),
             ("", "", "**Total**", payment.data["price"]),

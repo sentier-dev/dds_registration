@@ -31,7 +31,8 @@ from .core.helpers.create_pdf import (
 )
 from .core.helpers.create_certificate import create_certificate_pdf
 from .core.helpers.create_invitation import create_invitation_pdf
-from .core.helpers.dates import this_year
+from .core.helpers.dates import end_of_this_year, one_year_from_today, this_year
+from .core.membership.validity import until_label
 from .core.helpers.email import send_email
 
 alphabet = string.ascii_lowercase + string.digits
@@ -209,7 +210,7 @@ class Payment(Model):
     #     "price": option.price,
     #     "currency": option.currency,
     #     "includes_membership": option.includes_membership,
-    #     "membership_end_year": option.membership_end_year,
+    #     "membership_until": option.membership_until.isoformat(),
     # }
     data = models.JSONField(help_text="JSON object", default=dict)
 
@@ -245,9 +246,12 @@ class Payment(Model):
 
         if self.data.get("includes_membership"):
             user = User.objects.get(id=self.data["user"]["id"])
+            granted_until = date.fromisoformat(
+                until_label(self.data.get("membership_until") or self.data.get("membership_end_year"))
+            )
             try:
                 membership = Membership.objects.get(user=user)
-                membership.until = max(membership.until, self.data["membership_end_year"])
+                membership.until = max(membership.until, granted_until)
                 membership.save()
             except ObjectDoesNotExist:
                 Membership(
@@ -255,7 +259,7 @@ class Payment(Model):
                     membership_type="NORMAL",
                     payment=self,
                     mailing_list=True,
-                    until=self.data["membership_end_year"],
+                    until=granted_until,
                 ).save()
 
         if settings.SLACK_PAYMENTS_WEBHOOK:
@@ -338,7 +342,8 @@ class Payment(Model):
         # TODO: Issue #149: To extract these (and all other hardcoded here, in `send_email` methods?) texts to template files, with substiting names, urls and emails from settings or preferences values?
         if self.data["kind"] == "membership":
             subject = f"DdS Membership Invoice {self.invoice_no}"
-            message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\n\nYour membership will run until December 31st, {user.membership.until} (Don't worry, you will get a reminder to renew for another year :).\n\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\n\nYou can change your invoice details here: https://events.d-d-s.ch{reverse('membership_application')}.\n\nIf you have any questions, please contact events@d-d-s.ch."
+            until_text = user.membership.until.strftime("%-d %B %Y")
+            message = f"Thanks for signing up for Départ de Sentier membership! Membership fees allow us to write awesome open source code, deploy open infrastructure, and run community events without spending all our time fundraising.\n\nYour membership will run until {until_text} (Don't worry, you will get a reminder to renew for another year :).\n\nPlease find attached the membership invoice. Your membership is not in force until the bank transfer is received.\n\nYou can change your invoice details here: https://events.d-d-s.ch{reverse('membership_application')}.\n\nIf you have any questions, please contact events@d-d-s.ch."
         else:
             event = Event.objects.get(id=self.data["event"]["id"])
             subject = f"DdS Event {event.title} Registration Invoice {self.invoice_no}"
@@ -416,22 +421,40 @@ MEMBERSHIP_DATA = MembershipData()
 HUMANS = ("ACADEMIC", "NORMAL", "HONORARY")
 
 
+class OrganizationType(models.TextChoices):
+    UNIVERSITY = "UNIVERSITY", "University"
+    RESEARCH = "RESEARCH", "Research institute"
+    COMPANY = "COMPANY", "Company"
+    CONSULTANCY = "CONSULTANCY", "Consultancy"
+    PUBLIC = "PUBLIC", "Public sector"
+    NGO = "NGO", "NGO / non-profit"
+    INDEPENDENT = "INDEPENDENT", "Independent / freelance"
+    STUDENT = "STUDENT", "Student"
+    OTHER = "OTHER", "Other"
+
+
 class Membership(Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     membership_type = models.TextField(choices=MEMBERSHIP_DATA.choices, default=MEMBERSHIP_DATA.default)
+    organization = models.CharField(max_length=200, blank=True, default="")
+    organization_type = models.CharField(max_length=16, choices=OrganizationType.choices, blank=True, default="")
 
-    started = models.IntegerField(default=this_year)
-    until = models.IntegerField(default=this_year)
+    started = models.DateField(default=date.today, help_text="Date the member first joined")
+    until = models.DateField(default=one_year_from_today, help_text="Last day the membership is valid (inclusive)")
     payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
     mailing_list = models.BooleanField(default=False)
 
     @property
     def active(self) -> bool:
-        return this_year() <= self.until
+        return date.today() <= self.until
+
+    @property
+    def needs_details(self) -> bool:
+        return not self.organization or not self.organization_type
 
     @classmethod
     def mailinglist_people(cls):
-        return cls.objects.filter(until__gte=this_year(), mailing_list=True, membership_type__in=HUMANS)
+        return cls.objects.filter(until__gte=date.today(), mailing_list=True, membership_type__in=HUMANS)
 
     def __str__(self):
         items = [
@@ -441,6 +464,31 @@ class Membership(Model):
         ]
         info = ", ".join(filter(None, map(str, items)))
         return info
+
+
+class MembershipReminder(Model):
+    """One row per reminder email actually sent; keyed on the end date it was about."""
+
+    STAGES = [
+        ("before_60", "60 days before expiry"),
+        ("before_30", "30 days before expiry"),
+        ("expiry", "On expiry"),
+        ("after_30", "30 days after expiry"),
+        ("after_60", "60 days after expiry"),
+    ]
+
+    membership = models.ForeignKey(Membership, on_delete=models.CASCADE, related_name="reminders")
+    until = models.DateField()
+    stage = models.CharField(max_length=16, choices=STAGES)
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["membership", "until", "stage"], name="one_reminder_per_stage"),
+        ]
+
+    def __str__(self):
+        return f"{self.membership.user.email} {self.stage} ({self.until})"
 
 
 class Event(Model):
@@ -473,18 +521,18 @@ class Event(Model):
         help_text="Maximum number of participants (0 = no limit)",
     )
     has_certificate = models.BooleanField(default=False, help_text="Event has certificate of participation")
-    certificate_title = models.TextField(
-        blank=True, null=True, help_text="Certificate title."
-    )
+    certificate_title = models.TextField(blank=True, null=True, help_text="Certificate title.")
     certificate_text = models.TextField(
-        blank=True, null=True, help_text="Certificate text. Can include MarkDown. MUST include `{attendee_name}` template variable where the name of the attendee will be substituted."
+        blank=True,
+        null=True,
+        help_text="Certificate text. Can include MarkDown. MUST include `{attendee_name}` template variable where the name of the attendee will be substituted.",
     )
     has_invitation = models.BooleanField(default=False, help_text="Event has letter of invitation")
-    invitation_title = models.TextField(
-        blank=True, null=True, help_text="Invtation letter title."
-    )
+    invitation_title = models.TextField(blank=True, null=True, help_text="Invtation letter title.")
     invitation_text = models.TextField(
-        blank=True, null=True, help_text="Invitation letter text. Can include MarkDown. MUST include `{attendee_name}` template variable where the name of the attendee will be substituted."
+        blank=True,
+        null=True,
+        help_text="Invitation letter text. Can include MarkDown. MUST include `{attendee_name}` template variable where the name of the attendee will be substituted.",
     )
 
     free = models.BooleanField(default=False)
@@ -548,7 +596,10 @@ class Event(Model):
         if self.max_participants and self.active_registration_count >= self.max_participants:
             return False
         if self.application_form:
-            if user.is_authenticated and Registration.objects.filter(user=user, event__id=self.id, status="SELECTED").count():
+            if (
+                user.is_authenticated
+                and Registration.objects.filter(user=user, event__id=self.id, status="SELECTED").count()
+            ):
                 return self.today_within_registration_band()
             return self.today_within_application_band()
         return self.today_within_registration_band()
@@ -588,8 +639,8 @@ class RegistrationOption(Model):
     includes_membership = models.BooleanField(
         default=False, help_text="Does this registration option include DdS membership?"
     )
-    membership_end_year = models.IntegerField(
-        default=this_year, help_text="If membership is included, until what year is it valid?"
+    membership_until = models.DateField(
+        default=end_of_this_year, help_text="If membership is included, last day it is valid (inclusive)"
     )
     max_participants = models.PositiveIntegerField(
         default=0,
@@ -617,7 +668,7 @@ class RegistrationOption(Model):
     @property
     def form_label(self):
         if self.includes_membership:
-            membership = " (includes DdS membership through {})".format(self.membership_end_year)
+            membership = " (includes DdS membership through {})".format(self.membership_until.isoformat())
         else:
             membership = ""
         if self.has_vat:
@@ -827,17 +878,12 @@ class Registration(Model):
 
 
 class Certificate(Model):
-    registration = models.OneToOneField(
-        Registration,
-        related_name="certificate",
-        on_delete=models.CASCADE
-    )
+    registration = models.OneToOneField(Registration, related_name="certificate", on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
 
     def pdf(self):
         url = "https://{}{}".format(
-            Site.objects.get_current().domain,
-            reverse("event_certificate_validation", args=(self.uuid,))
+            Site.objects.get_current().domain, reverse("event_certificate_validation", args=(self.uuid,))
         )
         return create_certificate_pdf(
             attendee_name=self.registration.user.get_full_name(),
@@ -848,17 +894,12 @@ class Certificate(Model):
 
 
 class InvitationLetter(Model):
-    registration = models.OneToOneField(
-        Registration,
-        related_name="invitation",
-        on_delete=models.CASCADE
-    )
+    registration = models.OneToOneField(Registration, related_name="invitation", on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
 
     def pdf(self):
         url = "https://{}{}".format(
-            Site.objects.get_current().domain,
-            reverse("event_invitation_validation", args=(self.uuid,))
+            Site.objects.get_current().domain, reverse("event_invitation_validation", args=(self.uuid,))
         )
         return create_invitation_pdf(
             attendee_name=self.registration.user.get_full_name(),

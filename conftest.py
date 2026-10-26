@@ -25,7 +25,25 @@ _TEST_ENV_DEFAULTS = {
     "SLACK_REGISTRATIONS_WEBHOOK": "",
     "SENTRY_DSN": "",
     "DEFAULT_FROM_EMAIL": "test@example.com",
+    "CELERY_TASK_ALWAYS_EAGER": "True",
+    "CELERY_BROKER_URL": "memory://",
 }
 
 for _key, _value in _TEST_ENV_DEFAULTS.items():
     os.environ.setdefault(_key, _value)
+
+
+def pytest_configure(config):
+    """Run Celery tasks inline during tests.
+
+    pytest-django imports the settings module before this conftest runs, so the
+    env defaults above do not reach import-time settings such as the Celery
+    block; configure the app object directly instead.
+    """
+    from django.conf import settings
+
+    # Celery resolves the namespaced Django name (CELERY_*) before its own conf
+    # overrides, so the attributes have to change on the settings object itself.
+    settings.CELERY_TASK_ALWAYS_EAGER = True
+    settings.CELERY_TASK_EAGER_PROPAGATES = True
+    settings.CELERY_BROKER_URL = "memory://"

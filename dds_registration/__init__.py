@@ -4,10 +4,13 @@ __timestamp__ = "2024.04.30 15:01 +0200"
 __timetag__ = "240430-1501"
 
 
+from .celery import app as celery_app  # noqa: E402
+
 __all__ = (
     __version__,
     __timestamp__,
     __timetag__,
+    "celery_app",
 )
 
 

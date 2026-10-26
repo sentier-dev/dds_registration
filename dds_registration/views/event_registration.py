@@ -23,11 +23,10 @@ def event_certificate(request: HttpRequest, event_code: str) -> HttpResponse:
     if not event.has_certificate or not registration:
         raise Http404
 
-    response = HttpResponse(
-        content=bytes(registration.get_certificate().output()),
-        content_type="application/pdf"
+    response = HttpResponse(content=bytes(registration.get_certificate().output()), content_type="application/pdf")
+    response["Content-Disposition"] = (
+        f'attachment; filename="DdS event certificate {registration.certificate.uuid}.pdf"'
     )
-    response["Content-Disposition"] = f'attachment; filename="DdS event certificate {registration.certificate.uuid}.pdf"'
     return response
 
 
@@ -37,10 +36,7 @@ def event_certificate_validation(request: HttpRequest, certificate_code: str) ->
     except ObjectDoesNotExist:
         raise Http404
 
-    response = HttpResponse(
-        content=bytes(certificate.pdf().output()),
-        content_type="application/pdf"
-    )
+    response = HttpResponse(content=bytes(certificate.pdf().output()), content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="DdS event certificate {certificate.uuid}.pdf"'
     return response
 
@@ -57,11 +53,10 @@ def event_invitation(request: HttpRequest, event_code: str) -> HttpResponse:
     if not event.has_invitation or not registration:
         raise Http404
 
-    response = HttpResponse(
-        content=bytes(registration.get_invitation().output()),
-        content_type="application/pdf"
+    response = HttpResponse(content=bytes(registration.get_invitation().output()), content_type="application/pdf")
+    response["Content-Disposition"] = (
+        f'attachment; filename="DdS Letter of Invitation {registration.invitation.uuid}.pdf"'
     )
-    response["Content-Disposition"] = f'attachment; filename="DdS Letter of Invitation {registration.invitation.uuid}.pdf"'
     return response
 
 
@@ -71,10 +66,7 @@ def event_invitation_validation(request: HttpRequest, invitation_code: str) -> H
     except ObjectDoesNotExist:
         raise Http404
 
-    response = HttpResponse(
-        content=bytes(letter.pdf().output()),
-        content_type="application/pdf"
-    )
+    response = HttpResponse(content=bytes(letter.pdf().output()), content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="DdS Letter of Invitation {letter.uuid}.pdf"'
     return response
 
@@ -210,7 +202,7 @@ def event_registration(request: HttpRequest, event_code: str):
                         "net_price": option.net_price(),
                         "currency": option.currency,
                         "includes_membership": option.includes_membership,
-                        "membership_end_year": option.membership_end_year,
+                        "membership_until": option.membership_until.isoformat(),
                     },
                 )
                 payment.save()
