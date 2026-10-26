@@ -1,0 +1,14 @@
+{% autoescape off %}Dear {{ user.first_name|default:user.email }},
+
+Thank you for being a member of Départ de Sentier. {% if expired %}Your membership expired on {{ until|date:"j F Y" }}.{% else %}Your membership is valid until {{ until|date:"j F Y" }}, which is in {{ days_left }} day{{ days_left|pluralize }}.{% endif %}
+
+Membership fees allow us to write open source code, deploy open infrastructure, and run community events without spending all our time fundraising. Renewing takes two minutes:
+
+{{ renew_url }}
+
+Renewing early adds a full year to your current end date, so you never lose time. If you have already renewed, please ignore this message.
+
+If you have any questions, please contact events@d-d-s.ch.
+
+Départ de Sentier
+{% endautoescape %}

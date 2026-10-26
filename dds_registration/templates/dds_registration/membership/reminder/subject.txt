@@ -1,0 +1,1 @@
+{% autoescape off %}{% if expired %}Your DdS membership expired on {{ until|date:"j F Y" }}{% else %}Your DdS membership expires on {{ until|date:"j F Y" }}{% endif %}{% endautoescape %}
