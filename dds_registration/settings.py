@@ -8,6 +8,7 @@ from pathlib import Path
 
 import environ
 import sentry_sdk
+from celery.schedules import crontab
 from loguru import logger
 
 # Working folder
@@ -42,6 +43,8 @@ env = environ.Env(
     SLACK_PAYMENTS_WEBHOOK=(str, ""),
     SLACK_REGISTRATIONS_WEBHOOK=(str, ""),
     SENTRY_DSN=(str, ""),
+    CELERY_BROKER_URL=(str, "redis://127.0.0.1:6379/2"),
+    CELERY_TASK_ALWAYS_EAGER=(bool, False),
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
@@ -316,6 +319,19 @@ TIMEOUT = 30 if DEBUG else 300  # Short value for debug time
 # TODO: Use `Site.objects.get_current().name` (via `from django.contrib.sites.models import Site`) as site title.
 # Members may renew this many days before their membership ends.
 MEMBERSHIP_RENEWAL_WINDOW_DAYS = 60
+
+# Celery: on hubdds the broker is the Redis instance Indico already runs (db0/db1),
+# so this app uses db2. In dev and tests tasks run inline (eager).
+CELERY_BROKER_URL = env("CELERY_BROKER_URL")
+CELERY_TASK_ALWAYS_EAGER = env("CELERY_TASK_ALWAYS_EAGER") or DEBUG
+CELERY_TASK_EAGER_PROPAGATES = CELERY_TASK_ALWAYS_EAGER
+# Daily at 06:00 UTC (server and TIME_ZONE are UTC): 07:00 CET / 08:00 CEST.
+CELERY_BEAT_SCHEDULE = {
+    "membership-reminders": {
+        "task": "dds_registration.tasks.membership_reminders.sweep",
+        "schedule": crontab(hour=6, minute=0),
+    },
+}
 
 SITE_NAME = "Départ de Sentier Events and Membership Portal"
 SITE_TITLE = SITE_NAME

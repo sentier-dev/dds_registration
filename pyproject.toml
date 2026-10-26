@@ -38,6 +38,7 @@ dependencies = [
     "pyyaml",
 
     "beautifulsoup4>=4.12.3",  # Html content prettifier
+    "celery[redis]>=5.4",  # renewal reminders (beat + worker)
     "crispy-bootstrap5>=2024.2",
     "django-compressor>=4.4",
     "django-crispy-forms>=2.1",
