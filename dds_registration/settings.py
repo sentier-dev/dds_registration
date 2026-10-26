@@ -187,6 +187,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hijack.middleware.HijackUserMiddleware",
+    APP_NAME + ".middleware.MembershipDetailsMiddleware.MembershipDetailsMiddleware",
     APP_NAME + ".middleware.BeautifulMiddleware.BeautifulMiddleware",  # Html content prettifier
 ]
 

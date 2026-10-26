@@ -1,0 +1,29 @@
+{% extends "base-regular.html.django" %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Membership details — {{ block.super }}{% endblock title %}
+
+{% block content %}
+{{ block.super }}
+
+<fieldset>
+  <legend>
+    <h1 class="page-title primary-color">Your membership details</h1>
+  </legend>
+</fieldset>
+
+{% include "assets/render-messages/render-messages.django" %}
+
+<p>Please tell us which organization you belong to. We use this to understand who our members are; it is never shared outside the association.</p>
+
+<form role="form" method="post">
+  {% csrf_token %}
+  {{ form|crispy }}
+
+  <div class="common-actions">
+    <input class="btn btn-primary" type="submit" value="Save" />
+  </div>
+</form>
+
+{% endblock content %}
