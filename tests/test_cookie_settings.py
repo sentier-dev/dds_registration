@@ -28,7 +28,7 @@ _BASE_ENV = {
     "STRIPE_PAYMENT_PRODUCT_NAME": "x",
     "SLACK_PAYMENTS_WEBHOOK": "x",
     "SLACK_REGISTRATIONS_WEBHOOK": "x",
-    "SENTRY_DSN": "",
+    "ERROR_MONITORING_DSN": "",
     "DEFAULT_FROM_EMAIL": "x@example.com",
 }
 
@@ -61,7 +61,7 @@ def _load_settings(*, debug: bool) -> dict:
         text=True,
         check=True,
     )
-    # settings.py logs a Sentry line to stderr; the JSON is the last stdout line.
+    # settings.py logs an error-monitoring line to stderr; the JSON is the last stdout line.
     return json.loads(out.stdout.strip().splitlines()[-1])
 
 

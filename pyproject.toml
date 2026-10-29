@@ -62,7 +62,6 @@ dependencies = [
     "qrcode",
     "qrcode",
     "requests",
-    "sentry_sdk",
     "stripe>=8.9.0",
     "xlsxwriter",
 ]

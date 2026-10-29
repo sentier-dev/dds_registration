@@ -7,7 +7,6 @@ import string
 from pathlib import Path
 
 import environ
-import sentry_sdk
 from celery.schedules import crontab
 from loguru import logger
 
@@ -42,7 +41,7 @@ env = environ.Env(
     STRIPE_SECRET_KEY=(str, ""),
     SLACK_PAYMENTS_WEBHOOK=(str, ""),
     SLACK_REGISTRATIONS_WEBHOOK=(str, ""),
-    SENTRY_DSN=(str, ""),
+    ERROR_MONITORING_DSN=(str, ""),
     CELERY_BROKER_URL=(str, "redis://127.0.0.1:6379/2"),
     CELERY_TASK_ALWAYS_EAGER=(bool, False),
 )
@@ -66,7 +65,7 @@ STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY") or ""
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 SLACK_PAYMENTS_WEBHOOK = env("SLACK_PAYMENTS_WEBHOOK")
 SLACK_REGISTRATIONS_WEBHOOK = env("SLACK_REGISTRATIONS_WEBHOOK")
-SENTRY_DSN = env("SENTRY_DSN")
+ERROR_MONITORING_DSN = env("ERROR_MONITORING_DSN")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # Static files (CSS, JavaScript, Images)
@@ -370,16 +369,13 @@ PASS_VARIABLES = {
     "SITE_KEYWORDS": SITE_KEYWORDS,
 }
 
-if SENTRY_DSN:
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        traces_sample_rate=1.0,
-        # Set profiles_sample_rate to 1.0 to profile 100%
-        # of sampled transactions.
-        # We recommend adjusting this value in production.
-        profiles_sample_rate=1.0,
-    )
+# Error-monitoring entry point.
+#
+# Sentry was removed (see CHANGES.md). If another service (Sentry, GlitchTip, Rollbar,
+# ...) is wanted later, initialise its SDK here, guarded by
+# ERROR_MONITORING_DSN. Nothing is wired up at the moment, so a non-empty DSN
+# is reported but otherwise ignored.
+if ERROR_MONITORING_DSN:
+    logger.warning("ERROR_MONITORING_DSN is set but no error-monitoring backend is configured")
 else:
-    logger.info("No key for Sentry found")
+    logger.info("No error-monitoring DSN configured")

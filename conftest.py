@@ -23,7 +23,7 @@ _TEST_ENV_DEFAULTS = {
     "STRIPE_PAYMENT_PRODUCT_NAME": "test-product",
     "SLACK_PAYMENTS_WEBHOOK": "",
     "SLACK_REGISTRATIONS_WEBHOOK": "",
-    "SENTRY_DSN": "",
+    "ERROR_MONITORING_DSN": "",
     "DEFAULT_FROM_EMAIL": "test@example.com",
     "CELERY_TASK_ALWAYS_EAGER": "True",
     "CELERY_BROKER_URL": "memory://",
