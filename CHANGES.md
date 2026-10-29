@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Sentry integration and the `sentry_sdk` dependency. The `SENTRY_DSN` setting is replaced by `ERROR_MONITORING_DSN`, which is read but not wired to any service; the init block in `settings.py` is kept as the entry point for a future error-monitoring backend.
+
 ### Added
 
 - Membership `started`/`until` are dates; membership runs one year from joining and early renewal extends from the current end date (admins can edit both dates). Existing rows migrate to `until = Dec 31 of the stored year`.
