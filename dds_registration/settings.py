@@ -42,6 +42,7 @@ env = environ.Env(
     SLACK_PAYMENTS_WEBHOOK=(str, ""),
     SLACK_REGISTRATIONS_WEBHOOK=(str, ""),
     ERROR_MONITORING_DSN=(str, ""),
+    TEAM_CALENDAR_PATH=(str, ""),
     CELERY_BROKER_URL=(str, "redis://127.0.0.1:6379/2"),
     CELERY_TASK_ALWAYS_EAGER=(bool, False),
 )
@@ -66,6 +67,9 @@ STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 SLACK_PAYMENTS_WEBHOOK = env("SLACK_PAYMENTS_WEBHOOK")
 SLACK_REGISTRATIONS_WEBHOOK = env("SLACK_REGISTRATIONS_WEBHOOK")
 ERROR_MONITORING_DSN = env("ERROR_MONITORING_DSN")
+# The team calendar HTML is deployed separately from the app release. Without
+# the variable the bundled placeholder (no data) is served.
+TEAM_CALENDAR_PATH = env("TEAM_CALENDAR_PATH") or str(BASE_DIR / "dds_registration" / "team_calendar" / "index.html")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # Static files (CSS, JavaScript, Images)
