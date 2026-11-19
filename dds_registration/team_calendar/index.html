@@ -348,7 +348,7 @@
      location  optional location string
 ════════════════════════════════════════════════════════ */
 const EVENTS = [
-  { name: "Brightcon 2026",    from: "2026-09-20", to: "2026-09-25" },
+  { name: "Brightcon 2026",    from: "2026-09-20", to: "2026-09-25", location: "Aalborg, Denmark" },
   { name: "Spring School",     from: "2027-02-28", to: "2027-03-05", location: "Möschberg, Switzerland" }
 ];
 
@@ -357,10 +357,13 @@ const MEETINGS = [
   { name: "2nd GreenGrocer General Assembly", from: "2026-11-03", to: "2026-11-05", location: "Oxford, UK" }
 ];
 const EXTERNAL_EVENTS = [
+  { name: "UNEP Global LCA Data Atlas Workshop", from: "2026-10-20", to: "2026-10-21", location: "Milan, Italy" },
   { name: "93rd LCA Discussion Forum", from: "2026-07-07", to: "2026-07-07", location: "ETH Zurich, Alumni Pavillon", url: "https://lca-forum.ch/forum?tx_news_pi1%5BactbackPid%5D=1&tx_news_pi1%5Baction%5D=detail&tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5Bnews%5D=93&cHash=1a9feca5af660e14cc86ab8e86d5231e" }
 ];
 const INTERNAL_MEETINGS = [
-  { name: "DdS Strategic Workshop", from: "2026-07-16", to: "2026-07-16", location: "Zurich, Switzerland" }
+  { name: "DdS Strategic Workshop", from: "2026-08-26", to: "2026-08-26", location: "Zurich, Switzerland" },
+  { name: "DdS Monthly Touchbase", from: "2026-10-05", to: "2026-10-05", location: "Online" },
+  { name: "DdS Monthly Touchbase", from: "2026-10-26", to: "2026-10-26", location: "Online" }
 ];
 const MEMBERS = [
   {
@@ -372,11 +375,16 @@ const MEMBERS = [
     element: "@xiaojin.zhang:matrix.org",
     annualDays: 20,      // annual holiday entitlement
     carryOver: 2.7,      // days carried over from 2025
+    startDate: "2025-09-02",
     periods: [
       { from: "2026-01-26", to: "2026-01-29", status: "away", type: "personal", location: "Private holiday" },
       { from: "2026-06-02", to: "2026-06-02", status: "half-day", timeFrom: "08:00", timeTo: "13:00", location: "Wettingen, Switzerland" },
       { from: "2026-06-04", to: "2026-06-04", status: "away", type: "public", location: "Fronleichnam" },
-      { from: "2026-07-20", to: "2026-08-02", status: "away", type: "personal", location: "TBD" }
+      { from: "2026-07-20", to: "2026-07-31", status: "away", type: "personal", location: "Private holiday" },
+      // Private holiday 28 Sep – 2 Oct 2026 (4 days; Mon PM and Fri PM are regular time off)
+      { from: "2026-09-28", to: "2026-09-28", status: "half-day", timeFrom: "08:00", timeTo: "13:00", location: "Private holiday" },
+      { from: "2026-09-29", to: "2026-10-01", status: "away", type: "personal", location: "Private holiday" },
+      { from: "2026-10-02", to: "2026-10-02", status: "half-day", timeFrom: "08:00", timeTo: "13:00", location: "Private holiday" }
     ],
     recurring: [
       // Full Fridays off: Sep 2025 – 7 Aug 2026
@@ -394,10 +402,13 @@ const MEMBERS = [
     avBg: "#E1F5EE", avColor: "#085041",
     email: "laurenz@d-d-s.ch",
     element: "@lbougan:matrix.org",
-    annualDays: 25,      // annual holiday entitlement
+    // Pro-rated entitlement: started 15 Apr 2026, so 25 days × 8.5/12 months (15 Apr – 31 Dec) ≈ 17.7, rounded to 18
+    annualDays: 18,      // annual holiday entitlement (pro-rated, see above)
     carryOver: 0,
+    startDate: "2026-04-15",
     periods: [
-      { from: "2026-06-02", to: "2026-06-21", status: "outside of Switzerland", location: "Paris, France" }
+      { from: "2026-06-02", to: "2026-06-21", status: "outside of Switzerland", location: "Paris, France" },
+      { from: "2026-07-20", to: "2026-07-31", status: "away", type: "personal", location: "Private holiday" }
     ]
   }
 ];
