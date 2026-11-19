@@ -38,15 +38,33 @@ def team_calendar(request: HttpRequest) -> HttpResponse:
     so a newly deployed calendar shows up without a restart.
     """
     path = Path(settings.TEAM_CALENDAR_PATH)
+    html = _read_calendar(path)
+    if html is None:
+        response = HttpResponse(UNAVAILABLE_HTML, status=503)
+    else:
+        response = HttpResponse(html)
+        # Keep BeautifulMiddleware from rewriting the page and its script.
+        response.serve_verbatim = True
+    response["Content-Security-Policy"] = SANDBOX_POLICY
+    return response
+
+
+def _read_calendar(path: Path):
+    """Return the calendar HTML, or None (after logging why) if it cannot be served."""
+    # The folder is written by a deploy key from outside this app: never follow
+    # a link out of it to some other file this process can read.
+    if path.is_symlink():
+        LOG.error("Team calendar file %s is a symbolic link, refusing to serve it", path)
+        return None
     try:
         html = path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as error:
         LOG.error("Team calendar file %s cannot be read: %s", path, error)
-        response = HttpResponse(UNAVAILABLE_HTML, status=503)
-    else:
-        response = HttpResponse(html)
-    response["Content-Security-Policy"] = SANDBOX_POLICY
-    return response
+        return None
+    if not html.strip():
+        LOG.error("Team calendar file %s is empty", path)
+        return None
+    return html
 
 
 __all__ = [team_calendar]

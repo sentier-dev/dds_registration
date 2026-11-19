@@ -404,7 +404,12 @@ The Action logs in with a key that can only write into that folder. Its entry in
 `/home/registration/.ssh/authorized_keys`:
 
 ```
-command="rrsync -wo /home/registration/team-calendar",restrict ssh-ed25519 AAAA... team-calendar-deploy
+command="rrsync -wo -no-del -munge /home/registration/team-calendar",restrict ssh-ed25519 AAAA... team-calendar-deploy
 ```
+
+`-munge` defuses any symbolic link sent with that key, and the view refuses to
+serve a link as well. The Action must copy with plain `rsync` (no `--inplace`):
+rsync then writes a temporary file and renames it, so a visitor never gets a
+half-written page.
 
 If the file is missing or unreadable the page answers 503 and the path is logged.

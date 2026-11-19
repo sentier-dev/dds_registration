@@ -15,6 +15,9 @@ def BeautifulMiddleware(get_response):
     def middleware(request):
         response = get_response(request)
         # TODO: Do this conversion only in prod mode
+        # Views that serve a finished document set `serve_verbatim` on the response.
+        if getattr(response, "serve_verbatim", False):
+            return response
         if not settings.DEV and response.status_code == 200 and response["content-type"].startswith("text/html"):
             content = response.content.decode("utf-8")
             # Remove comments
