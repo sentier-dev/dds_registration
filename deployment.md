@@ -382,3 +382,34 @@ include membership). Then swap the code directory as above.
   options crashed the migration; the join date wrongly took a later renewal's
   paid date.
 - Backward migration returns every membership row to its original values.
+
+## Team calendar (deployed separately from the app)
+
+The page at `/team-calendar/` is not part of the release. The view serves the file
+named by the `TEAM_CALENDAR_PATH` environment variable; the file bundled in this
+repository is only a placeholder. The calendar itself lives in a private repository,
+whose GitHub Action copies `index.html` to the server on every push. The view reads
+the file on each request, so no restart is needed after a calendar update.
+
+One-time server setup (the folder must be outside `registration/`, which
+`download-latest.sh` deletes on every deploy):
+
+```bash
+sudo -u registration mkdir -p /home/registration/team-calendar
+# add to the [Service] section of dds-registration.service, then daemon-reload + restart:
+#   Environment=TEAM_CALENDAR_PATH=/home/registration/team-calendar/index.html
+```
+
+The Action logs in with a key that can only write into that folder. Its entry in
+`/home/registration/.ssh/authorized_keys`:
+
+```
+command="rrsync -wo -no-del -munge /home/registration/team-calendar",restrict ssh-ed25519 AAAA... team-calendar-deploy
+```
+
+`-munge` defuses any symbolic link sent with that key, and the view refuses to
+serve a link as well. The Action must copy with plain `rsync` (no `--inplace`):
+rsync then writes a temporary file and renames it, so a visitor never gets a
+half-written page.
+
+If the file is missing or unreadable the page answers 503 and the path is logged.

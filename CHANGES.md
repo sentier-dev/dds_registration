@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The team calendar is no longer shipped with the app. The view serves the file named by the `TEAM_CALENDAR_PATH` environment variable (deployed separately, see `deployment.md`), answers 503 when it cannot be read, and sandboxes the page with a `Content-Security-Policy` header. The bundled file is a placeholder without data.
+
 ### Removed
 
 - Sentry integration and the `sentry_sdk` dependency. The `SENTRY_DSN` setting is replaced by `ERROR_MONITORING_DSN`, which is read but not wired to any service; the init block in `settings.py` is kept as the entry point for a future error-monitoring backend.
